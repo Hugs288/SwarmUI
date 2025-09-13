@@ -413,9 +413,9 @@ public class Settings : AutoConfiguration
         public bool AutoSwapImagesIncludesFullView = false; // TODO: UserUI
 
         [ConfigComment("A list of what buttons to include directly under images in the main prompt area of the Generate tab.\nOther buttons will be moved into the 'More' dropdown.\nThis should be a comma separated list."
-            + "\nThe following options are available: \"Use As Init\", \"Use As Image Prompt\", \"Edit Image\", \"Upscale 2x\", \"Star\", \"Reuse Parameters\", \"Open In Folder\", \"Delete\", \"Download\" \"View In History\", \"Refine Image\""
-            + "\nThe default is blank, which currently implies 'Use As Init,Edit Image,Star,Reuse Parameters'")]
-        public string ButtonsUnderMainImages = ""; // TODO: UserUI
+            + "\nThe following options are available: \"Use As Init\", \"Use As Image Prompt\", \"Edit Image\", \"Upscale 2x\", \"Star\", \"Reuse Parameters\", \"Open In Folder\", \"Copy File\", \"Delete\", \"Download\" \"View In History\", \"Refine Image\""
+            + "\nThe default is 'Use As Init,Edit Image,Star,Reuse Parameters,Copy File'")]
+        public string ButtonsUnderMainImages = "Use As Init,Edit Image,Star,Reuse Parameters,Copy File"; // TODO: UserUI
 
         [ConfigComment("How to format image metadata on the Generate tab when looking at an image.\n'below' means put the metadata below the image.\n'side' means put the image in a vertical column to the side.\n'auto' means switch to whichever fits better depending on the page width.\nDefault is 'auto'.")]
         [ManualSettingsOptions(Vals = ["auto", "below", "side"])]
