@@ -382,7 +382,7 @@ public class Image
                     {
                         TextCompressionThreshold = int.MaxValue,
                         BitDepth = img.PixelType.BitsPerPixel > 32 ? PngBitDepth.Bit16 : PngBitDepth.Bit8,
-                        CompressionLevel = PngCompressionLevel.Level1,
+                        CompressionLevel = PngCompressionLevel.Level6,
                         ColorType = PngColorType.RgbWithAlpha,
                         TransparentColorMode = PngTransparentColorMode.Preserve
                     };
@@ -394,7 +394,7 @@ public class Image
                     {
                         TextCompressionThreshold = int.MaxValue,
                         BitDepth = img.PixelType.BitsPerPixel > 32 ? PngBitDepth.Bit16 : PngBitDepth.Bit8,
-                        CompressionLevel = PngCompressionLevel.Level1
+                        CompressionLevel = PngCompressionLevel.Level6
                     };
                     img.SaveAsPng(ms, encoder);
                 }
