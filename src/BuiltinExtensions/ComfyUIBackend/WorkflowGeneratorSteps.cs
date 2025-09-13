@@ -209,18 +209,6 @@ public class WorkflowGeneratorSteps
         }, -7);
         AddModelGenStep(g =>
         {
-            if (g.UserInput.TryGet(T2IParamTypes.ClipStopAtLayer, out int layer))
-            {
-                string clipSkip = g.CreateNode("CLIPSetLastLayer", new JObject()
-                {
-                    ["clip"] = g.LoadingClip,
-                    ["stop_at_clip_layer"] = layer
-                });
-                g.LoadingClip = [clipSkip, 0];
-            }
-        }, -6);
-        AddModelGenStep(g =>
-        {
             if (g.UserInput.TryGet(T2IParamTypes.SeamlessTileable, out string tileable) && tileable != "false")
             {
                 string mode = "Both";
