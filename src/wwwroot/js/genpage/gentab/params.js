@@ -1179,7 +1179,18 @@ function hideUnsupportableParams() {
         let elem = document.getElementById(`input_${param.id}`);
         if (elem) {
             let box = findParentOfClass(elem, 'auto-input');
-            let supported = param.feature_flag == null || param.feature_flag.split(',').every(f => currentBackendFeatureSet.includes(f));
+            let supported = param.feature_flag == null || param.feature_flag.split('|').some(or_group =>
+                or_group.split(',').every(f => {
+                    if (f.includes(':')) {
+                        let [key, val] = f.split(':', 2);
+                        let otherParamElem = document.getElementById(`input_${key}`);
+                        if (otherParamElem) {
+                            return `${getInputVal(otherParamElem)}` == val;
+                        }
+                        return false;
+                    }
+                    return currentBackendFeatureSet.includes(f);
+                }));
             let filterShow = true;
             if (filter && param.id != 'prompt') {
                 let searchText = `${param.id} ${param.name} ${param.description} ${param.group ? param.group.name : ''}`.toLowerCase();

@@ -425,10 +425,10 @@ public class T2IParamTypes
             "CLIP + T5", GetValues: _ => ["CLIP Only", "T5 Only", "CLIP + T5"], Toggleable: true, Group: GroupSampling, FeatureFlag: "sd3", OrderPriority: 5, ChangeWeight: 9
             ));
         FluxGuidanceScale = Register<double>(new("Flux Guidance Scale", "What guidance scale to use for Flux-Dev or related models.\nDoes not apply to Flux-Schnell.\nFor Flux-Dev, this is a distilled embedded value the model was trained on, this is based on an alternative guidance methodology, and is not CFG.\n3.5 is default, but closer to 2.0 may allow for more stylistic flexibility.\nFor Hunyuan Video, this is distilled from CFG Scale, and prefers values closer to 6.",
-            "3.5", Min: 0, Max: 100, ViewMax: 10, Step: 0.1, Toggleable: true, Group: GroupSampling, ViewType: ParamViewType.SLIDER, OrderPriority: 6, FeatureFlag: "flux-dev"
+            "3.5", Min: 0, Max: 100, ViewMax: 10, Step: 0.1, Toggleable: true, Group: GroupSampling, ViewType: ParamViewType.SLIDER, OrderPriority: 6, FeatureFlag: "Flux.1-dev|hunyuan-video"
             ));
         FluxDisableGuidance = Register<bool>(new("Flux Disable Guidance", "Disables Flux Guidance Scale.\nSome models prefer this. Usually you don't need this.",
-            "false", IgnoreIf: "false", Group: GroupSampling, IsAdvanced: true, OrderPriority: 6.2, FeatureFlag: "flux-dev"
+            "false", IgnoreIf: "false", Group: GroupSampling, IsAdvanced: true, OrderPriority: 6.2, FeatureFlag: "Flux.1-dev|hunyuan-video"
             ));
         ZeroNegative = Register<bool>(new("Zero Negative", "Zeroes the negative prompt if it's empty.\nDoes nothing if the negative prompt is not empty.\nThis may yield better quality on SD3.",
             "false", IgnoreIf: "false", Group: GroupSampling, OrderPriority: 7
@@ -439,19 +439,19 @@ public class T2IParamTypes
         // ================================================ Advanced Sampling ================================================
         GroupAdvancedSampling = new("Advanced Sampling", Open: false, OrderPriority: 15, IsAdvanced: true, Parent: GroupSampling);
         SamplerSigmaMin = Register<double>(new("Sampler Sigma Min", "Minimum sigma value for the sampler.\nOnly applies to Karras/Exponential schedulers.",
-            "0", Min: 0, Max: 1000, Step: 0.01, Toggleable: true, IsAdvanced: true, Group: GroupAdvancedSampling, OrderPriority: -23
+            "0", Min: 0, Max: 1000, Step: 0.01, Toggleable: true, IsAdvanced: true, Group: GroupAdvancedSampling, OrderPriority: -23, FeatureFlag: "scheduler:karras|scheduler:exponential"
             ));
         SamplerSigmaMax = Register<double>(new("Sampler Sigma Max", "Maximum sigma value for the sampler.\nOnly applies to Karras/Exponential schedulers.",
-            "10", Min: 0, Max: 1000, Step: 0.01, Toggleable: true, IsAdvanced: true, Group: GroupAdvancedSampling, OrderPriority: -22
+            "10", Min: 0, Max: 1000, Step: 0.01, Toggleable: true, IsAdvanced: true, Group: GroupAdvancedSampling, OrderPriority: -22, FeatureFlag: "scheduler:karras|scheduler:exponential"
+            ));
+        SamplerRho = Register<double>(new("Sampler Rho", "Rho value for the sampler.\nOnly applies to Karras/Exponential schedulers.",
+            "7", Min: 0, Max: 1000, Step: 0.01, Toggleable: true, IsAdvanced: true, Group: GroupAdvancedSampling, OrderPriority: -20, FeatureFlag: "scheduler:karras|scheduler:exponential"
             ));
         SigmaShift = Register<double>(new("Sigma Shift", "Sigma shift is used for modern rectified flow models (like SD3) specifically.\nThis shifts the balance of steps between low-frequency steps (structural/compositional steps), and high-frequency steps (detail steps).\nThis value only works within ranges a model was trained for, so for most models you should leave this param disabled to use the default, but fiddling it can sometimes work to adjust results.\nFor SD3, this value is recommended to be in the range of 1.5 to 3, normally 3.\nFor AuraFlow, 1.73 (square root of 3) is recommended.\nFor Flux, Schnell uses 0, 1.15 may be good for Dev.\nHiDream uses 3, but HiDream Dev also likes 6.",
             "3", Min: 0, Max: 100, Step: 0.01, Toggleable: true, IsAdvanced: true, Group: GroupAdvancedSampling, OrderPriority: -21
             ));
-        SamplerRho = Register<double>(new("Sampler Rho", "Rho value for the sampler.\nOnly applies to Karras/Exponential schedulers.",
-            "7", Min: 0, Max: 1000, Step: 0.01, Toggleable: true, IsAdvanced: true, Group: GroupAdvancedSampling, OrderPriority: -20
-            ));
         IP2PCFG2 = Register<double>(new("IP2P CFG 2", "CFG Scale for Cond2-Negative in InstructPix2Pix (Edit) models.",
-            "1.5", Toggleable: true, Min: 1, Max: 100, ViewMax: 20, Step: 0.5, Examples: ["1.5", "2"], ViewType: ParamViewType.SLIDER, Group: GroupAdvancedSampling, OrderPriority: -12
+            "1.5", Toggleable: true, Min: 1, Max: 100, ViewMax: 20, Step: 0.5, Examples: ["1.5", "2"], ViewType: ParamViewType.SLIDER, Group: GroupAdvancedSampling, OrderPriority: -12, FeatureFlag: "omnigen-2"
             ));
         VAETileSize = Register<int>(new("VAE Tile Size", "If enabled, decodes images through the VAE using tiles of this size.\nVAE Tiling reduces VRAM consumption, but takes longer and may impact quality.",
             "256", Min: 128, Max: 4096, Step: 32, Toggleable: true, IsAdvanced: true, Group: GroupAdvancedSampling, OrderPriority: -5
