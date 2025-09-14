@@ -132,26 +132,6 @@ public class WorkflowGeneratorSteps
         }, -9);
         AddModelGenStep(g =>
         {
-            string applyTo = g.UserInput.Get(T2IParamTypes.FreeUApplyTo, null);
-            if (g.Features.Contains("freeu") && applyTo is not null)
-            {
-                if (applyTo == "Both" || applyTo == g.LoadingModelType)
-                {
-                    string version = g.UserInput.Get(T2IParamTypes.FreeUVersion, "1");
-                    string freeU = g.CreateNode(version == "2" ? "FreeU_V2" : "FreeU", new JObject()
-                    {
-                        ["model"] = g.LoadingModel,
-                        ["b1"] = g.UserInput.Get(T2IParamTypes.FreeUBlock1),
-                        ["b2"] = g.UserInput.Get(T2IParamTypes.FreeUBlock2),
-                        ["s1"] = g.UserInput.Get(T2IParamTypes.FreeUSkip1),
-                        ["s2"] = g.UserInput.Get(T2IParamTypes.FreeUSkip2)
-                    });
-                    g.LoadingModel = [freeU, 0];
-                }
-            }
-        }, -8);
-        AddModelGenStep(g =>
-        {
             if (g.UserInput.TryGet(ComfyUIBackendExtension.SelfAttentionGuidanceScale, out double sagScale))
             {
                 string patched = g.CreateNode("SelfAttentionGuidance", new JObject()
@@ -1538,18 +1518,6 @@ public class WorkflowGeneratorSteps
                     ["alpha"] = new JArray() { thresholded, 0 }
                 });
                 g.FinalImageOut = [joined, 0];
-            }
-            if (g.UserInput.Get(T2IParamTypes.RemoveBackground, false))
-            {
-                if (g.UserInput.Get(T2IParamTypes.OutputIntermediateImages, false))
-                {
-                    g.CreateImageSaveNode(g.FinalImageOut, g.GetStableDynamicID(50000, 0));
-                }
-                string removed = g.CreateNode("SwarmRemBg", new JObject()
-                {
-                    ["images"] = g.FinalImageOut
-                });
-                g.FinalImageOut = [removed, 0];
             }
             if (g.UserInput.SourceSession is null && g.UserInput.Get(T2IParamTypes.DoNotSave, false) && g.UserInput.Get(T2IParamTypes.Steps) == 0 && !g.UserInput.TryGet(T2IParamTypes.RefinerModel, out _))
             {

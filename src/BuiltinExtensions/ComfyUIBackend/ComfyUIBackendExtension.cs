@@ -35,10 +35,10 @@ public class ComfyUIBackendExtension : Extension
     public static ConcurrentDictionary<string, ComfyCustomWorkflow> CustomWorkflows = new();
 
     /// <summary>Set of all feature-ids supported by ComfyUI backends.</summary>
-    public static HashSet<string> FeaturesSupported = ["comfyui", "refiners", "controlnet", "endstepsearly", "seamless", "video", "variation_seed", "freeu", "yolov8"];
+    public static HashSet<string> FeaturesSupported = ["comfyui", "refiners", "controlnet", "endstepsearly", "seamless", "video", "variation_seed", "yolov8"];
 
     /// <summary>Set of feature-ids that were added presumptively during loading and should be removed if the backend turns out to be missing them.</summary>
-    public static HashSet<string> FeaturesDiscardIfNotFound = ["variation_seed", "freeu", "yolov8"];
+    public static HashSet<string> FeaturesDiscardIfNotFound = ["variation_seed", "yolov8"];
 
     /// <summary>Extensible map of ComfyUI Node IDs to supported feature IDs.</summary>
     public static Dictionary<string, string> NodeToFeatureMap = new()
@@ -48,7 +48,6 @@ public class ComfyUIBackendExtension : Extension
         ["SwarmJustLoadTheModelPlease"] = "comfy_just_load_model",
         ["SwarmLatentBlendMasked"] = "comfy_latent_blend_masked",
         ["SwarmKSampler"] = "variation_seed",
-        ["FreeU"] = "freeu",
         ["AITemplateLoader"] = "aitemplate",
         ["IPAdapter"] = "ipadapter",
         ["IPAdapterApply"] = "ipadapter",
@@ -641,7 +640,7 @@ public class ComfyUIBackendExtension : Extension
             "false", IgnoreIf: "false", FeatureFlag: "aitemplate", Group: ComfyGroup, ChangeWeight: 5
             ));
         PreferredDType = T2IParamTypes.Register<string>(new("Preferred DType", "Preferred data type for models, when a choice is available.\n(Notably primarily affects Flux.1 models currently).\nIf disabled, will automatically decide.\n'fp8_e43fn' is recommended for large models.\n'Default' uses global default type, usually fp16 or bf16.",
-            "automatic", FeatureFlag: "comfyui", Group: T2IParamTypes.GroupAdvancedSampling, IsAdvanced: true, Toggleable: true, OrderPriority: 9, GetValues: (_) => ["automatic///Automatic (decide by model)", "default///Default (16 bit)", "fp8_e4m3fn///FP8 e4m3fn (8 bit)", "fp8_e5m2///FP8 e5m2 (alt 8 bit)"]
+            "automatic", FeatureFlag: "comfyui", Group: T2IParamTypes.GroupSwarmInternal, IsAdvanced: true, Toggleable: true, OrderPriority: 9, GetValues: (_) => ["automatic///Automatic (decide by model)", "default///Default (16 bit)", "fp8_e4m3fn///FP8 e4m3fn (8 bit)", "fp8_e5m2///FP8 e5m2 (alt 8 bit)"]
             ));
         SelfAttentionGuidanceScale = T2IParamTypes.Register<double>(new("Self-Attention Guidance Scale", "Scale for Self-Attention Guidance.\n''Self-Attention Guidance (SAG) uses the intermediate self-attention maps of diffusion models to enhance their stability and efficacy.\nSpecifically, SAG adversarially blurs only the regions that diffusion models attend to at each iteration and guides them accordingly.''\nDefaults to 0.5.\nThis is only expected to work on older unet-based models (eg SDXL) and not on newer models.",
             "0.5", Min: -2, Max: 5, Step: 0.1, FeatureFlag: "comfyui", Group: T2IParamTypes.GroupAlternateGuidance, IsAdvanced: true, Toggleable: true, ViewType: ParamViewType.SLIDER, OrderPriority: 12
@@ -656,7 +655,7 @@ public class ComfyUIBackendExtension : Extension
             "0.7", Min: 0, Max: 1, Step: 0.01, FeatureFlag: "comfyui", Group: T2IParamTypes.GroupAlternateGuidance, IsAdvanced: true, Toggleable: true, ViewType: ParamViewType.SLIDER, OrderPriority: 14
             ));
         RenormCFG = T2IParamTypes.Register<double>(new("Renorm CFG", "If enabled, use 'Renorm CFG', a technique developed for use with Lumina 2.\nAt 0, this does nothing. Lumina 2 reference code sets this to 1.\nThis parameter only works on some models, and will corrupt others.",
-            "0", Min: 0, Max: 100, Step: 0.1, IgnoreIf: "0", ViewMax: 2, FeatureFlag: "comfyui", Group: T2IParamTypes.GroupAlternateGuidance, IsAdvanced: true, ViewType: ParamViewType.SLIDER, OrderPriority: 15
+            "0", Min: 0, Max: 100, Step: 0.1, IgnoreIf: "0", ViewMax: 2, FeatureFlag: "comfyui,lumina2", Group: T2IParamTypes.GroupAlternateGuidance, IsAdvanced: true, ViewType: ParamViewType.SLIDER, OrderPriority: 15
             ));
         UseCfgZeroStar = T2IParamTypes.Register<bool>(new("Use CFG Zero Star", "If enabled, use 'CFG Zero Star' (CFG-Zero*, defined <a target=\"_blank\" href=\"https://arxiv.org/abs/2503.18886\">in this paper</a>).\nThis may slightly improve quality on modern 'Flow' models when using CFG.",
             "false", IgnoreIf: "false", FeatureFlag: "comfyui", Group: T2IParamTypes.GroupAlternateGuidance, IsAdvanced: true, OrderPriority: 16
@@ -699,13 +698,13 @@ public class ComfyUIBackendExtension : Extension
             "RIFE", FeatureFlag: "frameinterps,text2video", Group: T2IParamTypes.GroupText2Video, Permission: Permissions.ParamVideo, GetValues: (_) => interpolators, OrderPriority: 33, DependNonDefault: Text2VideoFrameInterpolationMultiplier.Type.ID, IsAdvanced: true
             ));
         VideoPreviewType = T2IParamTypes.Register<string>(new("Video Preview Type", "How to display previews for generating videos.\n'Animate' shows a low-res animated video preview.\n'iterate' shows one frame at a time while it goes.\n'one' displays just the first frame.\n'none' disables previews.",
-            "animate", IgnoreIf: "animate", FeatureFlag: "comfyui", Group: T2IParamTypes.GroupAdvancedVideo, Permission: Permissions.ParamVideo, IsAdvanced: true, GetValues: (_) => ["animate", "iterate", "one", "none"]
+            "animate", IgnoreIf: "animate", FeatureFlag: "comfyui,text2video", Group: T2IParamTypes.GroupAdvancedVideo, Permission: Permissions.ParamVideo, IsAdvanced: true, GetValues: (_) => ["animate", "iterate", "one", "none"]
             ));
         VideoFrameInterpolationMultiplier = T2IParamTypes.Register<int>(new("Video Frame Interpolation Multiplier", "How many frames to interpolate between each frame in the video.\nHigher values are smoother, but make take significant time to save the output, and may have quality artifacts.",
-            "1", IgnoreIf: "1", Min: 1, Max: 10, Step: 1, FeatureFlag: "frameinterps", Group: T2IParamTypes.GroupVideo, Permission: Permissions.ParamVideo, OrderPriority: 32, IsAdvanced: true
+            "1", IgnoreIf: "1", Min: 1, Max: 10, Step: 1, FeatureFlag: "frameinterps,text2video", Group: T2IParamTypes.GroupVideo, Permission: Permissions.ParamVideo, OrderPriority: 32, IsAdvanced: true
             ));
         VideoFrameInterpolationMethod = T2IParamTypes.Register<string>(new("Video Frame Interpolation Method", "How to interpolate frames in the video.\n'RIFE' or 'FILM' are two different decent interpolation model options.",
-            "RIFE", FeatureFlag: "frameinterps", Group: T2IParamTypes.GroupVideo, Permission: Permissions.ParamVideo, GetValues: (_) => interpolators, OrderPriority: 33, DependNonDefault: VideoFrameInterpolationMultiplier.Type.ID, IsAdvanced: true
+            "RIFE", FeatureFlag: "frameinterps,text2video", Group: T2IParamTypes.GroupVideo, Permission: Permissions.ParamVideo, GetValues: (_) => interpolators, OrderPriority: 33, DependNonDefault: VideoFrameInterpolationMultiplier.Type.ID, IsAdvanced: true
             ));
         GligenModel = T2IParamTypes.Register<string>(new("GLIGEN Model", "Optionally use a GLIGEN model.\nGLIGEN is only compatible with SDv1 at time of writing.",
             "None", IgnoreIf: "None", FeatureFlag: "comfyui", Group: T2IParamTypes.GroupRegionalPrompting, GetValues: (_) => GligenModels, IsAdvanced: true
