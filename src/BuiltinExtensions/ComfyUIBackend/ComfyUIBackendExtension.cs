@@ -707,7 +707,7 @@ public class ComfyUIBackendExtension : Extension
             "RIFE", FeatureFlag: "frameinterps,text2video", Group: T2IParamTypes.GroupVideo, Permission: Permissions.ParamVideo, GetValues: (_) => interpolators, OrderPriority: 33, DependNonDefault: VideoFrameInterpolationMultiplier.Type.ID, IsAdvanced: true
             ));
         GligenModel = T2IParamTypes.Register<string>(new("GLIGEN Model", "Optionally use a GLIGEN model.\nGLIGEN is only compatible with SDv1 at time of writing.",
-            "None", IgnoreIf: "None", FeatureFlag: "comfyui", Group: T2IParamTypes.GroupRegionalPrompting, GetValues: (_) => GligenModels, IsAdvanced: true
+            "None", IgnoreIf: "None", FeatureFlag: "comfyui,stable-diffusion-v1", Group: T2IParamTypes.GroupRegionalPrompting, GetValues: (_) => GligenModels, IsAdvanced: true
             ));
         ShiftedLatentAverageInit = T2IParamTypes.Register<bool>(new("Shifted Latent Average Init", "If checked, shifts the empty latent to use a mean-average per-channel latent value (as calculated by Birchlabs).\nIf unchecked, default behavior of zero-init latents are used.\nThis can potentially improve the color range or even general quality on SDv1, SDv2, and SDXL models.\nNote that the effect is very minor.",
             "false", IgnoreIf: "false", FeatureFlag: "comfyui", Group: T2IParamTypes.GroupAdvancedSampling, IsAdvanced: true

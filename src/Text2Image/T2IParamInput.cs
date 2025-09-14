@@ -55,7 +55,6 @@ public class T2IParamInput
                 int height = int.Parse(heightText.Trim());
                 input.Set(T2IParamTypes.Width, width);
                 input.Set(T2IParamTypes.Height, height);
-                input.Remove(T2IParamTypes.AltResolutionHeightMult);
             }
         },
         input =>
@@ -236,10 +235,6 @@ public class T2IParamInput
         if (TryGet(T2IParamTypes.RawResolution, out string res))
         {
             return int.Parse(res.After('x'));
-        }
-        if (TryGet(T2IParamTypes.AltResolutionHeightMult, out double val) && TryGet(T2IParamTypes.Width, out int width))
-        {
-            return (int)(val * width);
         }
         if (TryGet(T2IParamTypes.SideLength, out int sideLen) && TryGet(T2IParamTypes.AspectRatio, out string aspect) && ResolutionAspectReferences.TryGetValue(aspect, out (int, int) resRef))
         {

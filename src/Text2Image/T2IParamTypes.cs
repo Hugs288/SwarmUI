@@ -303,7 +303,7 @@ public class T2IParamTypes
     public static T2IRegisteredParam<string> Prompt, NegativePrompt, AspectRatio, BackendType, RefinerMethod, PersonalNote, VideoFormat, VideoResolution, UnsamplerPrompt, ImageFormat, MaskBehavior, ColorCorrectionBehavior, RawResolution, SeamlessTileable, SD3TextEncs, BitDepth, Webhooks, Text2VideoFormat, WildcardSeedBehavior, SegmentSortOrder, SegmentTargetResolution, TorchCompile, VideoExtendFormat, ExactBackendID, OverridePredictionType, OverrideOutpathFormat;
     public static T2IRegisteredParam<int> Images, Steps, Width, Height, SideLength, BatchSize, VAETileSize, VAETileOverlap, VAETemporalTileSize, VAETemporalTileOverlap, ClipStopAtLayer, VideoFrames, VideoMotionBucket, VideoFPS, VideoSteps, RefinerSteps, CascadeLatentCompression, MaskShrinkGrow, MaskBlur, MaskGrow, SegmentMaskBlur, SegmentMaskGrow, SegmentMaskOversize, SegmentSteps, Text2VideoFrames, Text2VideoFPS, TrimVideoStartFrames, TrimVideoEndFrames, VideoExtendFrameOverlap;
     public static T2IRegisteredParam<long> Seed, VariationSeed, WildcardSeed;
-    public static T2IRegisteredParam<double> CFGScale, VariationSeedStrength, InitImageCreativity, InitImageResetToNorm, InitImageNoise, RefinerControl, RefinerUpscale, RefinerCFGScale, ReVisionStrength, AltResolutionHeightMult, GlobalRegionFactor, EndStepsEarly, SamplerSigmaMin, SamplerSigmaMax, SamplerRho, VideoAugmentationLevel, VideoCFG, VideoMinCFG, Video2VideoCreativity, VideoSwapPercent, VideoExtendSwapPercent, IP2PCFG2, RegionalObjectCleanupFactor, SigmaShift, SegmentThresholdMax, SegmentCFGScale, FluxGuidanceScale;
+    public static T2IRegisteredParam<double> CFGScale, VariationSeedStrength, InitImageCreativity, InitImageResetToNorm, InitImageNoise, RefinerControl, RefinerUpscale, RefinerCFGScale, ReVisionStrength, GlobalRegionFactor, EndStepsEarly, SamplerSigmaMin, SamplerSigmaMax, SamplerRho, VideoAugmentationLevel, VideoCFG, VideoMinCFG, Video2VideoCreativity, VideoSwapPercent, VideoExtendSwapPercent, IP2PCFG2, RegionalObjectCleanupFactor, SigmaShift, SegmentThresholdMax, SegmentCFGScale, FluxGuidanceScale;
     public static T2IRegisteredParam<Image> InitImage, MaskImage, VideoEndFrame;
     public static T2IRegisteredParam<T2IModel> Model, RefinerModel, VAE, RegionalObjectInpaintingModel, SegmentModel, VideoModel, VideoSwapModel, RefinerVAE, ClipLModel, ClipGModel, ClipVisionModel, T5XXLModel, LLaVAModel, LLaMAModel, QwenModel, VideoExtendModel, VideoExtendSwapModel;
     public static T2IRegisteredParam<List<string>> Loras, LoraWeights, LoraTencWeights, LoraSectionConfinement;
@@ -424,10 +424,10 @@ public class T2IParamTypes
             "CLIP + T5", GetValues: _ => ["CLIP Only", "T5 Only", "CLIP + T5"], Toggleable: true, Group: GroupSampling, FeatureFlag: "sd3", OrderPriority: 5, ChangeWeight: 9
             ));
         FluxGuidanceScale = Register<double>(new("Flux Guidance Scale", "What guidance scale to use for Flux-Dev or related models.\nDoes not apply to Flux-Schnell.\nFor Flux-Dev, this is a distilled embedded value the model was trained on, this is based on an alternative guidance methodology, and is not CFG.\n3.5 is default, but closer to 2.0 may allow for more stylistic flexibility.\nFor Hunyuan Video, this is distilled from CFG Scale, and prefers values closer to 6.",
-            "3.5", Min: 0, Max: 100, ViewMax: 10, Step: 0.1, Toggleable: true, Group: GroupSampling, ViewType: ParamViewType.SLIDER, OrderPriority: 6, FeatureFlag: "Flux.1-dev|hunyuan-video"
+            "3.5", Min: 0, Max: 100, ViewMax: 10, Step: 0.1, Toggleable: true, Group: GroupSampling, ViewType: ParamViewType.SLIDER, OrderPriority: 6, FeatureFlag: "flux-dev|hunyuan-video"
             ));
         FluxDisableGuidance = Register<bool>(new("Flux Disable Guidance", "Disables Flux Guidance Scale.\nSome models prefer this. Usually you don't need this.",
-            "false", IgnoreIf: "false", Group: GroupSampling, IsAdvanced: true, OrderPriority: 6.2, FeatureFlag: "Flux.1-dev|hunyuan-video"
+            "false", IgnoreIf: "false", Group: GroupSampling, IsAdvanced: true, OrderPriority: 6.2, FeatureFlag: "flux-dev|hunyuan-video"
             ));
         ZeroNegative = Register<bool>(new("Zero Negative", "Zeroes the negative prompt if it's empty.\nDoes nothing if the negative prompt is not empty.\nThis may yield better quality on SD3.",
             "false", IgnoreIf: "false", Group: GroupSampling, OrderPriority: 7
@@ -684,7 +684,7 @@ public class T2IParamTypes
             "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 17, ChangeWeight: 7
             ));
         LLaVAModel = Register<T2IModel>(new("LLaVA Model", "Which LLaVA model to use as a text encoder, for Hunyuan Video 'diffusion_models' folder models.",
-            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 18, ChangeWeight: 7
+            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 18, ChangeWeight: 7, FeatureFlag: "hunyuan-video"
             ));
         LLaMAModel = Register<T2IModel>(new("LLaMA Model", "Which LLaMA model to use as a text encoder, for HiDream-style 'diffusion_models' folder models.",
             "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 19, ChangeWeight: 7
@@ -696,9 +696,6 @@ public class T2IParamTypes
         GroupSwarmInternal = new("Swarm Internal", Open: false, OrderPriority: 0, IsAdvanced: true);
         BatchSize = Register<int>(new("Batch Size", "Batch size - generates more images at once on a single GPU.\nThis increases VRAM usage.\nMay in some cases increase overall speed by a small amount (runs slower to get the images, but slightly faster per-image).",
             "1", IgnoreIf: "1", Min: 1, Max: 100, Step: 1, IsAdvanced: true, ViewType: ParamViewType.SLIDER, ViewMax: 10, ChangeWeight: 2, Group: GroupSwarmInternal, OrderPriority: -20
-            ));
-        AltResolutionHeightMult = Register<double>(new("Alt Resolution Height Multiplier", "When enabled, the normal width parameter is used, and this value is multiplied by the width to derive the image height.",
-            "1", Min: 0, Max: 10, Step: 0.1, Examples: ["0.5", "1", "1.5"], IsAdvanced: true, Toggleable: true, ViewType: ParamViewType.SLIDER, Group: GroupSwarmInternal, OrderPriority: -19
             ));
         RawResolution = Register<string>(new("Raw Resolution", "Optional advanced way to manually specify raw resolutions, useful for grids.\nWhen enabled, this overrides the default width/height params.",
             "1024x1024", Examples: ["512x512", "1024x1024", "1344x768"], Toggleable: true, IsAdvanced: true, Group: GroupSwarmInternal, OrderPriority: -18, Clean: (_, s) =>
