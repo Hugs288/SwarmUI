@@ -450,7 +450,7 @@ public class T2IParamTypes
             "3", Min: 0, Max: 100, Step: 0.01, Toggleable: true, IsAdvanced: true, Group: GroupAdvancedSampling, OrderPriority: -21
             ));
         IP2PCFG2 = Register<double>(new("IP2P CFG 2", "CFG Scale for Cond2-Negative in InstructPix2Pix (Edit) models.",
-            "1.5", Toggleable: true, Min: 1, Max: 100, ViewMax: 20, Step: 0.5, Examples: ["1.5", "2"], ViewType: ParamViewType.SLIDER, Group: GroupAdvancedSampling, OrderPriority: -12, FeatureFlag: "omnigen-2"
+            "1.5", Toggleable: true, Min: 1, Max: 100, ViewMax: 20, Step: 0.5, Examples: ["1.5", "2"], ViewType: ParamViewType.SLIDER, Group: GroupAdvancedSampling, OrderPriority: -12, FeatureFlag: "omnigen2"
             ));
         VAETileSize = Register<int>(new("VAE Tile Size", "If enabled, decodes images through the VAE using tiles of this size.\nVAE Tiling reduces VRAM consumption, but takes longer and may impact quality.",
             "256", Min: 128, Max: 4096, Step: 32, Toggleable: true, IsAdvanced: true, Group: GroupAdvancedSampling, OrderPriority: -5
@@ -649,7 +649,7 @@ public class T2IParamTypes
             "webp", GetValues: _ => videoFormats, OrderPriority: 20, Group: GroupVideoExtend, Permission: Permissions.ParamVideo, FeatureFlag: "video,text2video", DoNotPreview: true
             ));
         // ================================================ Advanced Model Addons ================================================
-        GroupAdvancedModelAddons = new("Advanced Model Addons", Open: false, OrderPriority: 8, IsAdvanced: true);
+        GroupAdvancedModelAddons = new("VAE/Text Encoder Override", Open: false, OrderPriority: 8, IsAdvanced: true);
         Model = Register<T2IModel>(new("Model", "What main checkpoint model should be used.",
             "", Permission: Permissions.ModelParams, VisibleNormally: false, Subtype: "Stable-Diffusion", ChangeWeight: 10
             ));
@@ -672,25 +672,25 @@ public class T2IParamTypes
             "", IgnoreIf: "", IsAdvanced: true, Group: GroupAdvancedModelAddons, VisibleNormally: false
             ));
         ClipLModel = Register<T2IModel>(new("CLIP-L Model", "Which CLIP-L model to use as a text encoder, for SD3/Flux style 'diffusion_models' folder models.",
-            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 15, ChangeWeight: 7
+            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 15, ChangeWeight: 7, FeatureFlag: "hidream-i1|sdxl|hunyuan-video|flux-dev|sd3|stable-diffusion-v1"
             ));
         ClipGModel = Register<T2IModel>(new("CLIP-G Model", "Which CLIP-G model to use as a text encoder, for SD3 style 'diffusion_models' folder models.",
-            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 16, ChangeWeight: 7
+            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 16, ChangeWeight: 7, FeatureFlag: "hidream-i1|sdxl|sd3|stable-diffusion-v2"
             ));
         ClipVisionModel = Register<T2IModel>(new("CLIP-Vision Model", "Which CLIP-Vision model to use as an image encoder, for certain image-input tasks.",
             "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "ClipVision", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 16.5, ChangeWeight: 7
             ));
         T5XXLModel = Register<T2IModel>(new("T5-XXL Model", "Which T5-XXL model to use as a text encoder, for SD3/Flux style 'diffusion_models' folder models.",
-            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 17, ChangeWeight: 7
+            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 17, ChangeWeight: 7, FeatureFlag: "sd3|flux-dev|chroma|hidream-i1|genmo-mochi-1|lightricks-ltx-video|nvidia-cosmos-1|nvidia-cosmos-predict2|wan"
             ));
         LLaVAModel = Register<T2IModel>(new("LLaVA Model", "Which LLaVA model to use as a text encoder, for Hunyuan Video 'diffusion_models' folder models.",
             "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 18, ChangeWeight: 7, FeatureFlag: "hunyuan-video"
             ));
         LLaMAModel = Register<T2IModel>(new("LLaMA Model", "Which LLaMA model to use as a text encoder, for HiDream-style 'diffusion_models' folder models.",
-            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 19, ChangeWeight: 7
+            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 19, ChangeWeight: 7, FeatureFlag: "hidream-i1"
             ));
         QwenModel = Register<T2IModel>(new("Qwen Model", "Which Qwen LLM to use as a text encoder, for OmniGen/QwenImage-style 'diffusion_models' folder models.",
-            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 20, ChangeWeight: 7
+            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 20, ChangeWeight: 7, FeatureFlag: "omnigen2|qwenimage"
             ));
         // ================================================ Swarm Internal ================================================
         GroupSwarmInternal = new("Swarm Internal", Open: false, OrderPriority: 0, IsAdvanced: true);

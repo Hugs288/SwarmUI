@@ -197,6 +197,11 @@ function reviseBackendFeatureSet() {
     }
     doCompatFeature('stable-diffusion-v3', 'sd3');
     doCompatFeature('stable-cascade-v1', 'cascade');
+    doCompatFeature('omnigen-2', 'omnigen2');
+    doCompatFeature('stable-diffusion-v1', 'sd1');
+    doCompatFeature('hidream-i1', 'hidream-i1');
+    doAnyArchFeature(['qwen-image', 'qwen-image-edit'], 'qwenimage');
+    doAnyArchFeature(['wan-21', 'wan-22'], 'wan');
     doAnyArchFeature(['Flux.1-dev'], 'flux-dev');
     doCompatFeature('stable-diffusion-xl-v1', 'sdxl');
     doAnyCompatFeature(['genmo-mochi-1', 'lightricks-ltx-video', 'hunyuan-video', 'nvidia-cosmos-1', `wan-21`, `wan-22`], 'text2video');
