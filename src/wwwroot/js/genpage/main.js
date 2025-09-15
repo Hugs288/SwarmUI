@@ -195,15 +195,21 @@ function reviseBackendFeatureSet() {
         }
         removeMe.push(featureFlag);
     }
+    doCompatFeature('stable-diffusion-v1', 'sd1');
+    doCompatFeature('stable-diffusion-v2', 'sd2');
+    doCompatFeature('stable-diffusion-xl-v1', 'sdxl');
     doCompatFeature('stable-diffusion-v3', 'sd3');
     doCompatFeature('stable-cascade-v1', 'cascade');
-    doCompatFeature('omnigen-2', 'omnigen2');
-    doCompatFeature('stable-diffusion-v1', 'sd1');
     doCompatFeature('hidream-i1', 'hidream-i1');
+    doCompatFeature('lumina-2', 'lumina-2');
+    doCompatFeature('hunyuan-video', 'hunyuan-video');
+    doCompatFeature('lightricks-ltx-video', 'ltxv');
+    doCompatFeature('chroma', 'chroma');
+    doCompatFeature('omnigen-2', 'omnigen-2');
+    doCompatFeature('genmo-mochi-1', 'genmo-mochi-1');
     doAnyArchFeature(['qwen-image', 'qwen-image-edit'], 'qwenimage');
     doAnyArchFeature(['wan-21', 'wan-22'], 'wan');
     doAnyArchFeature(['Flux.1-dev'], 'flux-dev');
-    doCompatFeature('stable-diffusion-xl-v1', 'sdxl');
     doAnyCompatFeature(['genmo-mochi-1', 'lightricks-ltx-video', 'hunyuan-video', 'nvidia-cosmos-1', `wan-21`, `wan-22`], 'text2video');
     for (let changer of featureSetChangers) {
         let [add, remove] = changer();

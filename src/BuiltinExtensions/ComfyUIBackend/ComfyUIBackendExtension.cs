@@ -649,13 +649,13 @@ public class ComfyUIBackendExtension : Extension
             "2", Min: 0, Max: 10, Step: 0.25, FeatureFlag: "comfyui", Group: T2IParamTypes.GroupAlternateGuidance, IsAdvanced: true, Toggleable: true, ViewType: ParamViewType.SLIDER, OrderPriority: 12.5, DependNonDefault: SelfAttentionGuidanceScale.Type.ID
             ));
         PerturbedAttentionGuidanceScale = T2IParamTypes.Register<double>(new("Perturbed-Attention Guidance Scale", "Scale for Perturbed-Attention Guidance (PAG).\n''PAG is designed to progressively enhance the structure of synthesized samples throughout the denoising process by considering the self-attention mechanisms' ability to capture structural information.\nIt involves generating intermediate samples with degraded structure by substituting selected self-attention maps in diffusion U-Net with an identity matrix, and guiding the denoising process away from these degraded samples.''\nDefaults to 3.\nThis is only expected to work on older unet-based models (eg SDXL) and not on newer models.",
-            "3", Min: 0, Max: 100, Step: 0.1, FeatureFlag: "comfyui", Group: T2IParamTypes.GroupAlternateGuidance, IsAdvanced: true, Toggleable: true, ViewType: ParamViewType.SLIDER, OrderPriority: 13
+            "3", Min: 0, Max: 10, Step: 0.1, FeatureFlag: "comfyui", Group: T2IParamTypes.GroupAlternateGuidance, IsAdvanced: true, Toggleable: true, ViewType: ParamViewType.SLIDER, OrderPriority: 13
             ));
         RescaleCFGMultiplier = T2IParamTypes.Register<double>(new("Rescale CFG Multiplier", "If enabled, use Comfy's native version of RescaleCFG.\nThis is only expected to work on certain vpred models.\nThis is, generally, pointless.\nThe value specified is the multiplier rate.",
             "0.7", Min: 0, Max: 1, Step: 0.01, FeatureFlag: "comfyui", Group: T2IParamTypes.GroupAlternateGuidance, IsAdvanced: true, Toggleable: true, ViewType: ParamViewType.SLIDER, OrderPriority: 14
             ));
         RenormCFG = T2IParamTypes.Register<double>(new("Renorm CFG", "If enabled, use 'Renorm CFG', a technique developed for use with Lumina 2.\nAt 0, this does nothing. Lumina 2 reference code sets this to 1.\nThis parameter only works on some models, and will corrupt others.",
-            "0", Min: 0, Max: 100, Step: 0.1, IgnoreIf: "0", ViewMax: 2, FeatureFlag: "comfyui,lumina2", Group: T2IParamTypes.GroupAlternateGuidance, IsAdvanced: true, ViewType: ParamViewType.SLIDER, OrderPriority: 15
+            "0", Min: 0, Max: 10, Step: 0.1, IgnoreIf: "0", ViewMax: 2, FeatureFlag: "comfyui,lumina-2", Group: T2IParamTypes.GroupAlternateGuidance, IsAdvanced: true, ViewType: ParamViewType.SLIDER, OrderPriority: 15
             ));
         UseCfgZeroStar = T2IParamTypes.Register<bool>(new("Use CFG Zero Star", "If enabled, use 'CFG Zero Star' (CFG-Zero*, defined <a target=\"_blank\" href=\"https://arxiv.org/abs/2503.18886\">in this paper</a>).\nThis may slightly improve quality on modern 'Flow' models when using CFG.",
             "false", IgnoreIf: "false", FeatureFlag: "comfyui", Group: T2IParamTypes.GroupAlternateGuidance, IsAdvanced: true, OrderPriority: 16
