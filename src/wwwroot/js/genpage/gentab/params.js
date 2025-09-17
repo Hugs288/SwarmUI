@@ -444,6 +444,24 @@ function genInputs(delay_final = false) {
                     });
                 }
             }
+            if (param.feature_flag) {
+                for (let or_group of param.feature_flag.split('|')) {
+                    for (let f of or_group.split(',')) {
+                        if (f.includes(':')) {
+                            let [key, val] = f.split(':', 2);
+                            if (!dependsHandled.includes(key)) {
+                                dependsHandled.push(key);
+                                let other = document.getElementById(`input_${key}`);
+                                if (other) {
+                                    other.addEventListener('change', () => {
+                                        scheduleParamUnsupportUpdate();
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         let inputAspectRatio = document.getElementById('input_aspectratio');
         let inputWidth = document.getElementById('input_width');
@@ -1189,7 +1207,7 @@ function hideUnsupportableParams() {
                         }
                         return false;
                     }
-                    return currentBackendFeatureSet.includes(f);
+                    return currentBackendFeatureSet.includes(f) || (curModelCompatClass && curModelCompatClass.startsWith(f));
                 }));
             let filterShow = true;
             if (filter && param.id != 'prompt') {
