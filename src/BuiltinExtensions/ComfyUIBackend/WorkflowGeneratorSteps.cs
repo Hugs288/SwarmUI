@@ -178,6 +178,14 @@ public class WorkflowGeneratorSteps
                 });
                 g.LoadingModel = [patched, 0];
             }
+            if (g.UserInput.Get(ComfyUIBackendExtension.UseTCFG, false))
+            {
+                string patched = g.CreateNode("TCFG", new JObject()
+                {
+                    ["model"] = g.LoadingModel
+                });
+                g.LoadingModel = [patched, 0];
+            }
             if (g.UserInput.Get(ComfyUIBackendExtension.UseMahiro, false))
             {
                 string patched = g.CreateNode("Mahiro", new JObject()

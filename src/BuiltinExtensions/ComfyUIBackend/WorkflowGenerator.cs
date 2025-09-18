@@ -1039,7 +1039,9 @@ public class WorkflowGenerator
                     string modelNode = CreateNode("NunchakuQwenImageDiTLoader", new JObject()
                     {
                         ["model_name"] = model.Name.EndsWith("/transformer_blocks.safetensors") ? model.Name.BeforeLast('/').Replace("/", ModelFolderFormat ?? $"{Path.DirectorySeparatorChar}") : model.ToString(ModelFolderFormat),
-                        ["cpu_offload"] = "auto"
+                        ["cpu_offload"] = "auto",
+                        ["num_blocks_on_gpu"] = 1, // TODO: If nunchaku doesn't fix automation here, add a param. Also enable cpu_offload if the param is given.
+                        ["use_pin_memory"] = "enable"
                     }, id);
                     LoadingModel = [modelNode, 0];
                 }
@@ -1642,6 +1644,23 @@ public class WorkflowGenerator
             }
             defsampler ??= "res_multistep";
             defscheduler ??= "karras";
+        }
+        else if (IsHunyuanImageRefiner())
+        {
+            if (!hadSpecialCond)
+            {
+                string refinerCond = CreateNode("HunyuanRefinerLatent", new JObject()
+                {
+                    ["positive"] = pos,
+                    ["negative"] = neg,
+                    ["latent"] = latent,
+                    ["noise_augmentation"] = 0.1 // TODO: User input?
+                });
+                pos = [refinerCond, 0];
+                neg = [refinerCond, 1];
+                latent = [refinerCond, 2];
+            }
+            defscheduler ??= "simple";
         }
         else if (IsFlux() || IsWanVideo() || IsWanVideo22() || IsOmniGen() || IsQwenImage())
         {
