@@ -649,7 +649,7 @@ public class T2IParamTypes
             "webp", GetValues: _ => videoFormats, OrderPriority: 20, Group: GroupVideoExtend, Permission: Permissions.ParamVideo, FeatureFlag: "video,text2video", DoNotPreview: true
             ));
         // ================================================ Advanced Model Addons ================================================
-        GroupAdvancedModelAddons = new("VAE/Text Encoder Override", Open: false, OrderPriority: 8, IsAdvanced: true);
+        GroupAdvancedModelAddons = new("Model Overrides", Open: false, OrderPriority: 8, IsAdvanced: true);
         Model = Register<T2IModel>(new("Model", "What main checkpoint model should be used.",
             "", Permission: Permissions.ModelParams, VisibleNormally: false, Subtype: "Stable-Diffusion", ChangeWeight: 10
             ));
