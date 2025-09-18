@@ -433,7 +433,7 @@ public class T2IParamTypes
             "false", IgnoreIf: "false", Group: GroupSampling, OrderPriority: 7
             ));
         SeamlessTileable = Register<string>(new("Seamless Tileable", "Makes the generated image seamlessly tileable (like a 3D texture would be).\nOptionally, can be tileable on only the X axis (horizontal) or Y axis (vertical).\nOnly compatible with UNet models (such as SDXL), and not with DiT models (such as Flux).",
-            "false", IgnoreIf: "false", GetValues: _ => ["false", "true", "X-Only", "Y-Only"], Group: GroupSampling, FeatureFlag: "seamless", OrderPriority: 15
+            "false", IgnoreIf: "false", GetValues: _ => ["false", "true", "X-Only", "Y-Only"], Group: GroupSampling, FeatureFlag: "seamless,stable-diffusion-v1|stable-diffusion-v2|stable-diffusion-xl-v1", OrderPriority: 15
             ));
         // ================================================ Advanced Sampling ================================================
         GroupAdvancedSampling = new("Advanced Sampling", Open: false, OrderPriority: 15, IsAdvanced: true, Parent: GroupSampling);
@@ -672,7 +672,7 @@ public class T2IParamTypes
             "", IgnoreIf: "", IsAdvanced: true, Group: GroupAdvancedModelAddons, VisibleNormally: false
             ));
         ClipLModel = Register<T2IModel>(new("CLIP-L Model", "Which CLIP-L model to use as a text encoder, for SD3/Flux style 'diffusion_models' folder models.",
-            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 15, ChangeWeight: 7, FeatureFlag: "hidream-i1|stable-diffusion-xl-v1|hunyuan-video|flux-dev|stable-diffusion-v3|stable-diffusion-v2"
+            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 15, ChangeWeight: 7, FeatureFlag: "hidream-i1|stable-diffusion-xl-v1|hunyuan-video|flux-dev|stable-diffusion-v3|stable-diffusion-v2|stable-diffusion-v1"
             ));
         ClipGModel = Register<T2IModel>(new("CLIP-G Model", "Which CLIP-G model to use as a text encoder, for SD3 style 'diffusion_models' folder models.",
             "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 16, ChangeWeight: 7, FeatureFlag: "hidream-i1|stable-diffusion-xl-v1|stable-diffusion-v3|stable-diffusion-v2"
