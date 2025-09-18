@@ -660,11 +660,11 @@ public class ComfyUIBackendExtension : Extension
         UseCfgZeroStar = T2IParamTypes.Register<bool>(new("Use CFG Zero Star", "If enabled, use 'CFG Zero Star' (CFG-Zero*, defined <a target=\"_blank\" href=\"https://arxiv.org/abs/2503.18886\">in this paper</a>).\nThis may slightly improve quality on modern 'Flow' models when using CFG.",
             "false", IgnoreIf: "false", FeatureFlag: "comfyui", Group: T2IParamTypes.GroupAlternateGuidance, IsAdvanced: true, OrderPriority: 16
             ));
-        UseMahiro = T2IParamTypes.Register<bool>(new("Use Mahiro Guidance", "If enabled, Modify the guidance scale to scale more on the 'direction' of the positive prompt rather than the difference between the negative prompt.",
-            "false", IgnoreIf: "false", FeatureFlag: "comfyui", Group: T2IParamTypes.GroupAlternateGuidance, IsAdvanced: true, OrderPriority: 16
-            ));
         UseTCFG = T2IParamTypes.Register<bool>(new("Use TCFG", "If enabled, use 'TCFG' (Tangential Damping Classifier-Free Guidance, defined <a target=\"_blank\" href=\"https://arxiv.org/abs/2503.18137\">in this paper</a>).\nThis may reduce CFG artifacts. Compatible with modern 'Flow' models.",
             "false", IgnoreIf: "false", FeatureFlag: "comfyui", Group: T2IParamTypes.GroupAlternateGuidance, IsAdvanced: true, OrderPriority: 17
+            ));
+        UseMahiro = T2IParamTypes.Register<bool>(new("Use Mahiro Guidance", "If enabled, Modify the guidance scale to scale more on the 'direction' of the positive prompt rather than the difference between the negative prompt.",
+            "false", IgnoreIf: "false", FeatureFlag: "comfyui", Group: T2IParamTypes.GroupAlternateGuidance, IsAdvanced: true, OrderPriority: 18
             ));
         RefinerUpscaleMethod = T2IParamTypes.Register<string>(new("Refiner Upscale Method", "How to upscale the image, if upscaling is used.",
             "pixel-lanczos", Group: T2IParamTypes.GroupRefiners, OrderPriority: -1, FeatureFlag: "comfyui", ChangeWeight: 1,
