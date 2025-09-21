@@ -108,7 +108,6 @@ let backendsWereLoadingEver = false;
 let reviseStatusInterval = null;
 let currentBackendFeatureSet = [];
 let rawBackendFeatureSet = [];
-let lastRevisedCompatClass = null;
 let lastStatusRequestPending = 0;
 function reviseStatusBar() {
     if (lastStatusRequestPending + 20 * 1000 > Date.now()) {
@@ -168,8 +167,7 @@ function reviseStatusBar() {
 let featureSetChangers = [];
 
 function reviseBackendFeatureSet() {
-    let modelChanged = curModelCompatClass != lastRevisedCompatClass;
-    currentBackendFeatureSet = Array.from(currentBackendFeatureSet);
+    currentBackendFeatureSet = Array.from(rawBackendFeatureSet);
     let addMe = [], removeMe = [];
     function doCompatFeature(compatClass, featureFlag) {
         if (curModelCompatClass && curModelCompatClass.startsWith(compatClass)) {
@@ -197,6 +195,9 @@ function reviseBackendFeatureSet() {
         }
         removeMe.push(featureFlag);
     }
+    if (curModelCompatClass) {
+        addMe.push(curModelCompatClass);
+    }
     doAnyArchFeature(['Flux.1-dev', 'hunyuan-video'], 'flux-dev');
     doAnyCompatFeature(['genmo-mochi-1', 'lightricks-ltx-video', 'hunyuan-video', 'nvidia-cosmos-1', `wan-21`, `wan-22`], 'text2video');
     for (let changer of featureSetChangers) {
@@ -218,7 +219,7 @@ function reviseBackendFeatureSet() {
             anyChanged = true;
         }
     }
-    if (anyChanged || modelChanged) {
+    if (anyChanged) {
         hideUnsupportableParams();
     }
 }
