@@ -186,19 +186,9 @@ function reviseBackendFeatureSet() {
         }
         removeMe.push(featureFlag);
     }
-    function doAnyArchFeature(archIds, featureFlag) {
-        for (let archId of archIds) {
-            if (curModelArch && curModelArch.startsWith(archId)) {
-                addMe.push(featureFlag);
-                return;
-            }
-        }
-        removeMe.push(featureFlag);
-    }
     if (curModelCompatClass) {
         addMe.push(curModelCompatClass);
-    }
-    doAnyArchFeature(['Flux.1-dev', 'hunyuan-video'], 'flux-dev');
+    };
     doAnyCompatFeature(['genmo-mochi-1', 'lightricks-ltx-video', 'hunyuan-video', 'nvidia-cosmos-1', `wan-21`, `wan-22`], 'text2video');
     for (let changer of featureSetChangers) {
         let [add, remove] = changer();
