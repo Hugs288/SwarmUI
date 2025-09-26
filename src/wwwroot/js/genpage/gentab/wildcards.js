@@ -23,9 +23,9 @@ class WildcardHelpers {
         this.nameElem.addEventListener('input', () => {
             this.modalMayClose = false;
         });
-        setTimeout(() => {
+        $(() => {
             $(this.modalElem).modal({backdrop: 'static', keyboard: false});
-        }, 1);
+        });
         $(this.modalElem).on('hidePrevented.bs.modal', () => {
             if (this.modalMayClose) {
                 $(this.modalElem).modal('hide');
