@@ -712,7 +712,7 @@ public abstract class ComfyUIAPIAbstractBackend : AbstractT2IBackend
         string workflow = null;
         // note: gently break any standard embed with a space, *require* swarm format embeds, as comfy's raw syntax has unwanted behaviors
         user_input.ProcessPromptEmbeds(x => $" embedding:{x.Replace("/", ModelFolderFormat)} ", p => p.Replace("embedding:", "embedding :", StringComparison.OrdinalIgnoreCase));
-        if (user_input.TryGet(ComfyUIBackendExtension.CustomWorkflowParam, out string customWorkflowName))
+        if (user_input.TryGet(T2IParamTypes.CustomWorkflowParam, out string customWorkflowName))
         {
             if (customWorkflowName.StartsWith("PARSED%"))
             {
@@ -806,8 +806,8 @@ public abstract class ComfyUIAPIAbstractBackend : AbstractT2IBackend
                     "subseed_strength" => user_input.GetString(T2IParamTypes.VariationSeedStrength),
                     "init_image" => user_input.Get(T2IParamTypes.InitImage, null)?.AsBase64,
                     "init_image_strength" => user_input.GetString(T2IParamTypes.InitImageCreativity),
-                    "comfy_sampler" or "comfyui_sampler" or "sampler" => user_input.GetString(ComfyUIBackendExtension.SamplerParam) ?? (string.IsNullOrWhiteSpace(defVal) ? "euler" : defVal),
-                    "comfy_scheduler" or "comfyui_scheduler" or "scheduler" => user_input.GetString(ComfyUIBackendExtension.SchedulerParam) ?? (string.IsNullOrWhiteSpace(defVal) ? "normal" : defVal),
+                    "comfy_sampler" or "comfyui_sampler" or "sampler" => user_input.GetString(T2IParamTypes.SamplerParam) ?? (string.IsNullOrWhiteSpace(defVal) ? "euler" : defVal),
+                    "comfy_scheduler" or "comfyui_scheduler" or "scheduler" => user_input.GetString(T2IParamTypes.SchedulerParam) ?? (string.IsNullOrWhiteSpace(defVal) ? "normal" : defVal),
                     "model" => user_input.Get(T2IParamTypes.Model).ToString(ModelFolderFormat),
                     "prefix" => $"SwarmUI_{Random.Shared.Next():X4}_",
                     "loras" => getLoras(),

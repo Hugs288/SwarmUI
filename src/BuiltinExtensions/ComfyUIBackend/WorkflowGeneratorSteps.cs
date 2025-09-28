@@ -120,7 +120,7 @@ public class WorkflowGeneratorSteps
         }, -10);
         AddModelGenStep(g =>
         {
-            if (g.UserInput.TryGet(ComfyUIBackendExtension.SetClipDevice, out string device) && g.Features.Contains("set_clip_device"))
+            if (g.UserInput.TryGet(T2IParamTypes.SetClipDevice, out string device) && g.Features.Contains("set_clip_device"))
             {
                 string clipDeviceNode = g.CreateNode("OverrideCLIPDevice", new JObject()
                 {
@@ -132,17 +132,17 @@ public class WorkflowGeneratorSteps
         }, -9);
         AddModelGenStep(g =>
         {
-            if (g.UserInput.TryGet(ComfyUIBackendExtension.SelfAttentionGuidanceScale, out double sagScale))
+            if (g.UserInput.TryGet(T2IParamTypes.SelfAttentionGuidanceScale, out double sagScale))
             {
                 string patched = g.CreateNode("SelfAttentionGuidance", new JObject()
                 {
                     ["model"] = g.LoadingModel,
                     ["scale"] = sagScale,
-                    ["blur_sigma"] = g.UserInput.Get(ComfyUIBackendExtension.SelfAttentionGuidanceSigmaBlur, 2.0)
+                    ["blur_sigma"] = g.UserInput.Get(T2IParamTypes.SelfAttentionGuidanceSigmaBlur, 2.0)
                 });
                 g.LoadingModel = [patched, 0];
             }
-            if (g.UserInput.TryGet(ComfyUIBackendExtension.PerturbedAttentionGuidanceScale, out double pagScale))
+            if (g.UserInput.TryGet(T2IParamTypes.PerturbedAttentionGuidanceScale, out double pagScale))
             {
                 string patched = g.CreateNode("PerturbedAttentionGuidance", new JObject()
                 {
@@ -151,7 +151,7 @@ public class WorkflowGeneratorSteps
                 });
                 g.LoadingModel = [patched, 0];
             }
-            if (g.UserInput.TryGet(ComfyUIBackendExtension.RescaleCFGMultiplier, out double rescaleCfg))
+            if (g.UserInput.TryGet(T2IParamTypes.RescaleCFGMultiplier, out double rescaleCfg))
             {
                 string patched = g.CreateNode("RescaleCFG", new JObject()
                 {
@@ -160,7 +160,7 @@ public class WorkflowGeneratorSteps
                 });
                 g.LoadingModel = [patched, 0];
             }
-            if (g.UserInput.TryGet(ComfyUIBackendExtension.RenormCFG, out double renormCfg))
+            if (g.UserInput.TryGet(T2IParamTypes.RenormCFG, out double renormCfg))
             {
                 string patched = g.CreateNode("RenormCFG", new JObject()
                 {
@@ -170,7 +170,7 @@ public class WorkflowGeneratorSteps
                 });
                 g.LoadingModel = [patched, 0];
             }
-            if (g.UserInput.Get(ComfyUIBackendExtension.UseCfgZeroStar, false))
+            if (g.UserInput.Get(T2IParamTypes.UseCfgZeroStar, false))
             {
                 string patched = g.CreateNode("CFGZeroStar", new JObject()
                 {
@@ -178,7 +178,7 @@ public class WorkflowGeneratorSteps
                 });
                 g.LoadingModel = [patched, 0];
             }
-            if (g.UserInput.Get(ComfyUIBackendExtension.UseTCFG, false))
+            if (g.UserInput.Get(T2IParamTypes.UseTCFG, false))
             {
                 string patched = g.CreateNode("TCFG", new JObject()
                 {
@@ -186,7 +186,7 @@ public class WorkflowGeneratorSteps
                 });
                 g.LoadingModel = [patched, 0];
             }
-            if (g.UserInput.Get(ComfyUIBackendExtension.UseMahiro, false))
+            if (g.UserInput.Get(T2IParamTypes.UseMahiro, false))
             {
                 string patched = g.CreateNode("Mahiro", new JObject()
                 {
@@ -218,10 +218,10 @@ public class WorkflowGeneratorSteps
         }, -5);
         AddModelGenStep(g =>
         {
-            if (g.UserInput.TryGet(ComfyUIBackendExtension.TeaCacheMode, out string teaCacheMode) && teaCacheMode != "disabled")
+            if (g.UserInput.TryGet(T2IParamTypes.TeaCacheMode, out string teaCacheMode) && teaCacheMode != "disabled")
             {
-                double teaCacheThreshold = g.UserInput.Get(ComfyUIBackendExtension.TeaCacheThreshold, 0.25);
-                double teaCacheStart = g.UserInput.Get(ComfyUIBackendExtension.TeaCacheStart, 0);
+                double teaCacheThreshold = g.UserInput.Get(T2IParamTypes.TeaCacheThreshold, 0.25);
+                double teaCacheStart = g.UserInput.Get(T2IParamTypes.TeaCacheStart, 0);
                 if (teaCacheMode == "base gen only" && g.LoadingModelType != "Base")
                 {
                     // wrong step, skip
@@ -302,7 +302,7 @@ public class WorkflowGeneratorSteps
                     Logs.Debug($"Ignore TeaCache Mode parameter because the current model is '{g.CurrentModelClass()?.Name ?? "(none)"}' which does not support TeaCache.");
                 }
             }
-            if (g.UserInput.TryGet(ComfyUIBackendExtension.EasyCacheMode, out string easyCacheMode) && easyCacheMode != "disabled")
+            if (g.UserInput.TryGet(T2IParamTypes.EasyCacheMode, out string easyCacheMode) && easyCacheMode != "disabled")
             {
                 if (teaCacheMode == "base gen only" && g.LoadingModelType != "Base")
                 {
@@ -313,9 +313,9 @@ public class WorkflowGeneratorSteps
                     string teaCacheNode = g.CreateNode("EasyCache", new JObject()
                     {
                         ["model"] = g.LoadingModel,
-                        ["reuse_threshold"] = g.UserInput.Get(ComfyUIBackendExtension.EasyCacheThreshold, 0),
-                        ["start_percent"] = g.UserInput.Get(ComfyUIBackendExtension.EasyCacheStart, 0),
-                        ["end_percent"] = g.UserInput.Get(ComfyUIBackendExtension.EasyCacheEnd, 1),
+                        ["reuse_threshold"] = g.UserInput.Get(T2IParamTypes.EasyCacheThreshold, 0),
+                        ["start_percent"] = g.UserInput.Get(T2IParamTypes.EasyCacheStart, 0),
+                        ["end_percent"] = g.UserInput.Get(T2IParamTypes.EasyCacheEnd, 1),
                         ["verbose"] = false
                     });
                     g.LoadingModel = [teaCacheNode, 0];
@@ -324,7 +324,7 @@ public class WorkflowGeneratorSteps
         }, -4);
         AddModelGenStep(g =>
         {
-            if (g.Features.Contains("aitemplate") && g.UserInput.Get(ComfyUIBackendExtension.AITemplateParam))
+            if (g.Features.Contains("aitemplate") && g.UserInput.Get(T2IParamTypes.AITemplateParam))
             {
                 string aitLoad = g.CreateNode("AITemplateLoader", new JObject()
                 {
@@ -434,8 +434,8 @@ public class WorkflowGeneratorSteps
                     {
                         ["model"] = g.FinalModel,
                         ["steps"] = steps,
-                        ["sampler_name"] = g.UserInput.Get(ComfyUIBackendExtension.SamplerParam, "euler"),
-                        ["scheduler"] = g.UserInput.Get(ComfyUIBackendExtension.SchedulerParam, "normal"),
+                        ["sampler_name"] = g.UserInput.Get(T2IParamTypes.SamplerParam, "euler"),
+                        ["scheduler"] = g.UserInput.Get(T2IParamTypes.SchedulerParam, "normal"),
                         ["positive"] = posCond,
                         ["negative"] = negCond,
                         ["latent_image"] = g.FinalLatentImage,
@@ -506,7 +506,7 @@ public class WorkflowGeneratorSteps
         {
             if (g.UserInput.TryGet(T2IParamTypes.PromptImages, out List<Image> images) && images.Any())
             {
-                if (g.UserInput.TryGet(ComfyUIBackendExtension.UseStyleModel, out string styleModelName))
+                if (g.UserInput.TryGet(T2IParamTypes.UseStyleModel, out string styleModelName))
                 {
                     string clipVis = g.RequireVisionModel("sigclip_vision_patch14_384.safetensors", "https://huggingface.co/Comfy-Org/sigclip_vision_384/resolve/main/sigclip_vision_patch14_384.safetensors", "1fee501deabac72f0ed17610307d7131e3e9d1e838d0363aa3c2b97a6e03fb33", T2IParamTypes.ClipVisionModel);
                     string styleModelClipLoader = g.CreateNode("CLIPVisionLoader", new JObject()
@@ -532,9 +532,9 @@ public class WorkflowGeneratorSteps
                             ["clip_vision_output"] = new JArray() { $"{encoded}", 0 },
                             ["style_model"] = new JArray() { $"{styleModelLoader}", 0 },
                             ["strength_type"] = "multiply",
-                            ["strength"] = g.UserInput.Get(ComfyUIBackendExtension.StyleModelMultiplyStrength, 1)
+                            ["strength"] = g.UserInput.Get(T2IParamTypes.StyleModelMultiplyStrength, 1)
                         });
-                        if (g.UserInput.TryGet(ComfyUIBackendExtension.StyleModelMergeStrength, out double mergeStrength) && mergeStrength < 1)
+                        if (g.UserInput.TryGet(T2IParamTypes.StyleModelMergeStrength, out double mergeStrength) && mergeStrength < 1)
                         {
                             styled = g.CreateNode("ConditioningAverage", new JObject()
                             {
@@ -543,7 +543,7 @@ public class WorkflowGeneratorSteps
                                 ["conditioning_to_strength"] = mergeStrength
                             });
                         }
-                        if (g.UserInput.TryGet(ComfyUIBackendExtension.StyleModelApplyStart, out double applyAt) && applyAt > 0)
+                        if (g.UserInput.TryGet(T2IParamTypes.StyleModelApplyStart, out double applyAt) && applyAt > 0)
                         {
                             string cond1 = g.CreateNode("ConditioningSetTimestepRange", new JObject()
                             {
@@ -653,7 +653,7 @@ public class WorkflowGeneratorSteps
                     g.FinalLatentImage = [referencedModel, 1];
                     g.DefaultPreviews = "second";
                 }
-                if (g.UserInput.TryGet(ComfyUIBackendExtension.UseIPAdapterForRevision, out string ipAdapter) && ipAdapter != "None")
+                if (g.UserInput.TryGet(T2IParamTypes.UseIPAdapterForRevision, out string ipAdapter) && ipAdapter != "None")
                 {
                     string getIPAvisionLoader()
                     {
@@ -818,15 +818,15 @@ public class WorkflowGeneratorSteps
                                 ["preset"] = ipAdapter
                             });
                         }
-                        double ipAdapterStart = g.UserInput.Get(ComfyUIBackendExtension.IPAdapterStart, 0.0);
-                        double ipAdapterEnd = g.UserInput.Get(ComfyUIBackendExtension.IPAdapterEnd, 1.0);
+                        double ipAdapterStart = g.UserInput.Get(T2IParamTypes.IPAdapterStart, 0.0);
+                        double ipAdapterEnd = g.UserInput.Get(T2IParamTypes.IPAdapterEnd, 1.0);
                         if (ipAdapterStart >= ipAdapterEnd)
                         {
                             throw new SwarmUserErrorException($"IP-Adapter Start must be less than IP-Adapter End.");
                         }
                         if (presetLow.StartsWith("file:"))
                         {
-                            string weightType = g.UserInput.Get(ComfyUIBackendExtension.IPAdapterWeightType, "linear");
+                            string weightType = g.UserInput.Get(T2IParamTypes.IPAdapterWeightType, "linear");
                             if (weightType == "standard") { weightType = "linear"; }
                             else if (weightType == "prompt is more important") { weightType = "ease out"; }
                             string ipAdapterNode = g.CreateNode("IPAdapterAdvanced", new JObject()
@@ -834,7 +834,7 @@ public class WorkflowGeneratorSteps
                                 ["model"] = g.FinalModel,
                                 ["ipadapter"] = new JArray() { ipAdapterLoader, 0 },
                                 ["image"] = new JArray() { lastImage, 0 },
-                                ["weight"] = g.UserInput.Get(ComfyUIBackendExtension.IPAdapterWeight, 1),
+                                ["weight"] = g.UserInput.Get(T2IParamTypes.IPAdapterWeight, 1),
                                 ["start_at"] = ipAdapterStart,
                                 ["end_at"] = ipAdapterEnd,
                                 ["weight_type"] = weightType,
@@ -852,10 +852,10 @@ public class WorkflowGeneratorSteps
                                 ["model"] = new JArray() { ipAdapterLoader, 0 },
                                 ["ipadapter"] = new JArray() { ipAdapterLoader, 1 },
                                 ["image"] = new JArray() { lastImage, 0 },
-                                ["weight"] = g.UserInput.Get(ComfyUIBackendExtension.IPAdapterWeight, 1),
+                                ["weight"] = g.UserInput.Get(T2IParamTypes.IPAdapterWeight, 1),
                                 ["start_at"] = ipAdapterStart,
                                 ["end_at"] = ipAdapterEnd,
-                                ["weight_type"] = g.UserInput.Get(ComfyUIBackendExtension.IPAdapterWeightType, "standard")
+                                ["weight_type"] = g.UserInput.Get(T2IParamTypes.IPAdapterWeightType, "standard")
                             });
                             g.FinalModel = [ipAdapterNode, 0];
                         }
@@ -872,7 +872,7 @@ public class WorkflowGeneratorSteps
                             ["model"] = g.FinalModel,
                             ["image"] = new JArray() { lastImage, 0 },
                             ["clip_vision"] = new JArray() { getIPAvisionLoader(), 0 },
-                            ["weight"] = g.UserInput.Get(ComfyUIBackendExtension.IPAdapterWeight, 1),
+                            ["weight"] = g.UserInput.Get(T2IParamTypes.IPAdapterWeight, 1),
                             ["noise"] = 0,
                             ["weight_type"] = "original"
                         });
@@ -885,7 +885,7 @@ public class WorkflowGeneratorSteps
                             ["model"] = g.FinalModel,
                             ["image"] = new JArray() { lastImage, 0 },
                             ["clip_vision"] = new JArray() { getIPAvisionLoader(), 0 },
-                            ["weight"] = g.UserInput.Get(ComfyUIBackendExtension.IPAdapterWeight, 1),
+                            ["weight"] = g.UserInput.Get(T2IParamTypes.IPAdapterWeight, 1),
                             ["model_name"] = ipAdapter,
                             ["dtype"] = "fp16" // TODO: ...???
                         });
@@ -939,7 +939,7 @@ public class WorkflowGeneratorSteps
                         firstImageNode = imageNodeActual;
                     }
                     T2IModel controlModel = g.UserInput.Get(controlnetParams.Model, null);
-                    if (!g.UserInput.TryGet(ComfyUIBackendExtension.ControlNetPreprocessorParams[i], out string preprocessor))
+                    if (!g.UserInput.TryGet(T2IParamTypes.ControlNetPreprocessorParams[i], out string preprocessor))
                     {
                         preprocessor = "none";
                         string wantedPreproc = controlModel?.Metadata?.Preprocessor;
@@ -958,7 +958,7 @@ public class WorkflowGeneratorSteps
                         }
                         else
                         {
-                            string[] procs = [.. ComfyUIBackendExtension.ControlNetPreprocessors.Keys];
+                            string[] procs = [.. T2IParamTypes.ControlNetPreprocessors.Keys];
                             bool getBestFor(string phrase)
                             {
                                 string result = procs.FirstOrDefault(m => m.ToLowerFast().Contains(phrase.ToLowerFast()));
@@ -1028,7 +1028,7 @@ public class WorkflowGeneratorSteps
                     {
                         ["control_net_name"] = controlModel.ToString(g.ModelFolderFormat)
                     });
-                    if (g.UserInput.TryGet(ComfyUIBackendExtension.ControlNetUnionTypeParams[i], out string unionType))
+                    if (g.UserInput.TryGet(T2IParamTypes.ControlNetUnionTypeParams[i], out string unionType))
                     {
                         controlModelNode = g.CreateNode("SetUnionControlNetType", new JObject()
                         {
@@ -1224,7 +1224,7 @@ public class WorkflowGeneratorSteps
                 negPrompt = g.CreateConditioning(g.UserInput.Get(T2IParamTypes.NegativePrompt), g.FinalClip, g.FinalLoadedModel, false, isRefiner: true);
                 bool doSave = g.UserInput.Get(T2IParamTypes.OutputIntermediateImages, false);
                 bool doUspcale = g.UserInput.TryGet(T2IParamTypes.RefinerUpscale, out double refineUpscale) && refineUpscale != 1;
-                string upscaleMethod = g.UserInput.Get(ComfyUIBackendExtension.RefinerUpscaleMethod, "None");
+                string upscaleMethod = g.UserInput.Get(T2IParamTypes.RefinerUpscaleMethod, "None");
                 // TODO: Better same-VAE check
                 bool doPixelUpscale = doUspcale && (upscaleMethod.StartsWith("pixel-") || upscaleMethod.StartsWith("model-"));
                 if (modelMustReencode || doPixelUpscale || doSave || g.MaskShrunkInfo.BoundsNode is not null)
@@ -1297,7 +1297,7 @@ public class WorkflowGeneratorSteps
                     g.FinalSamples = ["26", 0];
                 }
                 JArray model = g.FinalModel;
-                if (g.UserInput.TryGet(ComfyUIBackendExtension.RefinerHyperTile, out int tileSize))
+                if (g.UserInput.TryGet(T2IParamTypes.RefinerHyperTile, out int tileSize))
                 {
                     string hyperTileNode = g.CreateNode("HyperTile", new JObject()
                     {
@@ -1311,8 +1311,8 @@ public class WorkflowGeneratorSteps
                 }
                 int steps = g.UserInput.Get(T2IParamTypes.RefinerSteps, g.UserInput.Get(T2IParamTypes.Steps, 20, sectionId: T2IParamInput.SectionID_Refiner), sectionId: T2IParamInput.SectionID_Refiner);
                 double cfg = g.UserInput.Get(T2IParamTypes.RefinerCFGScale, g.UserInput.Get(T2IParamTypes.CFGScale, 7, sectionId: T2IParamInput.SectionID_Refiner), sectionId: T2IParamInput.SectionID_Refiner);
-                string explicitSampler = g.UserInput.Get(ComfyUIBackendExtension.SamplerParam, null, sectionId: T2IParamInput.SectionID_Refiner, includeBase: false) ?? g.UserInput.Get(ComfyUIBackendExtension.RefinerSamplerParam, null);
-                string explicitScheduler = g.UserInput.Get(ComfyUIBackendExtension.SchedulerParam, null, sectionId: T2IParamInput.SectionID_Refiner, includeBase: false) ?? g.UserInput.Get(ComfyUIBackendExtension.RefinerSchedulerParam, null);
+                string explicitSampler = g.UserInput.Get(T2IParamTypes.SamplerParam, null, sectionId: T2IParamInput.SectionID_Refiner, includeBase: false) ?? g.UserInput.Get(T2IParamTypes.RefinerSamplerParam, null);
+                string explicitScheduler = g.UserInput.Get(T2IParamTypes.SchedulerParam, null, sectionId: T2IParamInput.SectionID_Refiner, includeBase: false) ?? g.UserInput.Get(T2IParamTypes.RefinerSchedulerParam, null);
                 g.CreateKSampler(model, prompt, negPrompt, g.FinalSamples, cfg, steps, (int)Math.Round(steps * (1 - refinerControl)), 10000,
                     g.UserInput.Get(T2IParamTypes.Seed) + 1, false, method != "StepSwapNoisy", id: "23", doTiled: g.UserInput.Get(T2IParamTypes.RefinerDoTiling, false),
                     explicitSampler: explicitSampler, explicitScheduler: explicitScheduler, sectionId: T2IParamInput.SectionID_Refiner);
@@ -1548,8 +1548,8 @@ public class WorkflowGeneratorSteps
                         });
                         g.FinalImageOut = [trimNode, 0];
                     }
-                    if (g.UserInput.TryGet(ComfyUIBackendExtension.Text2VideoFrameInterpolationMethod, out string method)
-                        && g.UserInput.TryGet(ComfyUIBackendExtension.Text2VideoFrameInterpolationMultiplier, out int mult) && mult > 1
+                    if (g.UserInput.TryGet(T2IParamTypes.Text2VideoFrameInterpolationMethod, out string method)
+                        && g.UserInput.TryGet(T2IParamTypes.Text2VideoFrameInterpolationMultiplier, out int mult) && mult > 1
                         && g.UserInput.Get(T2IParamTypes.Text2VideoFrames, 99) > 1)
                     {
                         if (g.UserInput.Get(T2IParamTypes.OutputIntermediateImages, false))
@@ -1678,7 +1678,7 @@ public class WorkflowGeneratorSteps
                 };
                 g.CreateImageToVideo(genInfo);
                 videoFps = genInfo.VideoFPS;
-                if (g.UserInput.TryGet(ComfyUIBackendExtension.VideoFrameInterpolationMethod, out string method) && g.UserInput.TryGet(ComfyUIBackendExtension.VideoFrameInterpolationMultiplier, out int mult) && mult > 1)
+                if (g.UserInput.TryGet(T2IParamTypes.VideoFrameInterpolationMethod, out string method) && g.UserInput.TryGet(T2IParamTypes.VideoFrameInterpolationMultiplier, out int mult) && mult > 1)
                 {
                     if (g.UserInput.Get(T2IParamTypes.OutputIntermediateImages, false))
                     {
