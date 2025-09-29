@@ -818,94 +818,32 @@ public class WorkflowGenerator
             LoadingVAE = parts[4].Length == 0 ? null : [parts[4], int.Parse(parts[5])];
             return (model, LoadingModel, LoadingClip, LoadingVAE);
         }
-        string requireClipModel(string name, string url, string hash, T2IRegisteredParam<T2IModel> param)
+        string requireClipModel(string id, T2IRegisteredParam<T2IModel> param)
         {
             if (param is not null && UserInput.TryGet(param, out T2IModel model))
             {
                 return model.Name;
             }
+            if (!CommonModels.Known.TryGetValue(id, out CommonModels.ModelInfo info))
+            {
+                throw new InvalidOperationException($"Unknown common model ID: {id}");
+            }
+            string name = info.FileName;
             if (ClipModelsValid.ContainsKey(name))
             {
                 return name;
             }
-            if (Program.T2IModelSets["Clip"].Models.ContainsKey(name))
+            if (Program.T2IModelSets[info.FolderType].Models.ContainsKey(name))
             {
                 ClipModelsValid.TryAdd(name, name);
                 return name;
             }
-            string filePath = Utilities.CombinePathWithAbsolute(Program.ServerSettings.Paths.ActualModelRoot, Program.ServerSettings.Paths.SDClipFolder.Split(';')[0], name);
-            DownloadModel(name, filePath, url, hash);
+            string folder = Program.T2IModelSets[info.FolderType].FolderPaths[0];
+            string filePath = Utilities.CombinePathWithAbsolute(Program.ServerSettings.Paths.ActualModelRoot, folder, name);
+            DownloadModel(name, filePath, info.URL, info.Hash);
+            Program.RefreshAllModelSets();
             ClipModelsValid.TryAdd(name, name);
             return name;
-        }
-        string getT5XXLModel()
-        {
-            return requireClipModel("t5xxl_enconly.safetensors", "https://huggingface.co/mcmonkey/google_t5-v1_1-xxl_encoderonly/resolve/main/t5xxl_fp8_e4m3fn.safetensors", "7d330da4816157540d6bb7838bf63a0f02f573fc48ca4d8de34bb0cbfd514f09", T2IParamTypes.T5XXLModel);
-        }
-        string getOldT5XXLModel()
-        {
-            return requireClipModel("old_t5xxl_cosmos.safetensors", "https://huggingface.co/comfyanonymous/cosmos_1.0_text_encoder_and_VAE_ComfyUI/resolve/main/text_encoders/oldt5_xxl_fp8_e4m3fn_scaled.safetensors", "1d0dd711ec9866173d4b39e86db3f45e1614a4e3f84919556f854f773352ea81", T2IParamTypes.T5XXLModel);
-        }
-        string getUniMaxT5XXLModel()
-        {
-            return requireClipModel("umt5_xxl_fp8_e4m3fn_scaled.safetensors", "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors", "c3355d30191f1f066b26d93fba017ae9809dce6c627dda5f6a66eaa651204f68", T2IParamTypes.T5XXLModel);
-        }
-        string getByT5SmallGlyphxl_tenc()
-        {
-            return requireClipModel("byt5_small_glyphxl_fp16.safetensors", "https://huggingface.co/Comfy-Org/HunyuanImage_2.1_ComfyUI/resolve/main/split_files/text_encoders/byt5_small_glyphxl_fp16.safetensors", "516910bb4c9b225370290e40585d1b0e6c8cd3583690f7eec2f7fb593990fb48", T2IParamTypes.T5XXLModel);
-        }
-        string getOmniQwenModel()
-        {
-            return requireClipModel("qwen_2.5_vl_fp16.safetensors", "https://huggingface.co/Comfy-Org/Omnigen2_ComfyUI_repackaged/resolve/main/split_files/text_encoders/qwen_2.5_vl_fp16.safetensors", "ba05dd266ad6a6aa90f7b2936e4e775d801fb233540585b43933647f8bc4fbc3", T2IParamTypes.QwenModel);
-        }
-        string getQwenImage25_7b_tenc()
-        {
-            return requireClipModel("qwen_2.5_vl_7b_fp8_scaled.safetensors", "https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors", "cb5636d852a0ea6a9075ab1bef496c0db7aef13c02350571e388aea959c5c0b4", T2IParamTypes.QwenModel);
-        }
-        string getClipLModel()
-        {
-            if (UserInput.TryGet(T2IParamTypes.ClipLModel, out T2IModel model))
-            {
-                return model.Name;
-            }
-            if (Program.T2IModelSets["Clip"].Models.ContainsKey("clip_l_sdxl_base.safetensors"))
-            {
-                return "clip_l_sdxl_base.safetensors";
-            }
-            return requireClipModel("clip_l.safetensors", "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/text_encoder/model.fp16.safetensors", "660c6f5b1abae9dc498ac2d21e1347d2abdb0cf6c0c0c8576cd796491d9a6cdd", T2IParamTypes.ClipLModel);
-        }
-        string getClipGModel()
-        {
-            if (UserInput.TryGet(T2IParamTypes.ClipGModel, out T2IModel model))
-            {
-                return model.Name;
-            }
-            if (Program.T2IModelSets["Clip"].Models.ContainsKey("clip_g_sdxl_base.safetensors"))
-            {
-                return "clip_g_sdxl_base.safetensors";
-            }
-            return requireClipModel("clip_g.safetensors", "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/text_encoder_2/model.fp16.safetensors", "ec310df2af79c318e24d20511b601a591ca8cd4f1fce1d8dff822a356bcdb1f4", T2IParamTypes.ClipGModel);
-        }
-        string getHiDreamClipLModel()
-        {
-            return requireClipModel("long_clip_l_hi_dream.safetensors", "https://huggingface.co/Comfy-Org/HiDream-I1_ComfyUI/resolve/main/split_files/text_encoders/clip_l_hidream.safetensors", "706fdb88e22e18177b207837c02f4b86a652abca0302821f2bfa24ac6aea4f71", T2IParamTypes.ClipLModel);
-        }
-        string getHiDreamClipGModel()
-        {
-            return requireClipModel("long_clip_g_hi_dream.safetensors", "https://huggingface.co/Comfy-Org/HiDream-I1_ComfyUI/resolve/main/split_files/text_encoders/clip_g_hidream.safetensors", "3771e70e36450e5199f30bad61a53faae85a2e02606974bcda0a6a573c0519d5", T2IParamTypes.ClipGModel);
-        }
-        string getLlava3Model()
-        {
-            return requireClipModel("llava_llama3_fp8_scaled.safetensors", "https://huggingface.co/Comfy-Org/HunyuanVideo_repackaged/resolve/main/split_files/text_encoders/llava_llama3_fp8_scaled.safetensors", "2f0c3ad255c282cead3f078753af37d19099cafcfc8265bbbd511f133e7af250", T2IParamTypes.LLaVAModel);
-        }
-        string getLlama31_8b_Model()
-        {
-            return requireClipModel("llama_3.1_8b_instruct_fp8_scaled.safetensors", "https://huggingface.co/Comfy-Org/HiDream-I1_ComfyUI/resolve/main/split_files/text_encoders/llama_3.1_8b_instruct_fp8_scaled.safetensors", "9f86897bbeb933ef4fd06297740edb8dd962c94efcd92b373a11460c33765ea6", T2IParamTypes.LLaMAModel);
-        }
-        string getGemma2Model()
-        {
-            // TODO: Selector param?
-            return requireClipModel("gemma_2_2b_fp16.safetensors", "https://huggingface.co/Comfy-Org/Lumina_Image_2.0_Repackaged/resolve/main/split_files/text_encoders/gemma_2_2b_fp16.safetensors", "29761442862f8d064d3f854bb6fabf4379dcff511a7f6ba9405a00bd0f7e2dbd", null);
         }
         IsDifferentialDiffusion = false;
         LoadingModelType = type;
@@ -1000,7 +938,7 @@ public class WorkflowGenerator
             LoadingModel = [pixartNode, 0];
             string singleClipLoader = CreateNode("CLIPLoader", new JObject()
             {
-                ["clip_name"] = getT5XXLModel(),
+                ["clip_name"] = requireClipModel("t5xxl", T2IParamTypes.T5XXLModel),
                 ["type"] = "sd3"
             });
             LoadingClip = [singleClipLoader, 0];
@@ -1194,23 +1132,23 @@ public class WorkflowGenerator
                 if (mode == "T5 Only")
                 {
                     string loaderType = "CLIPLoader";
-                    if (getT5XXLModel().EndsWith(".gguf"))
+                    if (requireClipModel("t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf"))
                     {
                         loaderType = "CLIPLoaderGGUF";
                     }
                     string singleClipLoader = CreateNode(loaderType, new JObject()
                     {
-                        ["clip_name"] = getT5XXLModel(),
+                        ["clip_name"] = requireClipModel("t5xxl", T2IParamTypes.T5XXLModel),
                         ["type"] = "sd3"
                     });
                     LoadingClip = [singleClipLoader, 0];
                 }
-                else if (mode == "CLIP Only")
+                else if (mode == "CLIP Only" || !tencs.Contains("t5xxl"))
                 {
                     string dualClipLoader = CreateNode("DualCLIPLoader", new JObject()
                     {
-                        ["clip_name1"] = getClipGModel(),
-                        ["clip_name2"] = getClipLModel(),
+                        ["clip_name1"] = requireClipModel("clip-g", T2IParamTypes.ClipGModel),
+                        ["clip_name2"] = requireClipModel("clip-l", T2IParamTypes.ClipLModel),
                         ["type"] = "sd3"
                     });
                     LoadingClip = [dualClipLoader, 0];
@@ -1218,15 +1156,15 @@ public class WorkflowGenerator
                 else
                 {
                     string loaderType = "TripleCLIPLoader";
-                    if (getT5XXLModel().EndsWith(".gguf"))
+                    if (requireClipModel("t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf"))
                     {
                         loaderType = "TripleCLIPLoaderGGUF";
                     }
                     string tripleClipLoader = CreateNode(loaderType, new JObject()
                     {
-                        ["clip_name1"] = getClipGModel(),
-                        ["clip_name2"] = getClipLModel(),
-                        ["clip_name3"] = getT5XXLModel()
+                        ["clip_name1"] = requireClipModel("clip-g", T2IParamTypes.ClipGModel),
+                        ["clip_name2"] = requireClipModel("clip-l", T2IParamTypes.ClipLModel),
+                        ["clip_name3"] = requireClipModel("t5xxl", T2IParamTypes.T5XXLModel)
                     });
                     LoadingClip = [tripleClipLoader, 0];
                 }
@@ -1243,14 +1181,14 @@ public class WorkflowGenerator
         else if (IsFlux() && (LoadingClip is null || LoadingVAE is null || UserInput.Get(T2IParamTypes.T5XXLModel) is not null || UserInput.Get(T2IParamTypes.ClipLModel) is not null))
         {
             string loaderType = "DualCLIPLoader";
-            if (getT5XXLModel().EndsWith(".gguf"))
+            if (requireClipModel("t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf"))
             {
                 loaderType = "DualCLIPLoaderGGUF";
             }
             string dualClipLoader = CreateNode(loaderType, new JObject()
             {
-                ["clip_name1"] = getT5XXLModel(),
-                ["clip_name2"] = getClipLModel(),
+                ["clip_name1"] = requireClipModel("t5xxl", T2IParamTypes.T5XXLModel),
+                ["clip_name2"] = requireClipModel("clip-l", T2IParamTypes.ClipLModel),
                 ["type"] = "flux"
             });
             LoadingClip = [dualClipLoader, 0];
@@ -1259,13 +1197,13 @@ public class WorkflowGenerator
         else if (IsChroma())
         {
             string loaderType = "CLIPLoader";
-            if (getT5XXLModel().EndsWith(".gguf"))
+            if (requireClipModel("t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf"))
             {
                 loaderType = "CLIPLoaderGGUF";
             }
             string clipLoader = CreateNode(loaderType, new JObject()
             {
-                ["clip_name"] = getT5XXLModel(),
+                ["clip_name"] = requireClipModel("t5xxl", T2IParamTypes.T5XXLModel),
                 ["type"] = "chroma"
             });
             LoadingClip = [clipLoader, 0];
@@ -1281,16 +1219,16 @@ public class WorkflowGenerator
         else if (IsHiDream())
         {
             string loaderType = "QuadrupleCLIPLoader";
-            if (getT5XXLModel().EndsWith(".gguf") || getLlama31_8b_Model().EndsWith(".gguf"))
+            if (requireClipModel("t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf") || requireClipModel("llama3.1-8b", T2IParamTypes.LLaMAModel).EndsWith(".gguf"))
             {
                 loaderType = "QuadrupleCLIPLoaderGGUF";
             }
             string quadClipLoader = CreateNode(loaderType, new JObject()
             {
-                ["clip_name1"] = getHiDreamClipLModel(),
-                ["clip_name2"] = getHiDreamClipGModel(),
-                ["clip_name3"] = getT5XXLModel(),
-                ["clip_name4"] = getLlama31_8b_Model()
+                ["clip_name1"] = requireClipModel("hidream-clip-l", T2IParamTypes.ClipLModel),
+                ["clip_name2"] = requireClipModel("hidream-clip-g", T2IParamTypes.ClipGModel),
+                ["clip_name3"] = requireClipModel("t5xxl", T2IParamTypes.T5XXLModel),
+                ["clip_name4"] = requireClipModel("llama3.1-8b", T2IParamTypes.LLaMAModel)
             });
             LoadingClip = [quadClipLoader, 0];
             doVaeLoader(UserInput.SourceSession?.User?.Settings?.VAEs?.DefaultFluxVAE, "flux-1", "flux-ae");
@@ -1298,13 +1236,13 @@ public class WorkflowGenerator
         else if (IsOmniGen())
         {
             string loaderType = "CLIPLoader";
-            if (getOmniQwenModel().EndsWith(".gguf"))
+            if (requireClipModel("qwen-2.5-vl-fp16", T2IParamTypes.QwenModel).EndsWith(".gguf"))
             {
                 loaderType = "CLIPLoaderGGUF";
             }
             string clipLoader = CreateNode(loaderType, new JObject()
             {
-                ["clip_name"] = getOmniQwenModel(),
+                ["clip_name"] = requireClipModel("qwen-2.5-vl-fp16", T2IParamTypes.QwenModel),
             });
             LoadingClip = [clipLoader, 0];
             doVaeLoader(UserInput.SourceSession?.User?.Settings?.VAEs?.DefaultFluxVAE, "flux-1", "flux-ae");
@@ -1312,13 +1250,13 @@ public class WorkflowGenerator
         else if (IsQwenImage())
         {
             string loaderType = "CLIPLoader";
-            if (getQwenImage25_7b_tenc().EndsWith(".gguf"))
+            if (requireClipModel("qwen-2.5-vl-7b", T2IParamTypes.QwenModel).EndsWith(".gguf"))
             {
                 loaderType = "CLIPLoaderGGUF";
             }
             string clipLoader = CreateNode(loaderType, new JObject()
             {
-                ["clip_name"] = getQwenImage25_7b_tenc(),
+                ["clip_name"] = requireClipModel("qwen-2.5-vl-7b", T2IParamTypes.QwenModel),
             });
             LoadingClip = [clipLoader, 0];
             doVaeLoader(null, "qwen-image", "qwen-image-vae");
@@ -1332,14 +1270,14 @@ public class WorkflowGenerator
         else if (IsHunyuanImage())
         {
             string loaderType = "DualCLIPLoader";
-            if (getQwenImage25_7b_tenc().EndsWith(".gguf"))
+            if (requireClipModel("qwen-2.5-vl-7b", T2IParamTypes.QwenModel).EndsWith(".gguf"))
             {
                 loaderType = "DualCLIPLoaderGGUF";
             }
             string clipLoader = CreateNode(loaderType, new JObject()
             {
-                ["clip_name1"] = getQwenImage25_7b_tenc(),
-                ["clip_name2"] = getByT5SmallGlyphxl_tenc(),
+                ["clip_name1"] = requireClipModel("qwen-2.5-vl-7b", T2IParamTypes.QwenModel),
+                ["clip_name2"] = requireClipModel("byt5-small-glyphxl", T2IParamTypes.T5XXLModel),
                 ["type"] = "hunyuan_image",
                 ["device"] = "default"
             });
@@ -1349,14 +1287,14 @@ public class WorkflowGenerator
         else if (IsHunyuanImageRefiner())
         {
             string loaderType = "DualCLIPLoader";
-            if (getQwenImage25_7b_tenc().EndsWith(".gguf"))
+            if (requireClipModel("qwen-2.5-vl-7b", T2IParamTypes.QwenModel).EndsWith(".gguf"))
             {
                 loaderType = "DualCLIPLoaderGGUF";
             }
             string clipLoader = CreateNode(loaderType, new JObject()
             {
-                ["clip_name1"] = getQwenImage25_7b_tenc(),
-                ["clip_name2"] = getByT5SmallGlyphxl_tenc(),
+                ["clip_name1"] = requireClipModel("qwen-2.5-vl-7b", T2IParamTypes.QwenModel),
+                ["clip_name2"] = requireClipModel("byt5-small-glyphxl", T2IParamTypes.T5XXLModel),
                 ["type"] = "hunyuan_image",
                 ["device"] = "default"
             });
@@ -1366,13 +1304,13 @@ public class WorkflowGenerator
         else if (IsMochi() && (LoadingClip is null || LoadingVAE is null || UserInput.Get(T2IParamTypes.T5XXLModel) is not null))
         {
             string loaderType = "CLIPLoader";
-            if (getT5XXLModel().EndsWith(".gguf"))
+            if (requireClipModel("t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf"))
             {
                 loaderType = "CLIPLoaderGGUF";
             }
             string clipLoader = CreateNode(loaderType, new JObject()
             {
-                ["clip_name"] = getT5XXLModel(),
+                ["clip_name"] = requireClipModel("t5xxl", T2IParamTypes.T5XXLModel),
                 ["type"] = "mochi"
             });
             LoadingClip = [clipLoader, 0];
@@ -1381,13 +1319,13 @@ public class WorkflowGenerator
         else if (IsLTXV())
         {
             string loaderType = "CLIPLoader";
-            if (getT5XXLModel().EndsWith(".gguf"))
+            if (requireClipModel("t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf"))
             {
                 loaderType = "CLIPLoaderGGUF";
             }
             string clipLoader = CreateNode(loaderType, new JObject()
             {
-                ["clip_name"] = getT5XXLModel(),
+                ["clip_name"] = requireClipModel("t5xxl", T2IParamTypes.T5XXLModel),
                 ["type"] = "ltxv"
             });
             LoadingClip = [clipLoader, 0];
@@ -1396,14 +1334,14 @@ public class WorkflowGenerator
         else if (IsHunyuanVideo())
         {
             string loaderType = "DualCLIPLoader";
-            if (getClipLModel().EndsWith(".gguf") || getLlava3Model().EndsWith(".gguf"))
+            if (requireClipModel("clip-l", T2IParamTypes.ClipLModel).EndsWith(".gguf") || requireClipModel("llava-llama3", T2IParamTypes.LLaVAModel).EndsWith(".gguf"))
             {
                 loaderType = "DualCLIPLoaderGGUF";
             }
             string dualClipLoader = CreateNode(loaderType, new JObject()
             {
-                ["clip_name1"] = getClipLModel(),
-                ["clip_name2"] = getLlava3Model(),
+                ["clip_name1"] = requireClipModel("clip-l", T2IParamTypes.ClipLModel),
+                ["clip_name2"] = requireClipModel("llava-llama3", T2IParamTypes.LLaVAModel),
                 ["type"] = "hunyuan_video"
             });
             LoadingClip = [dualClipLoader, 0];
@@ -1413,7 +1351,7 @@ public class WorkflowGenerator
         {
             string clipLoader = CreateNode("CLIPLoader", new JObject()
             {
-                ["clip_name"] = getOldT5XXLModel(),
+                ["clip_name"] = requireClipModel("old-t5xxl", T2IParamTypes.T5XXLModel),
                 ["type"] = "cosmos"
             });
             LoadingClip = [clipLoader, 0];
@@ -1423,7 +1361,7 @@ public class WorkflowGenerator
         {
             string clipLoader = CreateNode("CLIPLoader", new JObject()
             {
-                ["clip_name"] = getOldT5XXLModel(),
+                ["clip_name"] = requireClipModel("old-t5xxl", T2IParamTypes.T5XXLModel),
                 ["type"] = "cosmos"
             });
             LoadingClip = [clipLoader, 0];
@@ -1433,7 +1371,7 @@ public class WorkflowGenerator
         {
             string clipLoader = CreateNode("CLIPLoader", new JObject()
             {
-                ["clip_name"] = getUniMaxT5XXLModel(),
+                ["clip_name"] = requireClipModel("umt5xxl", T2IParamTypes.T5XXLModel),
                 ["type"] = "wan"
             });
             LoadingClip = [clipLoader, 0];
@@ -1443,7 +1381,7 @@ public class WorkflowGenerator
         {
             string clipLoader = CreateNode("CLIPLoader", new JObject()
             {
-                ["clip_name"] = getUniMaxT5XXLModel(),
+                ["clip_name"] = requireClipModel("umt5xxl", T2IParamTypes.T5XXLModel),
                 ["type"] = "wan"
             });
             LoadingClip = [clipLoader, 0];
@@ -1470,7 +1408,7 @@ public class WorkflowGenerator
             {
                 string dualClipLoader = CreateNode("CLIPLoader", new JObject()
                 {
-                    ["clip_name"] = getGemma2Model(),
+                    ["clip_name"] = requireClipModel("gemma2-2b", null),
                     ["type"] = "lumina2"
                 });
                 LoadingClip = [dualClipLoader, 0];
