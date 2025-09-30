@@ -179,14 +179,14 @@ public class WorkflowGenerator
     public bool IsFlux()
     {
         string clazz = CurrentCompatClass();
-        return clazz is not null && clazz == "flux-1";
+        return clazz is not null && clazz.StartsWith("flux-1");
     }
 
     /// <summary>Returns true if the current model is a Kontext model (eg Flux.1 Kontext Dev).</summary>
     public bool IsKontext()
     {
-        string clazz = CurrentModelClass()?.ID;
-        return clazz is not null && clazz.EndsWith("/kontext");
+        string clazz = CurrentCompatClass();
+        return clazz is not null && clazz == "flux-1-kontext";
     }
 
     /// <summary>Returns true if the current model is Chroma.</summary>
@@ -2104,7 +2104,13 @@ public class WorkflowGenerator
             switch (CurrentCompatClass())
             {
                 case "stable-diffusion-v1": // https://github.com/Birch-san/sdxl-diffusion-decoder/blob/4ba89847c02db070b766969c0eca3686a1e7512e/script/inference_decoder.py#L112
-                case "stable-diffusion-v2":
+                case "stable-diffusion-v2-512":
+                    offA = 2.1335;
+                    offB = 0.1237;
+                    offC = 0.4052;
+                    offD = -0.0940;
+                    break;
+                case "stable-diffusion-v2-768-v":
                     offA = 2.1335;
                     offB = 0.1237;
                     offC = 0.4052;
