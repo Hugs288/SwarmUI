@@ -240,8 +240,8 @@ public class WorkflowGenerator
     /// <summary>Returns true if the current model is Qwen Image Edit.</summary>
     public bool IsQwenImageEdit()
     {
-        string clazz = CurrentModelClass()?.ID;
-        return clazz is not null && clazz.StartsWith("qwen-image-edit");
+        string clazz = CurrentCompatClass();
+        return clazz is not null && clazz == "qwen-image-edit";
     }
 
     /// <summary>Returns true if the current model is Qwen Image Edit Plus.</summary>
@@ -297,7 +297,7 @@ public class WorkflowGenerator
     public bool IsNvidiaCosmos2()
     {
         string clazz = CurrentCompatClass();
-        return clazz is not null && clazz.StartsWith("nvidia-cosmos-predict2");
+        return clazz is not null && clazz == "nvidia-cosmos-predict2";
     }
 
     /// <summary>Returns true if the current model is any Wan-2.1 variant.</summary>

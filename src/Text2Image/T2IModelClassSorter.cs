@@ -434,11 +434,11 @@ public class T2IModelClassSorter
             return isCosmosVae(h);
         }});
         // ====================== Nvidia Cosmos Predict2 ======================
-        Register(new() { ID = "nvidia-cosmos-predict2-t2i-2b", CompatClass = "nvidia-cosmos-predict2-t2i-2b", Name = "NVIDIA Cosmos Predict2 Text2Image 2B", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "nvidia-cosmos-predict2-t2i-2b", CompatClass = "nvidia-cosmos-predict2", Name = "NVIDIA Cosmos Predict2 Text2Image 2B", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
             return isCosmosPredict2_2B(h);
         }});
-        Register(new() { ID = "nvidia-cosmos-predict2-t2i-14b", CompatClass = "nvidia-cosmos-predict2-t2i-14b", Name = "NVIDIA Cosmos Predict2 Text2Image 14B", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "nvidia-cosmos-predict2-t2i-14b", CompatClass = "nvidia-cosmos-predict2", Name = "NVIDIA Cosmos Predict2 Text2Image 14B", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
             return isCosmosPredict2_14B(h);
         }});
@@ -475,7 +475,7 @@ public class T2IModelClassSorter
         {
             return isHiDream(h);
         }});
-        Register(new() { ID = "hidream-i1-edit", CompatClass = "hidream-i1", Name = "HiDream i1 Edit", StandardWidth = 768, StandardHeight = 768, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "hidream-i1-edit", CompatClass = "hidream-i1-edit", Name = "HiDream i1 Edit", StandardWidth = 768, StandardHeight = 768, IsThisModelOfClass = (m, h) =>
         {
             return false; // Must manual edit, seems undetectable?
         }});
@@ -491,11 +491,11 @@ public class T2IModelClassSorter
         {
             return isQwenImage(h) && !isControlnetX(h) && !isSD3Controlnet(h);
         }});
-        Register(new() { ID = "qwen-image-edit", CompatClass = "qwen-image", Name = "Qwen Image Edit", StandardWidth = 1328, StandardHeight = 1328, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "qwen-image-edit", CompatClass = "qwen-image-edit", Name = "Qwen Image Edit", StandardWidth = 1328, StandardHeight = 1328, IsThisModelOfClass = (m, h) =>
         {
             return false;
         }});
-        Register(new() { ID = "qwen-image-edit-plus", CompatClass = "qwen-image", Name = "Qwen Image Edit Plus", StandardWidth = 1328, StandardHeight = 1328, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "qwen-image-edit-plus", CompatClass = "qwen-image-edit", Name = "Qwen Image Edit Plus", StandardWidth = 1328, StandardHeight = 1328, IsThisModelOfClass = (m, h) =>
         {
             return false;
         }});
