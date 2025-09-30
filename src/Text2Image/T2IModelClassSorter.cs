@@ -236,7 +236,7 @@ public class T2IModelClassSorter
         // ====================== Stable Cascade ======================
         Register(new() { ID = "stable-cascade-v1-stage-a/vae", CompatClass = "stable-cascade-v1", Name = "Stable Cascade v1 (Stage A)", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
-             return isCascadeA(h) && !isCascadeB(h) && !isCascadeC(h);
+            return isCascadeA(h) && !isCascadeB(h) && !isCascadeC(h);
         }});
         Register(new() { ID = "stable-cascade-v1-stage-b", CompatClass = "stable-cascade-v1", Name = "Stable Cascade v1 (Stage B)", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {

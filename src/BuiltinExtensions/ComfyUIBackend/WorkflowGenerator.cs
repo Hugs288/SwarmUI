@@ -1225,8 +1225,8 @@ public class WorkflowGenerator
             }
             string quadClipLoader = CreateNode(loaderType, new JObject()
             {
-                ["clip_name1"] = requireClipModel("hidream-clip-l", T2IParamTypes.ClipLModel),
-                ["clip_name2"] = requireClipModel("hidream-clip-g", T2IParamTypes.ClipGModel),
+                ["clip_name1"] = requireClipModel("clip-l-hidream", T2IParamTypes.ClipLModel),
+                ["clip_name2"] = requireClipModel("clip-g-hidream", T2IParamTypes.ClipGModel),
                 ["clip_name3"] = requireClipModel("t5xxl", T2IParamTypes.T5XXLModel),
                 ["clip_name4"] = requireClipModel("llama3.1-8b", T2IParamTypes.LLaMAModel)
             });
