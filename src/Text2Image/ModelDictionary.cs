@@ -55,6 +55,12 @@ public static class ModelDictionary
     /// <summary>The main dictionary mapping a model's compatibility class to its detailed information.</summary>
     public static FrozenDictionary<string, ModelInfo> Models;
 
+    /// <summary>Static constructor to initialize the model dictionary.</summary>
+    static ModelDictionary()
+    {
+        RegisterDefaults();
+    }
+
     /// <summary>Register a new model type.</summary>
     public static void Register(Dictionary<string, ModelInfo> models, ModelInfo info)
     {
@@ -90,8 +96,8 @@ public static class ModelDictionary
         Register(models, new("hidream-i1", ModelType.TextToImage, ModelArchitecture.Dit, PredictionType.RectifiedFlow, ["clip-l-hidream", "clip-g-hidream", "t5xxl", "llama3.1_8b"], "flux-ae", 1024, 1024, 5, 50, LatentNode: "EmptySD3LatentImage", DefaultSampler: "uni_pc", SigmaShiftNode: "ModelSamplingSD3", DefaultSigmaShift: 3.0));
         Register(models, new("hidream-i1-edit", ModelType.ImageEdit, ModelArchitecture.Dit, PredictionType.RectifiedFlow, ["clip-l-hidream", "clip-g-hidream", "t5xxl", "llama3.1_8b"], "flux-ae", 768, 768, 5, 28, LatentNode: "EmptySD3LatentImage", DefaultScheduler: "normal", SigmaShiftNode: "ModelSamplingSD3", DefaultSigmaShift: 3.0));
         Register(models, new("nvidia-cosmos-predict2", ModelType.TextToImage, ModelArchitecture.Dit, PredictionType.Epsilon, ["old_t5xxl"], "wan21-vae", 1024, 1024, 4, 30, ClipType: "cosmos"));
-        Register(models, new("qwen-image", ModelType.TextToImage, ModelArchitecture.Dit, PredictionType.RectifiedFlow, ["qwen-2.5-vl-7b"], "qwen-image-vae", 1328, 1328, 2.5, 20, "EmptySD3LatentImage", DefaultSigmaShift: 3.1, SigmaShiftNode: "ModelSamplingAuraFlow"));
-        Register(models, new("qwen-image-edit", ModelType.ImageEdit, ModelArchitecture.Dit, PredictionType.RectifiedFlow, ["qwen-2.5-vl-7b"], "qwen-image-vae", 1328, 1328, 2.5, 20, "EmptySD3LatentImage", DefaultSigmaShift: 3.0, SigmaShiftNode: "ModelSamplingAuraFlow"));
+        Register(models, new("qwen-image", ModelType.TextToImage, ModelArchitecture.Dit, PredictionType.RectifiedFlow, ["qwen-2.5-vl-7b"], "qwen-image-vae", 1328, 1328, 2.5, 20, "EmptySD3LatentImage", DefaultSigmaShift: 3.1, SigmaShiftNode: "ModelSamplingAuraFlow", ClipType: "qwen_image"));
+        Register(models, new("qwen-image-edit", ModelType.ImageEdit, ModelArchitecture.Dit, PredictionType.RectifiedFlow, ["qwen-2.5-vl-7b"], "qwen-image-vae", 1328, 1328, 2.5, 20, "EmptySD3LatentImage", DefaultSigmaShift: 3.0, SigmaShiftNode: "ModelSamplingAuraFlow", ClipType: "qwen_image"));
         Register(models, new("hunyuan-image-2_1", ModelType.TextToImage, ModelArchitecture.Dit, PredictionType.RectifiedFlow, ["qwen-2.5-vl-7b", "byt5-small-glyphxl"], "hunyuan_image_2_1_vae", 2048, 2048, 3.5, 20, "EmptyHunyuanImageLatent", SigmaShiftNode: "ModelSamplingSD3", DefaultSigmaShift: 3.0, ClipType: "hunyuan_image"));
         Register(models, new("hunyuan-video", ModelType.TextToVideo, ModelArchitecture.Dit, PredictionType.RectifiedFlow, ["clip_l", "llava-llama3"], "hunyuan-video-vae", 720, 720, 6, 20, "EmptyHunyuanLatentVideo", DefaultFrames: 73, SigmaShiftNode: "ModelSamplingSD3",  DefaultSigmaShift: 7.0, ClipType: "hunyuan_video"));
         Register(models, new("wan-21", ModelType.TextAndImageToVideo, ModelArchitecture.Dit, PredictionType.RectifiedFlow, ["umt5xxl"], "wan21-vae", 960, 960, 6, 20, LatentNode: "EmptyHunyuanLatentVideo", DefaultScheduler: "simple", DefaultFrames: 81, DefaultSigmaShift: 3.0, SigmaShiftNode: "ModelSamplingSD3", ClipType: "wan"));
