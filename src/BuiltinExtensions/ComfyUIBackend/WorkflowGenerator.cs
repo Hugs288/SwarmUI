@@ -806,7 +806,7 @@ public class WorkflowGenerator
         }
     }
 
-    /// <summary>Creates a model loader and adapts it with any registered model adapters, and returns (Model, Clip, VAE).</summary>
+/// <summary>Creates a model loader and adapts it with any registered model adapters, and returns (Model, Clip, VAE).</summary>
     public (T2IModel, JArray, JArray, JArray) CreateStandardModelLoader(T2IModel model, string type, string id = null, bool noCascadeFix = false)
     {
         string helper = $"modelloader_{model.Name}_{type}";
@@ -844,12 +844,6 @@ public class WorkflowGenerator
             Program.RefreshAllModelSets();
             ClipModelsValid.TryAdd(name, name);
             return name;
-        }
-        IsDifferentialDiffusion = false;
-        LoadingModelType = type;
-        if (!noCascadeFix && model.ModelClass?.ID == "stable-cascade-v1-stage-b" && model.Name.Contains("stage_b") && Program.MainSDModels.Models.TryGetValue(model.Name.Replace("stage_b", "stage_c"), out T2IModel altCascadeModel))
-        {
-            model = altCascadeModel;
         }
         void doVaeLoader(string defaultVal, string compatClass, string knownName)
         {
@@ -890,11 +884,18 @@ public class WorkflowGenerator
             }
             LoadingVAE = CreateVAELoader(vaeFile, nodeId);
         }
+        IsDifferentialDiffusion = false;
+        LoadingModelType = type;
+        if (!noCascadeFix && model.ModelClass?.ID == "stable-cascade-v1-stage-b" && model.Name.Contains("stage_b") && Program.MainSDModels.Models.TryGetValue(model.Name.Replace("stage_b", "stage_c"), out T2IModel altCascadeModel))
+        {
+            model = altCascadeModel;
+        }
         LoadingModel = null;
         foreach (WorkflowGenStep step in ModelGenSteps.Where(s => s.Priority <= -100))
         {
             step.Action(this);
         }
+        ModelInfo info = ModelDictionary.GetModel(CurrentCompatClass());
         if (LoadingModel is not null)
         {
             // Custom action has loaded it for us.
@@ -1017,15 +1018,7 @@ public class WorkflowGenerator
                 string dtype = UserInput.Get(T2IParamTypes.PreferredDType, "automatic");
                 if (dtype == "automatic")
                 {
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) // TODO: Or AMD?
-                    {
-                        dtype = "default";
-                    }
-                    else if (model.Metadata?.SpecialFormat == "fp8_scaled")
-                    {
-                        dtype = "default";
-                    }
-                    else if (IsNvidiaCosmos2() || IsOmniGen() || IsChroma())
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || model.Metadata?.SpecialFormat == "fp8_scaled" || IsNvidiaCosmos2() || IsOmniGen() || IsChroma()) // TODO: Or AMD?
                     {
                         dtype = "default";
                     }
