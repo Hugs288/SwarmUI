@@ -320,12 +320,7 @@ public class Image
         {
             "PNG" => "png",
             "JPG" => "jpg",
-            "JPG90" => "jpg", // NOTE: Legacy (0.9.6) format variants with built-in quality selector
-            "JPG75" => "jpg",
             "WEBP_LOSSLESS" => "webp",
-            "WEBP_100" => "webp",
-            "WEBP_90" => "webp",
-            "WEBP_75" => "webp",
             "WEBP" => "webp",
             _ => throw new ArgumentException("Unknown format: " + format, nameof(format)),
         };
@@ -340,8 +335,7 @@ public class Image
         }
         using MemoryStream ms = new();
         ISImage img = ToIS;
-        bool isLossyWebp = format.StartsWith("WEBP") && format != "WEBP_LOSSLESS";
-        bool canDoStealth = metadata is not null && (format == "PNG" || format.StartsWith("WEBP")) && !(isLossyWebp && stealthMetadata.ToLowerFast() == "rgb");
+        bool canDoStealth = metadata is not null && (format == "PNG" || format.StartsWith("WEBP")) && !(format == "WEBP" && stealthMetadata.ToLowerFast() == "rgb");
         if (stealthMetadata.ToLowerFast() != "false" && canDoStealth)
         {
             string actualStealthMode = stealthMetadata.ToLowerInvariant();
@@ -403,31 +397,13 @@ public class Image
             case "JPG":
                 img.SaveAsJpeg(ms, new JpegEncoder() { Quality = quality });
                 break;
-            case "JPG90": // NOTE: Legacy (0.9.6) format variants with built-in quality selector
-                img.SaveAsJpeg(ms, new JpegEncoder() { Quality = 90 });
-                break;
-            case "JPG75":
-                img.SaveAsJpeg(ms, new JpegEncoder() { Quality = 75 });
-                break;
             case "WEBP_LOSSLESS":
                 ext = "webp";
-                img.SaveAsWebp(ms, new WebpEncoder() { NearLossless = true, FileFormat = WebpFileFormatType.Lossless, Quality = 100 });
+                img.SaveAsWebp(ms, new WebpEncoder() { NearLossless = false, FileFormat = WebpFileFormatType.Lossless, Quality = 100 });
                 break;
             case "WEBP":
                 ext = "webp";
                 img.SaveAsWebp(ms, new WebpEncoder() { NearLossless = false, FileFormat = WebpFileFormatType.Lossy, Quality = quality });
-                break;
-            case "WEBP_100":
-                ext = "webp";
-                img.SaveAsWebp(ms, new WebpEncoder() { NearLossless = false, FileFormat = WebpFileFormatType.Lossy, Quality = 100 });
-                break;
-            case "WEBP_90":
-                ext = "webp";
-                img.SaveAsWebp(ms, new WebpEncoder() { NearLossless = false, FileFormat = WebpFileFormatType.Lossy, Quality = 90 });
-                break;
-            case "WEBP_75":
-                ext = "webp";
-                img.SaveAsWebp(ms, new WebpEncoder() { NearLossless = false, FileFormat = WebpFileFormatType.Lossy, Quality = 75 });
                 break;
             default:
                 throw new SwarmReadableErrorException($"User setting for image format is '{format}', which is invalid");
