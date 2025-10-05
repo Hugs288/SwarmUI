@@ -354,10 +354,10 @@ public class T2IParamTypes
         // ================================================ Image Prompting ================================================
         GroupImagePrompting = new("Image Prompting", Open: false, Toggles: true, OrderPriority: -70, Description: $"Image prompting with ReVision, IP-Adapter, etc.\n<a target=\"_blank\" href=\"{Utilities.RepoDocsRoot}/Features/ImagePrompting.md\">See more docs here.</a>");
         ReVisionStrength = Register<double>(new("ReVision Strength", $"How strong to apply ReVision image inputs.\nSet to 0 to disable ReVision processing.",
-            "0", IgnoreIf: "0", OrderPriority: -70, Min: 0, Max: 10, Step: 0.1, ViewType: ParamViewType.SLIDER, Group: GroupImagePrompting, FeatureFlag: "stable-diffusion-xl-v1"
+            "0", IgnoreIf: "0", OrderPriority: -70, Min: 0, Max: 10, Step: 0.1, ViewType: ParamViewType.SLIDER, Group: GroupImagePrompting
             ));
         RevisionZeroPrompt = Register<bool>(new("ReVision Zero Prompt", "Zeroes the prompt and negative prompt for ReVision inputs.\nApplies only to the base, the refiner will still get prompts.\nIf you want zeros on both, just delete your prompt text.\nIf not checked, empty prompts will be zeroed regardless.",
-            "false", IgnoreIf: "false", Group: GroupImagePrompting, FeatureFlag: "stable-diffusion-xl-v1"
+            "false", IgnoreIf: "false", Group: GroupImagePrompting
             ));
         UseReferenceOnly = Register<bool>(new("Use Reference Only", "Use the 'Reference-Only' technique to guide the generation towards the input image.\nThis currently has side effects that notably prevent Batch from being used properly.",
             "false", IgnoreIf: "false", Group: GroupImagePrompting, IsAdvanced: true
@@ -417,22 +417,22 @@ public class T2IParamTypes
         // ================================================ Sampling ================================================
         GroupSampling = new("Sampling", Toggles: false, Open: false, OrderPriority: -8);
         CascadeLatentCompression = Register<int>(new("Cascade Latent Compression", "How deeply to compress latents when using Stable Cascade.\nDefault is 32, you can get slightly faster but lower quality results by using 42.",
-            "32", IgnoreIf: "32", Min: 1, Max: 100, Step: 1, IsAdvanced: true, Group: GroupSampling, OrderPriority: 4.5, FeatureFlag: "stable-cascade-v1"
+            "32", IgnoreIf: "32", Min: 1, Max: 100, Step: 1, IsAdvanced: true, Group: GroupSampling, OrderPriority: 4.5
             ));
         SD3TextEncs = Register<string>(new("SD3 TextEncs", "Which text encoders to use for Stable Diffusion 3 (SD3) models.\nCan use CLIP pairs, or T5, or both.\nBoth is the standard way to run SD3, but CLIP only uses fewer system resources.",
-            "CLIP + T5", GetValues: _ => ["CLIP Only", "T5 Only", "CLIP + T5"], Toggleable: true, Group: GroupSampling, FeatureFlag: "stable-diffusion-v3", OrderPriority: 5, ChangeWeight: 9
+            "CLIP + T5", GetValues: _ => ["CLIP Only", "T5 Only", "CLIP + T5"], Toggleable: true, Group: GroupSampling, FeatureFlag: "sd3", OrderPriority: 5, ChangeWeight: 9
             ));
         FluxGuidanceScale = Register<double>(new("Flux Guidance Scale", "What guidance scale to use for Flux-Dev or related models.\nDoes not apply to Flux-Schnell.\nFor Flux-Dev, this is a distilled embedded value the model was trained on, this is based on an alternative guidance methodology, and is not CFG.\n3.5 is default, but closer to 2.0 may allow for more stylistic flexibility.\nFor Hunyuan Video, this is distilled from CFG Scale, and prefers values closer to 6.",
-            "3.5", Min: 0, Max: 100, ViewMax: 10, Step: 0.1, Toggleable: true, Group: GroupSampling, ViewType: ParamViewType.SLIDER, OrderPriority: 6, FeatureFlag: "flux-1|hunyuan-video"
+            "3.5", Min: 0, Max: 100, ViewMax: 10, Step: 0.1, Toggleable: true, Group: GroupSampling, ViewType: ParamViewType.SLIDER, OrderPriority: 6, FeatureFlag: "flux-dev"
             ));
         FluxDisableGuidance = Register<bool>(new("Flux Disable Guidance", "Disables Flux Guidance Scale.\nSome models prefer this. Usually you don't need this.",
-            "false", IgnoreIf: "false", Group: GroupSampling, IsAdvanced: true, OrderPriority: 6.2, FeatureFlag: "flux-1|hunyuan-video"
+            "false", IgnoreIf: "false", Group: GroupSampling, IsAdvanced: true, OrderPriority: 6.2, FeatureFlag: "flux-dev"
             ));
         ZeroNegative = Register<bool>(new("Zero Negative", "Zeroes the negative prompt if it's empty.\nDoes nothing if the negative prompt is not empty.\nThis may yield better quality on SD3.",
             "false", IgnoreIf: "false", Group: GroupSampling, OrderPriority: 7
             ));
         SeamlessTileable = Register<string>(new("Seamless Tileable", "Makes the generated image seamlessly tileable (like a 3D texture would be).\nOptionally, can be tileable on only the X axis (horizontal) or Y axis (vertical).\nOnly compatible with UNet models (such as SDXL), and not with DiT models (such as Flux).",
-            "false", IgnoreIf: "false", GetValues: _ => ["false", "true", "X-Only", "Y-Only"], Group: GroupSampling, FeatureFlag: "seamless,stable-diffusion-v1|stable-diffusion-v2|stable-diffusion-xl-v1", OrderPriority: 15
+            "false", IgnoreIf: "false", GetValues: _ => ["false", "true", "X-Only", "Y-Only"], Group: GroupSampling, FeatureFlag: "seamless", OrderPriority: 15
             ));
         // ================================================ Advanced Sampling ================================================
         GroupAdvancedSampling = new("Advanced Sampling", Open: false, OrderPriority: 15, IsAdvanced: true, Parent: GroupSampling);
@@ -671,25 +671,25 @@ public class T2IParamTypes
             "", IgnoreIf: "", IsAdvanced: true, Group: GroupAdvancedModelAddons, VisibleNormally: false
             ));
         ClipLModel = Register<T2IModel>(new("CLIP-L Model", "Which CLIP-L model to use as a text encoder, for SD3/Flux style 'diffusion_models' folder models.",
-            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 15, ChangeWeight: 7, FeatureFlag: "hidream-i1|stable-diffusion-xl-v1|hunyuan-video|flux-1|stable-diffusion-v3|stable-diffusion-v2|stable-diffusion-v1"
+            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 15, ChangeWeight: 7
             ));
         ClipGModel = Register<T2IModel>(new("CLIP-G Model", "Which CLIP-G model to use as a text encoder, for SD3 style 'diffusion_models' folder models.",
-            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 16, ChangeWeight: 7, FeatureFlag: "hidream-i1|stable-diffusion-xl-v1|stable-diffusion-v3|stable-diffusion-v2"
+            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 16, ChangeWeight: 7
             ));
         ClipVisionModel = Register<T2IModel>(new("CLIP-Vision Model", "Which CLIP-Vision model to use as an image encoder, for certain image-input tasks.",
             "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "ClipVision", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 16.5, ChangeWeight: 7
             ));
         T5XXLModel = Register<T2IModel>(new("T5-XXL Model", "Which T5-XXL model to use as a text encoder, for SD3/Flux style 'diffusion_models' folder models.",
-            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 17, ChangeWeight: 7, FeatureFlag: "stable-diffusion-v3|flux-1|chroma|hidream-i1|genmo-mochi-1|lightricks-ltx-video|nvidia-cosmos-1|nvidia-cosmos-predict2|wan-21|wan-22"
+            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 17, ChangeWeight: 7
             ));
         LLaVAModel = Register<T2IModel>(new("LLaVA Model", "Which LLaVA model to use as a text encoder, for Hunyuan Video 'diffusion_models' folder models.",
-            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 18, ChangeWeight: 7, FeatureFlag: "hunyuan-video"
+            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 18, ChangeWeight: 7
             ));
         LLaMAModel = Register<T2IModel>(new("LLaMA Model", "Which LLaMA model to use as a text encoder, for HiDream-style 'diffusion_models' folder models.",
-            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 19, ChangeWeight: 7, FeatureFlag: "hidream-i1"
+            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 19, ChangeWeight: 7
             ));
         QwenModel = Register<T2IModel>(new("Qwen Model", "Which Qwen LLM to use as a text encoder, for OmniGen/QwenImage-style 'diffusion_models' folder models.",
-            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 20, ChangeWeight: 7, FeatureFlag: "omnigen-2|qwen-image|qwen-image-edit"
+            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 20, ChangeWeight: 7
             ));
         // ================================================ Swarm Internal ================================================
         GroupSwarmInternal = new("Swarm Internal", Open: false, OrderPriority: 0, IsAdvanced: true);
