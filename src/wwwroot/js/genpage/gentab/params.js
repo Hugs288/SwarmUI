@@ -833,24 +833,6 @@ function genInputs(delay_final = false) {
             imageEditor.doParamHides();
         }
         let featureFlagDependencies = {};
-        for (let p of gen_param_types) {
-            if (p.feature_flag) {
-                for (let and_part of p.feature_flag.split(',')) {
-                    for (let or_part of and_part.split('|')) {
-                        if (or_part.includes(':')) {
-                            const [param_id, param_value] = or_part.split(':', 2);
-                            featureFlagDependencies[param_id] = true;
-                        }
-                    }
-                }
-            }
-        }
-        for (let param_id in featureFlagDependencies) {
-            let elem = document.getElementById(`input_${param_id}`);
-            if (elem) {
-                elem.addEventListener('change', scheduleParamUnsupportUpdate);
-            }
-        }
     };
     if (delay_final) {
         setTimeout(() => {
@@ -1209,33 +1191,7 @@ function hideUnsupportableParams() {
         let elem = document.getElementById(`input_${param.id}`);
         if (elem) {
             let box = findParentOfClass(elem, 'auto-input');
-            let supported = true;
-            if (param.feature_flag) {
-                const and_parts = param.feature_flag.split(',');
-                for (const and_part of and_parts) {
-                    if (!supported) break;
-                    const or_parts = and_part.split('|');
-                    let or_part_succeeded = false;
-                    for (const or_part of or_parts) {
-                        if (or_part.includes(':')) {
-                            const [param_id, param_value] = or_part.split(':', 2);
-                            const targetParamElem = document.getElementById(`input_${param_id}`);
-                            if (targetParamElem && getInputVal(targetParamElem) == param_value) {
-                                or_part_succeeded = true;
-                                break;
-                            }
-                        } else {
-                            if (currentBackendFeatureSet.includes(or_part)) {
-                                or_part_succeeded = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (!or_part_succeeded) {
-                        supported = false;
-                    }
-                }
-            }
+            let supported = param.feature_flag == null || param.feature_flag.split(',').every(f => currentBackendFeatureSet.includes(f));
             let filterShow = true;
             if (filter && param.id != 'prompt') {
                 let searchText = `${param.id} ${param.name} ${param.description} ${param.group ? param.group.name : ''}`.toLowerCase();

@@ -167,7 +167,7 @@ function reviseStatusBar() {
 let featureSetChangers = [];
 
 function reviseBackendFeatureSet() {
-    currentBackendFeatureSet = Array.from(rawBackendFeatureSet);
+    currentBackendFeatureSet = Array.from(currentBackendFeatureSet);
     let addMe = [], removeMe = [];
     function doCompatFeature(compatClass, featureFlag) {
         if (curModelCompatClass && curModelCompatClass.startsWith(compatClass)) {
@@ -186,9 +186,19 @@ function reviseBackendFeatureSet() {
         }
         removeMe.push(featureFlag);
     }
-    if (curModelCompatClass) {
-        addMe.push(curModelCompatClass);
-    };
+    function doAnyArchFeature(archIds, featureFlag) {
+        for (let archId of archIds) {
+            if (curModelArch && curModelArch.startsWith(archId)) {
+                addMe.push(featureFlag);
+                return;
+            }
+        }
+        removeMe.push(featureFlag);
+    }
+    doCompatFeature('stable-diffusion-v3', 'sd3');
+    doCompatFeature('stable-cascade-v1', 'cascade');
+    doAnyArchFeature(['Flux.1-dev', 'hunyuan-video'], 'flux-dev');
+    doCompatFeature('stable-diffusion-xl-v1', 'sdxl');
     doAnyCompatFeature(['genmo-mochi-1', 'lightricks-ltx-video', 'hunyuan-video', 'nvidia-cosmos-1', `wan-21`, `wan-22`], 'text2video');
     for (let changer of featureSetChangers) {
         let [add, remove] = changer();
