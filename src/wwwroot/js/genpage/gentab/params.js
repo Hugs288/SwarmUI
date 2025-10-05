@@ -832,7 +832,6 @@ function genInputs(delay_final = false) {
         if (imageEditor.active) {
             imageEditor.doParamHides();
         }
-        let featureFlagDependencies = {};
     };
     if (delay_final) {
         setTimeout(() => {
