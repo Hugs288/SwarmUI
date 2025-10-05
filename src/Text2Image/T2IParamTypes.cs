@@ -4,7 +4,6 @@ using Newtonsoft.Json.Linq;
 using SwarmUI.Accounts;
 using SwarmUI.Core;
 using SwarmUI.Utils;
-using SwarmUI.Builtin_ComfyUIBackend;
 
 namespace SwarmUI.Text2Image;
 

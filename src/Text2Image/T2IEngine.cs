@@ -90,10 +90,6 @@ namespace SwarmUI.Text2Image
                 {
                     if (!features.Contains(flag) && !DisregardedFeatureFlags.Contains(flag))
                     {
-                        if (T2IModelClassSorter.ModelClasses.Values.Any(c => c.CompatClass == flag))
-                        {
-                            continue;
-                        }
                         Logs.Verbose($"Filter out backend {backend.ID} as the request requires flag {flag}, but the backend does not support it");
                         user_input.RefusalReasons.Add($"Request requires flag '{flag}' which is not present on the backend");
                         return false;
