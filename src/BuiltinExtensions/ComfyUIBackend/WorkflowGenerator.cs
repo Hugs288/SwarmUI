@@ -971,7 +971,7 @@ public class WorkflowGenerator
                     string modelNode = CreateNode("NunchakuFluxDiTLoader", new JObject()
                     {
                         ["model_path"] = model.Name.EndsWith("/transformer_blocks.safetensors") ? model.Name.BeforeLast('/').Replace("/", ModelFolderFormat ?? $"{Path.DirectorySeparatorChar}") : model.ToString(ModelFolderFormat),
-                        ["cache_threshold"] = UserInput.Get(T2IParamTypes.NunchakuCacheThreshold, 0),
+                        ["cache_threshold"] = UserInput.Get(ComfyUIBackendExtension.NunchakuCacheThreshold, 0),
                         ["attention"] = "nunchaku-fp16",
                         ["cpu_offload"] = "auto",
                         ["device_id"] = 0,
@@ -1015,7 +1015,7 @@ public class WorkflowGenerator
                 {
                     Logs.Error($"Model '{model.Name}' likely has corrupt/invalid metadata, and needs to be reset.");
                 }
-                string dtype = UserInput.Get(T2IParamTypes.PreferredDType, "automatic");
+                string dtype = UserInput.Get(ComfyUIBackendExtension.PreferredDType, "automatic");
                 if (dtype == "automatic")
                 {
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || model.Metadata?.SpecialFormat == "fp8_scaled" || IsNvidiaCosmos2() || IsOmniGen() || IsChroma()) // TODO: Or AMD?
@@ -1550,7 +1550,7 @@ public class WorkflowGenerator
     {
         if (IsVideoModel())
         {
-            previews ??= UserInput.Get(T2IParamTypes.VideoPreviewType, "animate");
+            previews ??= UserInput.Get(ComfyUIBackendExtension.VideoPreviewType, "animate");
         }
         if (IsLTXV())
         {
@@ -1846,9 +1846,9 @@ public class WorkflowGenerator
             });
             string samplerNode = CreateNode("KSamplerSelect", new JObject()
             {
-                ["sampler_name"] = explicitSampler ?? UserInput.Get(T2IParamTypes.SamplerParam, defsampler ?? DefaultSampler, sectionId: sectionId)
+                ["sampler_name"] = explicitSampler ?? UserInput.Get(ComfyUIBackendExtension.SamplerParam, defsampler ?? DefaultSampler, sectionId: sectionId)
             });
-            string scheduler = explicitScheduler ?? UserInput.Get(T2IParamTypes.SchedulerParam, defscheduler ?? DefaultScheduler, sectionId: sectionId).ToLowerFast();
+            string scheduler = explicitScheduler ?? UserInput.Get(ComfyUIBackendExtension.SchedulerParam, defscheduler ?? DefaultScheduler, sectionId: sectionId).ToLowerFast();
             JArray schedulerNode;
             if (scheduler == "turbo")
             {
@@ -1944,8 +1944,8 @@ public class WorkflowGenerator
             ["noise_seed"] = seed,
             ["steps"] = steps,
             ["cfg"] = cfg,
-            ["sampler_name"] = explicitSampler ?? UserInput.Get(T2IParamTypes.SamplerParam, defsampler ?? DefaultSampler, sectionId: sectionId),
-            ["scheduler"] = explicitScheduler ?? UserInput.Get(T2IParamTypes.SchedulerParam, defscheduler ?? DefaultScheduler, sectionId: sectionId),
+            ["sampler_name"] = explicitSampler ?? UserInput.Get(ComfyUIBackendExtension.SamplerParam, defsampler ?? DefaultSampler, sectionId: sectionId),
+            ["scheduler"] = explicitScheduler ?? UserInput.Get(ComfyUIBackendExtension.SchedulerParam, defscheduler ?? DefaultScheduler, sectionId: sectionId),
             ["positive"] = pos,
             ["negative"] = neg,
             ["latent_image"] = latent,
@@ -2091,7 +2091,7 @@ public class WorkflowGenerator
     /// <summary>Creates an Empty Latent Image node.</summary>
     public string CreateEmptyImage(int width, int height, int batchSize, string id = null)
     {
-        if (UserInput.Get(T2IParamTypes.ShiftedLatentAverageInit, false))
+        if (UserInput.Get(ComfyUIBackendExtension.ShiftedLatentAverageInit, false))
         {
             double offA = 0, offB = 0, offC = 0, offD = 0;
             switch (CurrentCompatClass())
@@ -2693,7 +2693,7 @@ public class WorkflowGenerator
         {
             altHandler(genInfo);
         }
-        string previewType = UserInput.Get(T2IParamTypes.VideoPreviewType, "animate");
+        string previewType = UserInput.Get(ComfyUIBackendExtension.VideoPreviewType, "animate");
         int endStep = 10000;
         bool returnLeftoverNoise = false;
         if (genInfo.VideoSwapModel is not null)
@@ -2701,8 +2701,8 @@ public class WorkflowGenerator
             endStep = (int)Math.Round(genInfo.Steps * (1 - genInfo.VideoSwapPercent));
             returnLeftoverNoise = true;
         }
-        string explicitSampler = UserInput.Get(T2IParamTypes.SamplerParam, null, sectionId: genInfo.ContextID, includeBase: false);
-        string explicitScheduler = UserInput.Get(T2IParamTypes.SchedulerParam, null, sectionId: genInfo.ContextID, includeBase: false);
+        string explicitSampler = UserInput.Get(ComfyUIBackendExtension.SamplerParam, null, sectionId: genInfo.ContextID, includeBase: false);
+        string explicitScheduler = UserInput.Get(ComfyUIBackendExtension.SchedulerParam, null, sectionId: genInfo.ContextID, includeBase: false);
         string samplered = CreateKSampler(genInfo.Model, genInfo.PosCond, genInfo.NegCond, genInfo.Latent, genInfo.VideoCFG.Value, genInfo.Steps, genInfo.StartStep, endStep, genInfo.Seed, returnLeftoverNoise, true, sigmin: 0.002, sigmax: 1000, previews: previewType, defsampler: genInfo.DefaultSampler, defscheduler: genInfo.DefaultScheduler, hadSpecialCond: genInfo.HadSpecialCond, explicitSampler: explicitSampler, explicitScheduler: explicitScheduler);
         FinalLatentImage = [samplered, 0];
         if (genInfo.VideoSwapModel is not null)
@@ -2714,8 +2714,8 @@ public class WorkflowGenerator
             genInfo.PosCond = CreateConditioning(genInfo.Prompt, clip, swapModel, true, isVideo: true, isVideoSwap: true);
             genInfo.NegCond = CreateConditioning(genInfo.NegativePrompt, clip, swapModel, false, isVideo: true, isVideoSwap: true);
             genInfo.PrepFullCond(this);
-            explicitSampler = UserInput.Get(T2IParamTypes.SamplerParam, null, sectionId: T2IParamInput.SectionID_VideoSwap, includeBase: false) ?? explicitSampler;
-            explicitScheduler = UserInput.Get(T2IParamTypes.SchedulerParam, null, sectionId: T2IParamInput.SectionID_VideoSwap, includeBase: false) ?? explicitScheduler;
+            explicitSampler = UserInput.Get(ComfyUIBackendExtension.SamplerParam, null, sectionId: T2IParamInput.SectionID_VideoSwap, includeBase: false) ?? explicitSampler;
+            explicitScheduler = UserInput.Get(ComfyUIBackendExtension.SchedulerParam, null, sectionId: T2IParamInput.SectionID_VideoSwap, includeBase: false) ?? explicitScheduler;
             cfg = UserInput.GetNullable(T2IParamTypes.CFGScale, T2IParamInput.SectionID_VideoSwap, false) ?? cfg;
             steps = UserInput.GetNullable(T2IParamTypes.Steps, T2IParamInput.SectionID_VideoSwap, false) ?? steps;
             endStep = (int)Math.Round(steps * (1 - genInfo.VideoSwapPercent));
@@ -2742,7 +2742,7 @@ public class WorkflowGenerator
     /// <summary>Creates an image preprocessor node.</summary>
     public JArray CreatePreprocessor(string preprocessor, JArray imageNode)
     {
-        JToken objectData = T2IParamTypes.ControlNetPreprocessors[preprocessor] ?? throw new SwarmUserErrorException($"ComfyUI backend does not have a preprocessor named '{preprocessor}'");
+        JToken objectData = ComfyUIBackendExtension.ControlNetPreprocessors[preprocessor] ?? throw new SwarmUserErrorException($"ComfyUI backend does not have a preprocessor named '{preprocessor}'");
         if (objectData is JObject objObj && objObj.TryGetValue("swarm_custom", out JToken swarmCustomTok) && swarmCustomTok.Value<bool>())
         {
             return CreateNodesFromSpecialSyntax(objObj, [imageNode]);
@@ -3114,7 +3114,7 @@ public class WorkflowGenerator
         {
             return globalCond;
         }
-        string gligenModel = UserInput.Get(T2IParamTypes.GligenModel, "None");
+        string gligenModel = UserInput.Get(ComfyUIBackendExtension.GligenModel, "None");
         if (gligenModel != "None")
         {
             string gligenLoader = NodeHelpers.GetOrCreate("gligen_loader", () =>
@@ -3208,7 +3208,7 @@ public class WorkflowGenerator
         DebugMask([maskBackground, 0]);
         void DebugMask(JArray mask)
         {
-            if (UserInput.Get(T2IParamTypes.DebugRegionalPrompting))
+            if (UserInput.Get(ComfyUIBackendExtension.DebugRegionalPrompting))
             {
                 string imgNode = CreateNode("MaskToImage", new JObject()
                 {
