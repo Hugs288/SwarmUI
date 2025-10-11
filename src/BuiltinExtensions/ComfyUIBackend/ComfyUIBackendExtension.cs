@@ -130,6 +130,18 @@ public class ComfyUIBackendExtension : Extension
         T2IParamTypes.ConcatDropdownValsClean(ref GligenModels, InternalListModelsFor("gligen", false));
         T2IParamTypes.ConcatDropdownValsClean(ref StyleModels, InternalListModelsFor("style_models", true));
         SwarmSwarmBackend.OnSwarmBackendAdded += OnSwarmBackendAdded;
+        SwarmSwarmBackend.ReviseRemotesEvent += (backend) =>
+        {
+            if (backend.IsAControlInstance || !backend.LinkedRemoteBackendType.StartsWith("comfyui_"))
+            {
+                return;
+            }
+            Utilities.RunCheckedTask(async () =>
+            {
+                JObject types = await backend.SendAPIJSON("ComfyGetNodeTypesForBackend", new JObject() { ["backend"] = backend.LinkedRemoteBackendID });
+                backend.ExtensionData["ComfyNodeTypes"] = new HashSet<string>(types["node_types"].Values<string>());
+            });
+        };
     }
 
     /// <summary>Helper to quickly read a list of model files in a model subfolder, for prepopulating model lists during startup.</summary>
@@ -317,29 +329,37 @@ public class ComfyUIBackendExtension : Extension
             CustomWorkflows.TryRemove(name, out _);
             return null;
         }
-        JObject json = File.ReadAllText(path).ParseToJson();
-        string getStringFor(string key)
+        try
         {
-            if (!json.TryGetValue(key, out JToken data))
+            JObject json = File.ReadAllText(path).ParseToJson();
+            string getStringFor(string key)
             {
-                return null;
+                if (!json.TryGetValue(key, out JToken data))
+                {
+                    return null;
+                }
+                if (data.Type == JTokenType.String)
+                {
+                    return data.ToString();
+                }
+                return data.ToString(Formatting.None);
             }
-            if (data.Type == JTokenType.String)
-            {
-                return data.ToString();
-            }
-            return data.ToString(Formatting.None);
+            string workflowData = getStringFor("workflow");
+            string prompt = getStringFor("prompt");
+            string customParams = getStringFor("custom_params");
+            string paramValues = getStringFor("param_values");
+            string image = getStringFor("image") ?? "/imgs/model_placeholder.jpg";
+            string description = getStringFor("description");
+            bool enableInSimple = json.TryGetValue("enable_in_simple", out JToken enableInSimpleTok) && enableInSimpleTok.ToObject<bool>();
+            workflow = new(name, workflowData, prompt, customParams, paramValues, image, description, enableInSimple);
+            CustomWorkflows[name] = workflow;
+            return workflow;
         }
-        string workflowData = getStringFor("workflow");
-        string prompt = getStringFor("prompt");
-        string customParams = getStringFor("custom_params");
-        string paramValues = getStringFor("param_values");
-        string image = getStringFor("image") ?? "/imgs/model_placeholder.jpg";
-        string description = getStringFor("description");
-        bool enableInSimple = json.TryGetValue("enable_in_simple", out JToken enableInSimpleTok) && enableInSimpleTok.ToObject<bool>();
-        workflow = new(name, workflowData, prompt, customParams, paramValues, image, description, enableInSimple);
-        CustomWorkflows[name] = workflow;
-        return workflow;
+        catch (Exception ex)
+        {
+            Logs.Error($"Error loading ComfyUI custom workflow '{name}': {ex.ReadableString()}");
+            return null;
+        }
     }
 
     public void Refresh()
@@ -610,7 +630,7 @@ public class ComfyUIBackendExtension : Extension
             "standard", FeatureFlag: "ipadapter", Group: T2IParamTypes.GroupImagePrompting, ViewType: ParamViewType.SLIDER, OrderPriority: 19, IsAdvanced: true, GetValues: _ => IPAdapterWeightTypes, DependNonDefault: UseIPAdapterForRevision.Type.ID
             ));
         UseStyleModel = T2IParamTypes.Register<string>(new("Use Style Model", $"Select a Style model to use it for image-prompt input handling.\nFlux.1 Redux is an example of a style model.\nPlace these models in `(Swarm)/Models/style_models`.",
-            "None", IgnoreIf: "None", FeatureFlag: "comfyui", GetValues: _ => StyleModels, Group: T2IParamTypes.GroupImagePrompting, OrderPriority: 14, ChangeWeight: 1
+            "None", IgnoreIf: "None", GetValues: _ => StyleModels, Group: T2IParamTypes.GroupImagePrompting, OrderPriority: 14, ChangeWeight: 1, FeatureFlag: "flux-dev"
             ));
         StyleModelMergeStrength = T2IParamTypes.Register<double>(new("Style Model Merge Strength", "How strongly to merge in the effects of the style model.\nAt 1, the style model is fully used.\nAt 0, the style model is ignored.\nFor Flux Redux, very low values (eg 0.1) are recommended.",
             "1", IgnoreIf: "1", Min: 0.0, Max: 1.0, Step: 0.01, FeatureFlag: "comfyui", Group: T2IParamTypes.GroupImagePrompting, ViewType: ParamViewType.SLIDER, OrderPriority: 14.5, IsAdvanced: true, Examples: ["0", "0.25", "0.5", "0.75", "1"], DependNonDefault: UseStyleModel.Type.ID

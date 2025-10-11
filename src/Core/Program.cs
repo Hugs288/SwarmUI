@@ -80,6 +80,9 @@ public class Program
     /// <summary>Event-action fired when the model paths have changed (eg via settings change).</summary>
     public static Action ModelPathsChangedEvent;
 
+    /// <summary>Event-action fired when shutdown has begun but before the global cancel has set.</summary>
+    public static Action PreShutdownEvent;
+
     /// <summary>General data directory root.</summary>
     public static string DataDir = "Data";
 
@@ -94,6 +97,9 @@ public class Program
 
     /// <summary>If non-zero, a remote automated API must declare that it is in control of this instance every this many milliseconds, or else the server will shut down.</summary>
     public static long RequireControlPingEveryMS = 0;
+
+    /// <summary>If true, user has requested that the server avoid saving data. This is not a hard requirement.</summary>
+    public static bool NoPersist = false;
 
     /// <summary>Primary execution entry point.</summary>
     public static void Main(string[] args)
@@ -510,6 +516,7 @@ public class Program
         Task.WaitAny(waitShutdown, Task.Delay(TimeSpan.FromMinutes(2)));
         Environment.ExitCode = code;
         Logs.Info("Shutting down...");
+        PreShutdownEvent?.Invoke();
         GlobalCancelSource.Cancel();
         Logs.Verbose("Shutdown webserver...");
         WebServer.WebApp?.StopAsync().Wait();
@@ -723,6 +730,7 @@ public class Program
         {
             TimeLastRemoteControlPing = Environment.TickCount64;
         }
+        NoPersist = GetCommandLineFlagAsBool("no_persist", false);
     }
 
     /// <summary>Applies runtime-changable settings.</summary>
@@ -818,7 +826,7 @@ public class Program
               [--host <hostname>] [--port <port>] [--asp_loglevel <level>] [--loglevel <level>]
               [--user_id <username>] [--lock_settings <true/false>] [--ngrok-path <path>] [--cloudflared-path <path>]
               [--proxy-region <region>] [--proxy-added-args <args>] [--ngrok-basic-auth <auth-info>]
-              [--launch_mode <mode>] [--require_control_within <minutes>] [--help <true/false>]
+              [--launch_mode <mode>] [--require_control_within <minutes>] [--no_persist <true/false>] [--help <true/false>]
 
             Generally, CLI args are almost never used. When they are are, they usually fall into the following categories:
               - `settings_file`, `lock_settings`, `backends_file`, `loglevel` may be useful to advanced users will multiple instances.

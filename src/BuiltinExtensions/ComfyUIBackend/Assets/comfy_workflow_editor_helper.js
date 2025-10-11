@@ -18,10 +18,15 @@ function comfyTryToLoad() {
     if (hasComfyLoaded) {
         return;
     }
+    let oldSpinner = document.getElementById('comfy_workflow_loadspinner');
+    if (oldSpinner) {
+        oldSpinner.remove();
+    }
     hasComfyLoaded = true;
     comfyButtonsArea.style.display = 'block';
     let container = getRequiredElementById('comfy_workflow_frameholder');
-    container.innerHTML = `<iframe class="comfy_workflow_frame" id="comfy_workflow_frame" src="ComfyBackendDirect/" onload="comfyOnLoadCallback()"></iframe>`;
+    container.innerHTML = `<div id="comfy_workflow_loadspinner" class="loading-spinner"><div class="loadspin1"></div><div class="loadspin2"></div><div class="loadspin3"></div></div><iframe class="comfy_workflow_frame" id="comfy_workflow_frame" src="ComfyBackendDirect/" style="visibility:hidden;" onload="comfyOnLoadCallback()" allowtransparency="true"></iframe>`;
+    uiImprover.runLoadSpinner(getRequiredElementById('comfy_workflow_loadspinner'));
 }
 
 /** Returns the ComfyUI workflow frame (or errors if not present). */
@@ -126,6 +131,7 @@ let comfyTryAgain = translatable(`Try Again?`);
  * Callback triggered when the ComfyUI workflow frame loads.
  */
 function comfyOnLoadCallback() {
+    comfyReloadObjectInfo(true);
     if (comfyFrame().contentWindow.document.body.getElementsByClassName('comfy-failed-to-load').length == 1) {
         hasComfyLoaded = false;
         comfyButtonsArea.style.display = 'none';
@@ -156,6 +162,11 @@ function comfyOnLoadCallback() {
                     return await origRefreshFunc();
                 };
                 app.swarmHasReplacedRefresh = true;
+            }
+            comfyFrame().style.visibility = 'visible';
+            let spinner = document.getElementById('comfy_workflow_loadspinner');
+            if (spinner) {
+                spinner.remove();
             }
             comfyFixMenuLocation();
             clearInterval(comfyRefreshControlInterval);
@@ -222,7 +233,10 @@ function comfyOnLoadCallback() {
 /**
  * Callback when params refresh, to re-assign object_info.
  */
-function comfyReloadObjectInfo() {
+function comfyReloadObjectInfo(needed = false) {
+    if (!needed && !comfyObjectData && !gen_param_types.some(p => p.revalueGetter)) {
+        return;
+    }
     let resolve = undefined;
     let promise = new Promise(r => { resolve = r });
     getJsonDirect('ComfyBackendDirect/object_info', (_, data) => {
@@ -1218,14 +1232,12 @@ function comfyImportWorkflow() {
 
 getRequiredElementById('maintab_comfyworkflow').addEventListener('click', comfyTryToLoad);
 
-backendsRevisedCallbacks.push(() => {
-    let hasAny = Object.values(backends_loaded).filter(x => x.type.startsWith('comfyui_')
-        || x.type == 'swarmswarmbackend' // TODO: Actually check if the backend has a comfy instance rather than just assuming swarmback==comfy
-        ).length > 0;
+featureSetChangedCallbacks.push(() => {
+    let hasAny = currentBackendFeatureSet.includes('comfyui');
     getRequiredElementById('maintab_comfyworkflow').style.display = hasAny ? 'block' : 'none';
     if (hasAny && !comfyHasTriedToLoad) {
         comfyHasTriedToLoad = true;
-        comfyReloadObjectInfo();
+        comfyReloadObjectInfo(false);
     }
 });
 
