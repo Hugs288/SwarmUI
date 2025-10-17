@@ -1128,10 +1128,6 @@ public class WorkflowGeneratorSteps
             {
                 endStep = (int)Math.Round(steps * (1 - refinerControl));
             }
-            if (g.UserInput.TryGet(T2IParamTypes.EndStepsEarly, out double endEarly))
-            {
-                endStep = (int)(steps * (1 - endEarly));
-            }
             double cfg = g.UserInput.Get(T2IParamTypes.CFGScale);
             if (!noSkip && (steps == 0 || endStep <= startStep))
             {

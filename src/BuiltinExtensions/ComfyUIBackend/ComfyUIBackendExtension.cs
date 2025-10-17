@@ -35,7 +35,7 @@ public class ComfyUIBackendExtension : Extension
     public static ConcurrentDictionary<string, ComfyCustomWorkflow> CustomWorkflows = new();
 
     /// <summary>Set of all feature-ids supported by ComfyUI backends.</summary>
-    public static HashSet<string> FeaturesSupported = ["comfyui", "refiners", "controlnet", "endstepsearly", "seamless", "video", "variation_seed", "yolov8"];
+    public static HashSet<string> FeaturesSupported = ["comfyui", "refiners", "controlnet", "seamless", "video", "variation_seed", "yolov8"];
 
     /// <summary>Set of feature-ids that were added presumptively during loading and should be removed if the backend turns out to be missing them.</summary>
     public static HashSet<string> FeaturesDiscardIfNotFound = ["variation_seed", "yolov8"];

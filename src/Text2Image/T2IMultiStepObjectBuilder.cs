@@ -38,7 +38,6 @@ public class T2IMultiStepObjectBuilder
         user_input.Remove(T2IParamTypes.RefinerModel);
         user_input.Remove(T2IParamTypes.RefinerUpscale);
         user_input.Remove(T2IParamTypes.RefinerMethod);
-        //user_input.Set(T2IParamTypes.EndStepsEarly, 0.2);
         user_input.Set(T2IParamTypes.Seed, user_input.Get(T2IParamTypes.Seed) + 1);
         claim.Extend(1 + objects.Length);
         T2IParamInput basicInput = user_input.Clone();
@@ -52,7 +51,6 @@ public class T2IMultiStepObjectBuilder
         {
             return null;
         }
-        //user_input.Set(T2IParamTypes.EndStepsEarly, 0.6); // TODO: Configurable
         using ISImage liveImg = img.ToIS;
         float overBound = 0.1f;
         foreach (PromptRegion.Part part in objects)
