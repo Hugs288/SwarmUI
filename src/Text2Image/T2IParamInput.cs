@@ -48,17 +48,6 @@ public class T2IParamInput
         },
         input =>
         {
-            if (input.TryGet(T2IParamTypes.RawResolution, out string res))
-            {
-                (string widthText, string heightText) = res.BeforeAndAfter('x');
-                int width = int.Parse(widthText.Trim());
-                int height = int.Parse(heightText.Trim());
-                input.Set(T2IParamTypes.Width, width);
-                input.Set(T2IParamTypes.Height, height);
-            }
-        },
-        input =>
-        {
             if (input.TryGet(T2IParamTypes.Loras, out List<string> loras))
             {
                 List<string> weights = input.Get(T2IParamTypes.LoraWeights, []);
@@ -217,10 +206,6 @@ public class T2IParamInput
     /// <summary>Gets the desired image width.</summary>
     public int GetImageWidth(int def = 512)
     {
-        if (TryGet(T2IParamTypes.RawResolution, out string res))
-        {
-            return int.Parse(res.Before('x'));
-        }
         if (TryGet(T2IParamTypes.SideLength, out int sideLen) && TryGet(T2IParamTypes.AspectRatio, out string aspect) && ResolutionAspectReferences.TryGetValue(aspect, out (int, int) resRef))
         {
             // NOTE: This math must match params.js AspectRatio
@@ -232,10 +217,6 @@ public class T2IParamInput
     /// <summary>Gets the desired image height, automatically using alt-res parameter if needed.</summary>
     public int GetImageHeight(int def = 512)
     {
-        if (TryGet(T2IParamTypes.RawResolution, out string res))
-        {
-            return int.Parse(res.After('x'));
-        }
         if (TryGet(T2IParamTypes.SideLength, out int sideLen) && TryGet(T2IParamTypes.AspectRatio, out string aspect) && ResolutionAspectReferences.TryGetValue(aspect, out (int, int) resRef))
         {
             return (int)Utilities.RoundToPrecision(resRef.Item2 * (sideLen / 512.0), 16);

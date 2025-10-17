@@ -134,7 +134,6 @@ public class ImageBatchToolExtension : Extension
                 param.Set(T2IParamTypes.Width, width);
                 param.Set(T2IParamTypes.Height, height);
                 param.Remove(T2IParamTypes.AspectRatio);
-                param.Remove(T2IParamTypes.RawResolution);
             }
             if (appendFilenameToPrompt)
             {

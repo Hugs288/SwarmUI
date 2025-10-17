@@ -299,7 +299,7 @@ public class T2IParamTypes
         return update;
     }
 
-    public static T2IRegisteredParam<string> Prompt, NegativePrompt, AspectRatio, BackendType, RefinerMethod, PersonalNote, VideoFormat, VideoResolution, UnsamplerPrompt, ImageFormat, MaskBehavior, ColorCorrectionBehavior, RawResolution, SeamlessTileable, SD3TextEncs, BitDepth, Webhooks, Text2VideoFormat, WildcardSeedBehavior, SegmentSortOrder, SegmentTargetResolution, TorchCompile, VideoExtendFormat, ExactBackendID, OverridePredictionType, OverrideOutpathFormat;
+    public static T2IRegisteredParam<string> Prompt, NegativePrompt, AspectRatio, BackendType, RefinerMethod, PersonalNote, VideoFormat, VideoResolution, UnsamplerPrompt, ImageFormat, MaskBehavior, ColorCorrectionBehavior, SeamlessTileable, SD3TextEncs, BitDepth, Webhooks, Text2VideoFormat, WildcardSeedBehavior, SegmentSortOrder, SegmentTargetResolution, TorchCompile, VideoExtendFormat, ExactBackendID, OverridePredictionType, OverrideOutpathFormat;
     public static T2IRegisteredParam<int> Images, Steps, Width, Height, SideLength, BatchSize, VAETileSize, VAETileOverlap, VAETemporalTileSize, VAETemporalTileOverlap, ClipStopAtLayer, VideoFrames, VideoMotionBucket, VideoFPS, VideoSteps, RefinerSteps, CascadeLatentCompression, MaskShrinkGrow, MaskBlur, MaskGrow, SegmentMaskBlur, SegmentMaskGrow, SegmentMaskOversize, SegmentSteps, Text2VideoFrames, Text2VideoFPS, TrimVideoStartFrames, TrimVideoEndFrames, VideoExtendFrameOverlap;
     public static T2IRegisteredParam<long> Seed, VariationSeed, WildcardSeed;
     public static T2IRegisteredParam<double> CFGScale, VariationSeedStrength, InitImageCreativity, InitImageResetToNorm, InitImageNoise, RefinerControl, RefinerUpscale, RefinerCFGScale, ReVisionStrength, GlobalRegionFactor, SamplerSigmaMin, SamplerSigmaMax, SamplerRho, VideoAugmentationLevel, VideoCFG, VideoMinCFG, Video2VideoCreativity, VideoSwapPercent, VideoExtendSwapPercent, IP2PCFG2, RegionalObjectCleanupFactor, SigmaShift, SegmentThresholdMax, SegmentCFGScale, FluxGuidanceScale;
@@ -692,19 +692,6 @@ public class T2IParamTypes
         GroupSwarmInternal = new("Swarm Internal", Open: false, OrderPriority: 0, IsAdvanced: true);
         BatchSize = Register<int>(new("Batch Size", "Batch size - generates more images at once on a single GPU.\nThis increases VRAM usage.\nMay in some cases increase overall speed by a small amount (runs slower to get the images, but slightly faster per-image).",
             "1", IgnoreIf: "1", Min: 1, Max: 100, Step: 1, IsAdvanced: true, ViewType: ParamViewType.SLIDER, ViewMax: 10, ChangeWeight: 2, Group: GroupSwarmInternal, OrderPriority: -20
-            ));
-        RawResolution = Register<string>(new("Raw Resolution", "Optional advanced way to manually specify raw resolutions, useful for grids.\nWhen enabled, this overrides the default width/height params.",
-            "1024x1024", Examples: ["512x512", "1024x1024", "1344x768"], Toggleable: true, IsAdvanced: true, Group: GroupSwarmInternal, OrderPriority: -18, Clean: (_, s) =>
-            {
-                (string widthText, string heightText) = s.BeforeAndAfter('x');
-                int width = int.Parse(widthText.Trim());
-                int height = int.Parse(heightText.Trim());
-                if (width < 64 || height < 64 || width > 16384 || height > 16384)
-                {
-                    throw new SwarmUserErrorException($"Invalid resolution: {width}x{height} (must be between 64x64 and 16384x16384)");
-                }
-                return s;
-            }
             ));
         OutputIntermediateImages = Register<bool>(new("Output Intermediate Images", "If checked, intermediate images (eg before a refiner or segment stage) will be output separately alongside the final image.\nIf unchecked, only the final image will be output.",
             "false", IgnoreIf: "false", IsAdvanced: true, Group: GroupSwarmInternal, OrderPriority: -16
