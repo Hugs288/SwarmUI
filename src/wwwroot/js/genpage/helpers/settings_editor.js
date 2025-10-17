@@ -153,11 +153,6 @@ function applyThemeSetting(theme_info) {
 
 function loadUserSettings(callback = null) {
     genericRequest('GetUserSettings', {}, data => {
-        if (coreModelMap['VAE'] != null) {
-            for (let setting of ['defaultsdxlvae', 'defaultsdv1vae', 'defaultsvdvae', 'defaultfluxvae', 'defaultsd3vae', 'defaultmochivae']) {
-                data.settings.vaes.value[setting].values = ['None'].concat(coreModelMap['VAE']);
-            }
-        }
         buildSettingsMenu(userSettingsContainer, data.settings, 'usersettings_', userSettingsData);
         applyThemeSetting(data.themes);
         // Build a second time to self-apply settings
