@@ -2466,7 +2466,7 @@ public class WorkflowGenerator
                 DefaultSampler = "euler";
                 DefaultScheduler = "simple";
             }
-            else if (VideoModel.ModelClass?.CompatClass == "wan-21-14b" || VideoModel.ModelClass?.CompatClass == "wan-21-1_3b")
+            else if (VideoModel.ModelClass.CompatClass.StartsWith("wan-21-14b") || VideoModel.ModelClass.CompatClass.StartsWith("wan-21-1_3b"))
             {
                 VideoFPS ??= 24;
                 Frames ??= 81;
