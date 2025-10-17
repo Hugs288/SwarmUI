@@ -105,9 +105,6 @@ public class WorkflowGenerator
     /// <summary>Type id ('Base', 'Refiner') of the current loading model.</summary>
     public string LoadingModelType;
 
-    /// <summary>If true, user-selected VAE may be wrong, so ignore it.</summary>
-    public bool NoVAEOverride = false;
-
     /// <summary>If true, the generator is currently working on the refiner stage.</summary>
     public bool IsRefinerStage = false;
 
@@ -850,7 +847,7 @@ public class WorkflowGenerator
             string vaeFile = defaultVal;
             string nodeId = null;
             CommonModels.ModelInfo knownFile = knownName is null ? null : CommonModels.Known[knownName];
-            if (!NoVAEOverride && UserInput.TryGet(T2IParamTypes.VAE, out T2IModel vaeModel))
+            if (UserInput.TryGet(T2IParamTypes.VAE, out T2IModel vaeModel))
             {
                 vaeFile = vaeModel.Name;
                 nodeId = "11";

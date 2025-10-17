@@ -66,7 +66,7 @@ public class WorkflowGeneratorSteps
             {
                 g.LoadingVAE = g.CreateVAELoader(rvae.ToString(g.ModelFolderFormat), g.HasNode("21") ? null : "21");
             }
-            else if (!g.NoVAEOverride && g.UserInput.TryGet(T2IParamTypes.VAE, out T2IModel vae))
+            else if (g.UserInput.TryGet(T2IParamTypes.VAE, out T2IModel vae))
             {
                 if (g.FinalLoadedModel.ModelClass?.ID == "stable-diffusion-v3-medium" && vae.ModelClass?.CompatClass != "stable-diffusion-v3")
                 {
@@ -74,7 +74,7 @@ public class WorkflowGeneratorSteps
                 }
                 g.LoadingVAE = g.CreateVAELoader(vae.ToString(g.ModelFolderFormat), g.HasNode("11") ? null : "11");
             }
-            else if (!g.NoVAEOverride && g.UserInput.Get(T2IParamTypes.AutomaticVAE, false))
+            else
             {
                 string vaeName = null;
                 if (!string.IsNullOrWhiteSpace(vaeName) && vaeName.ToLowerFast() != "none")
@@ -1202,11 +1202,9 @@ public class WorkflowGeneratorSteps
                 {
                     modelMustReencode = true;
                 }
-                g.NoVAEOverride = refineModel.ModelClass?.CompatClass != baseModel.ModelClass?.CompatClass;
                 g.FinalLoadedModel = refineModel;
                 g.FinalLoadedModelList = [refineModel];
                 (g.FinalLoadedModel, g.FinalModel, g.FinalClip, g.FinalVae) = g.CreateStandardModelLoader(refineModel, "Refiner", loaderNodeId);
-                g.NoVAEOverride = false;
                 prompt = g.CreateConditioning(g.UserInput.Get(T2IParamTypes.Prompt), g.FinalClip, g.FinalLoadedModel, true, isRefiner: true);
                 negPrompt = g.CreateConditioning(g.UserInput.Get(T2IParamTypes.NegativePrompt), g.FinalClip, g.FinalLoadedModel, false, isRefiner: true);
                 bool doSave = g.UserInput.Get(T2IParamTypes.OutputIntermediateImages, false);
@@ -1332,10 +1330,6 @@ public class WorkflowGeneratorSteps
                 JArray model = g.FinalModel, clip = g.FinalClip, vae = g.FinalVae;
                 if (g.UserInput.TryGet(T2IParamTypes.SegmentModel, out T2IModel segmentModel))
                 {
-                    if (segmentModel.ModelClass?.CompatClass != t2iModel.ModelClass?.CompatClass)
-                    {
-                        g.NoVAEOverride = true;
-                    }
                     t2iModel = segmentModel;
                     g.FinalLoadedModel = segmentModel;
                     (t2iModel, model, clip, vae) = g.CreateStandardModelLoader(t2iModel, "Refiner");

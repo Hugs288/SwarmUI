@@ -911,8 +911,7 @@ function getGenInput(input_overrides = {}, input_preoverrides = {}) {
             }
         }
     }
-    if (!input['vae'] || input['vae'] == 'Automatic') {
-        input['automaticvae'] = true;
+    if (!input['vae']) {
         delete input['vae'];
     }
     let revisionImageArea = getRequiredElementById('alt_prompt_image_area');
