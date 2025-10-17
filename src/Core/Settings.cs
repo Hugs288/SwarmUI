@@ -444,36 +444,6 @@ public class Settings : AutoConfiguration
         [ConfigComment("How many lines of text to display in the standard prompt box before cutting off to a scroll bar.\nActual size in practice tends to be a few lines shorter due to browser and font variations.\nDefault is 10.")]
         public int MaxPromptLines = 10; // TODO: UserUI
 
-        public class VAEsData : AutoConfiguration
-        {
-            [ConfigComment("What VAE to use with SDXL models by default. Use 'None' to use the one in the model.")]
-            [ManualSettingsOptions(Impl = null, Vals = ["None"])]
-            public string DefaultSDXLVAE = "None";
-
-            [ConfigComment("What VAE to use with SDv1 models by default. Use 'None' to use the one in the model.")]
-            [ManualSettingsOptions(Impl = null, Vals = ["None"])]
-            public string DefaultSDv1VAE = "None";
-
-            [ConfigComment("What VAE to use with SVD (Video) models by default. Use 'None' to use the one in the model. This should normally be an SDv1 VAE.")]
-            [ManualSettingsOptions(Impl = null, Vals = ["None"])]
-            public string DefaultSVDVAE = "None";
-
-            [ConfigComment("What VAE to use with Flux models by default.")]
-            [ManualSettingsOptions(Impl = null, Vals = ["None"])]
-            public string DefaultFluxVAE = "None";
-
-            [ConfigComment("What VAE to use with SD3 models by default.")]
-            [ManualSettingsOptions(Impl = null, Vals = ["None"])]
-            public string DefaultSD3VAE = "None";
-
-            [ConfigComment("What VAE to use with Mochi Text2Video models by default.")]
-            [ManualSettingsOptions(Impl = null, Vals = ["None"])]
-            public string DefaultMochiVAE = "None";
-        }
-
-        [ConfigComment("Options to override default VAEs with.")]
-        public VAEsData VAEs = new();
-
         [ConfigComment("Set to a number above 1 to allow generations of multiple images to automatically generate square mini-grids when they're done.")]
         public int MaxImagesInMiniGrid = 1;
 

@@ -943,7 +943,7 @@ public class WorkflowGenerator
                 ["type"] = "sd3"
             });
             LoadingClip = [singleClipLoader, 0];
-            doVaeLoader(UserInput.SourceSession?.User?.Settings?.VAEs?.DefaultSDXLVAE, "stable-diffusion-xl-v1", "sdxl-vae");
+            doVaeLoader(null, "stable-diffusion-xl-v1", "sdxl-vae");
         }
         else if (model.IsDiffusionModelsFormat)
         {
@@ -1168,7 +1168,7 @@ public class WorkflowGenerator
             }
             if (LoadingVAE is null)
             {
-                doVaeLoader(UserInput.SourceSession?.User?.Settings?.VAEs?.DefaultSD3VAE, "stable-diffusion-v3", "sd35-vae");
+                doVaeLoader(null, "stable-diffusion-v3", "sd35-vae");
             }
         }
         else if (IsFlux() && (LoadingClip is null || LoadingVAE is null || UserInput.Get(T2IParamTypes.T5XXLModel) is not null || UserInput.Get(T2IParamTypes.ClipLModel) is not null))
@@ -1185,7 +1185,7 @@ public class WorkflowGenerator
                 ["type"] = "flux"
             });
             LoadingClip = [dualClipLoader, 0];
-            doVaeLoader(UserInput.SourceSession?.User?.Settings?.VAEs?.DefaultFluxVAE, "flux-1", "flux-ae");
+            doVaeLoader(null, "flux-1", "flux-ae");
         }
         else if (IsChroma())
         {
@@ -1207,7 +1207,7 @@ public class WorkflowGenerator
                 ["min_length"] = 0
             });
             LoadingClip = [t5Patch, 0];
-            doVaeLoader(UserInput.SourceSession?.User?.Settings?.VAEs?.DefaultFluxVAE, "flux-1", "flux-ae");
+            doVaeLoader(null, "flux-1", "flux-ae");
         }
         else if (IsHiDream())
         {
@@ -1224,7 +1224,7 @@ public class WorkflowGenerator
                 ["clip_name4"] = requireClipModel("llama3.1-8b", T2IParamTypes.LLaMAModel)
             });
             LoadingClip = [quadClipLoader, 0];
-            doVaeLoader(UserInput.SourceSession?.User?.Settings?.VAEs?.DefaultFluxVAE, "flux-1", "flux-ae");
+            doVaeLoader(null, "flux-1", "flux-ae");
         }
         else if (IsOmniGen())
         {
@@ -1238,7 +1238,7 @@ public class WorkflowGenerator
                 ["clip_name"] = requireClipModel("qwen-2.5-vl-fp16", T2IParamTypes.QwenModel),
             });
             LoadingClip = [clipLoader, 0];
-            doVaeLoader(UserInput.SourceSession?.User?.Settings?.VAEs?.DefaultFluxVAE, "flux-1", "flux-ae");
+            doVaeLoader(null, "flux-1", "flux-ae");
         }
         else if (IsQwenImage())
         {
@@ -1307,7 +1307,7 @@ public class WorkflowGenerator
                 ["type"] = "mochi"
             });
             LoadingClip = [clipLoader, 0];
-            doVaeLoader(UserInput.SourceSession?.User?.Settings?.VAEs?.DefaultMochiVAE, "genmo-mochi-1", "mochi-vae");
+            doVaeLoader(null, "genmo-mochi-1", "mochi-vae");
         }
         else if (IsLTXV())
         {
@@ -1408,7 +1408,7 @@ public class WorkflowGenerator
             }
             if (LoadingVAE is null)
             {
-                doVaeLoader(UserInput.SourceSession?.User?.Settings?.VAEs?.DefaultFluxVAE, "flux-1", "flux-ae");
+                doVaeLoader(null, "flux-1", "flux-ae");
             }
         }
         else if (!string.IsNullOrWhiteSpace(predType) && LoadingModel is not null)
@@ -2616,11 +2616,7 @@ public class WorkflowGenerator
                         ["clip_name"] = fname
                     });
                     clipVision = [cliploader, 0];
-                    string svdVae = g.UserInput.SourceSession?.User?.Settings?.VAEs?.DefaultSVDVAE;
-                    if (string.IsNullOrWhiteSpace(svdVae))
-                    {
-                        svdVae = Program.T2IModelSets["VAE"].Models.Keys.FirstOrDefault(m => m.ToLowerFast().Contains("sdxl"));
-                    }
+                    string svdVae = Program.T2IModelSets["VAE"].Models.Keys.FirstOrDefault(m => m.ToLowerFast().Contains("sdxl"));
                     if (string.IsNullOrWhiteSpace(svdVae))
                     {
                         throw new SwarmUserErrorException("No default SVD VAE found, please download an SVD VAE (any SDv1 VAE will do) and set it as default in User Settings");
