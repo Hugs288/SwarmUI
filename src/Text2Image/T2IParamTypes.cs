@@ -515,7 +515,7 @@ public class T2IParamTypes
             List<T2IModel> baseList = [.. Program.MainSDModels.ListModelsFor(s).OrderBy(m => m.Name)];
             List<T2IModel> refinerList = [.. baseList.Where(m => m.ModelClass is not null && (m.ModelClass.Name.Contains("Refiner") || m.ModelClass.ID.Contains("wan-2_1-text2video-14b")))];
             List<string> bases = CleanModelList(baseList.Select(m => m.Name));
-            return ["(Use Base)", .. CleanModelList(refinerList.Select(m => m.Name)), "-----", .. bases];
+            return [.. CleanModelList(refinerList.Select(m => m.Name)), .. bases];
         }
         RefinerControl = Register<double>(new("Refiner Control Percentage", "Higher values give the refiner more control, lower values give the base more control.\nThis is similar to 'Init Image Creativity', but for the refiner. This controls how many steps the refiner takes.\nIn simple terms: this is the fraction of total steps to let the refiner run\nFor example, at Steps=20 with ControlPercentage=0.2 and Method=PostApply, the base will run 20 steps, then the refiner will run 20*0.2=just 4 steps.\nIf you find your quality is low at low control percentage values, it may be beneficial to set the advanced Refiner Steps parameter to a very high value let the refine logic run more actual steps.\nFor example, set RefinerSteps=60 so that 60*0.2=12 steps actually ran in the refiner.",
             "0.2", Min: 0, Max: 1, Step: 0.05, OrderPriority: -4, ViewType: ParamViewType.SLIDER, Group: GroupRefiners, FeatureFlag: "refiners", DoNotPreview: true, Examples: ["0.2", "0.3", "0.4"]
@@ -534,8 +534,8 @@ public class T2IParamTypes
             return [.. CleanModelList(Program.T2IModelSets["VAE"].ListModelsFor(s).Select(m => m.Name))];
         }
         GroupRefinerOverrides = new("Refiner Param Overrides", Toggles: false, Open: false, OrderPriority: 50, IsAdvanced: true, Description: "This sub-group of the Refine/Upscale group contains core-parameter overrides, such as replacing the base Step count or CFG Scale, unique to the refine/upscale generation stage.", Parent: GroupRefiners);
-        RefinerModel = Register<T2IModel>(new("Refiner Model", "The model to use for refinement. This should be a model that's good at small-details, and use a structural model as your base model.\n'Use Base' will use your base model rather than switching.\nSDXL 1.0 released with an official refiner model.",
-            "(Use Base)", IgnoreIf: "(Use Base)", GetValues: listRefinerModels, OrderPriority: -10, Group: GroupRefinerOverrides, FeatureFlag: "refiners", Subtype: "Stable-Diffusion", ChangeWeight: 9, DoNotPreview: true
+        RefinerModel = Register<T2IModel>(new("Refiner Model", "The model to use for refinement. This should be a model that's good at small-details, and use a structural model as your base model.\nIf disabled, the base model is used.",
+            "", IgnoreIf: "", GetValues: listRefinerModels, IsAdvanced: true, Toggleable: true, OrderPriority: -10, Group: GroupRefinerOverrides, FeatureFlag: "refiners", Subtype: "Stable-Diffusion", ChangeWeight: 9, DoNotPreview: true
             ));
         RefinerVAE = Register<T2IModel>(new("Refiner VAE", "Optional VAE replacement for the refiner stage.",
             "", IgnoreIf: "", GetValues: listVaes, IsAdvanced: true, Toggleable: true, OrderPriority: -9, Group: GroupRefinerOverrides, FeatureFlag: "refiners", Subtype: "VAE", ChangeWeight: 7, DoNotPreview: true
