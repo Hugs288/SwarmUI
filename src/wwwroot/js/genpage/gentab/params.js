@@ -914,9 +914,6 @@ function getGenInput(input_overrides = {}, input_preoverrides = {}) {
     if (input['aspectratio'] == 'Custom') {
         delete input['sidelength'];
     }
-    if (!input['vae']) {
-        delete input['vae'];
-    }
     let revisionImageArea = getRequiredElementById('alt_prompt_image_area');
     let revisionImages = [...revisionImageArea.querySelectorAll('.alt-prompt-image')].filter(c => c.tagName == "IMG");
     if (revisionImages.length > 0) {
