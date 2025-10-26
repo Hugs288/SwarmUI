@@ -171,7 +171,7 @@ public class Session : IEquatable<Session>
         Task<MediaFile> resultImg = Task.FromResult(file);
         if (file is ImageFile img && (!maySkipConversion || !user_input.Get(T2IParamTypes.DoNotSave, false) || user_input.SourceSession.User.Settings.FileFormat.ReformatTransientImages))
         {
-            string format = user_input.Get(T2IParamTypes.ImageFormat, User.Settings.FileFormat.ImageFormat);
+            string format = User.Settings.FileFormat.ImageFormat;
             resultImg = Task.Run<MediaFile>(() =>
             {
                 try
@@ -205,7 +205,7 @@ public class Session : IEquatable<Session>
         }
         string rawImagePath = User.BuildImageOutputPath(user_input, batchIndex);
         string imagePath = rawImagePath.Replace("[number]", "1");
-        string format = user_input.Get(T2IParamTypes.ImageFormat, User.Settings.FileFormat.ImageFormat);
+        string format = User.Settings.FileFormat.ImageFormat;
         string extension;
         try
         {
