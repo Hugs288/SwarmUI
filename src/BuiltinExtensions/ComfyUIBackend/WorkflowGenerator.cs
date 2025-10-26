@@ -1110,64 +1110,19 @@ public class WorkflowGenerator
                 ["shift"] = UserInput.Get(T2IParamTypes.SigmaShift, 3)
             });
             LoadingModel = [sd3Node, 0];
-            string tencs = model.Metadata?.TextEncoders ?? "";
-            if (!UserInput.TryGet(T2IParamTypes.SD3TextEncs, out string mode))
+            string loaderType = "TripleCLIPLoader";
+            if (requireClipModel("t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf"))
             {
-                if (tencs == "")
-                {
-                    mode = "CLIP + T5";
-                }
-                else
-                {
-                    mode = null;
-                }
+                loaderType = "TripleCLIPLoaderGGUF";
             }
-            if (mode == "CLIP Only" && tencs.Contains("clip_l") && !tencs.Contains("t5xxl")) { mode = null; }
-            if (mode == "T5 Only" && !tencs.Contains("clip_l") && tencs.Contains("t5xxl")) { mode = null; }
-            if (mode == "CLIP + T5" && tencs.Contains("clip_l") && tencs.Contains("t5xxl")) { mode = null; }
-            if (mode is not null)
+            string tripleClipLoader = CreateNode(loaderType, new JObject()
             {
-                if (mode == "T5 Only")
-                {
-                    string loaderType = "CLIPLoader";
-                    if (requireClipModel("t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf"))
-                    {
-                        loaderType = "CLIPLoaderGGUF";
-                    }
-                    string singleClipLoader = CreateNode(loaderType, new JObject()
-                    {
-                        ["clip_name"] = requireClipModel("t5xxl", T2IParamTypes.T5XXLModel),
-                        ["type"] = "sd3"
-                    });
-                    LoadingClip = [singleClipLoader, 0];
-                }
-                else if (mode == "CLIP Only" || !tencs.Contains("t5xxl"))
-                {
-                    string dualClipLoader = CreateNode("DualCLIPLoader", new JObject()
-                    {
-                        ["clip_name1"] = requireClipModel("clip-g", T2IParamTypes.ClipGModel),
-                        ["clip_name2"] = requireClipModel("clip-l", T2IParamTypes.ClipLModel),
-                        ["type"] = "sd3"
-                    });
-                    LoadingClip = [dualClipLoader, 0];
-                }
-                else
-                {
-                    string loaderType = "TripleCLIPLoader";
-                    if (requireClipModel("t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf"))
-                    {
-                        loaderType = "TripleCLIPLoaderGGUF";
-                    }
-                    string tripleClipLoader = CreateNode(loaderType, new JObject()
-                    {
-                        ["clip_name1"] = requireClipModel("clip-g", T2IParamTypes.ClipGModel),
-                        ["clip_name2"] = requireClipModel("clip-l", T2IParamTypes.ClipLModel),
-                        ["clip_name3"] = requireClipModel("t5xxl", T2IParamTypes.T5XXLModel)
-                    });
-                    LoadingClip = [tripleClipLoader, 0];
-                }
-            }
-            else if (LoadingClip is null)
+                ["clip_name1"] = requireClipModel("clip-g", T2IParamTypes.ClipGModel),
+                ["clip_name2"] = requireClipModel("clip-l", T2IParamTypes.ClipLModel),
+                ["clip_name3"] = requireClipModel("t5xxl", T2IParamTypes.T5XXLModel)
+            });
+            LoadingClip = [tripleClipLoader, 0];
+            if (LoadingClip is null)
             {
                 throw new SwarmUserErrorException($"Model '{model.Name}' is a full checkpoint format model, but was placed in the diffusion_models backbone folder. Please move it to the standard Stable Diffusion models folder.");
             }
