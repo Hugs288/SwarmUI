@@ -180,6 +180,13 @@ public class WorkflowGenerator
         return clazz is not null && clazz.StartsWith("flux-1");
     }
 
+    /// <summary>Returns true if the current model is AuraFlow.</summary>
+    public bool IsAuraFlow()
+    {
+        string clazz = CurrentCompatClass();
+        return clazz is not null && clazz == "auraflow-v1";
+    }
+
     /// <summary>Returns true if the current model is a Kontext model (eg Flux.1 Kontext Dev).</summary>
     public bool IsKontext()
     {
@@ -1184,6 +1191,28 @@ public class WorkflowGenerator
             });
             LoadingClip = [dualClipLoader, 0];
             doVaeLoader(null, "flux-1", "flux-ae");
+        }
+        else if (IsAuraFlow() && (LoadingClip is null || LoadingVAE is null || UserInput.Get(T2IParamTypes.T5XXLModel) is not null))
+        {
+            string loaderType = "CLIPLoader";
+            if (requireClipModel("pile-t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf"))
+            {
+                loaderType = "CLIPLoaderGGUF";
+            }
+            string dualClipLoader = CreateNode(loaderType, new JObject()
+            {
+                ["clip_name"] = requireClipModel("pile-t5xxl", T2IParamTypes.T5XXLModel),
+                ["type"] = "chroma"
+            });
+            LoadingClip = [dualClipLoader, 0];
+            string t5Patch = CreateNode("T5TokenizerOptions", new JObject()
+            {
+                ["clip"] = LoadingClip,
+                ["min_padding"] = 768,
+                ["min_length"] = 768
+            });
+            LoadingClip = [t5Patch, 0];
+            doVaeLoader(null, "stable-diffusion-xl-v1", "sdxl-vae");
         }
         else if (IsChroma())
         {
