@@ -38,8 +38,6 @@ public record class ModelInfo(
     string VAE,
     string LatentNode = "EmptyLatentImage",
     string SigmaShiftNode = null,
-    string UniqueClipLoader = null,
-    string UniqueModelLoader = null,
     List<string> DefaultParameters = null
 );
 
@@ -82,9 +80,9 @@ public static class ModelDictionary
         Register(models, new("flux-1-dev", ModelType.TextToImage, ModelArchitecture.Dit, PredictionType.RectifiedFlow, ["clip-l", "t5xxl"], "flux", "flux-ae", "EmptySD3LatentImage", DefaultParameters: ["sidelength:1024", "aspectratio:1:1", "cfgscale:1", "steps:20"]));
         Register(models, new("flux-1-schnell", ModelType.TextToImage, ModelArchitecture.Dit, PredictionType.RectifiedFlow, ["clip-l", "t5xxl"], "flux", "flux-ae", "EmptySD3LatentImage", DefaultParameters: ["sidelength:1024", "aspectratio:1:1", "cfgscale:1", "steps:4"]));
         Register(models, new("flux-1-kontext", ModelType.ImageEdit, ModelArchitecture.Dit, PredictionType.RectifiedFlow, ["clip-l", "t5xxl"], "flux", "flux-ae", "EmptySD3LatentImage", DefaultParameters: ["sidelength:1024", "aspectratio:1:1", "cfgscale:1", "steps:20"]));
-        Register(models, new("pixart-ms-sigma-xl-2", ModelType.TextToImage, ModelArchitecture.Dit, PredictionType.Epsilon, ["t5xxl"], "sd3", "sdxl-vae", UniqueModelLoader: "PixArtCheckpointLoader", DefaultParameters: ["sidelength:1024", "aspectratio:1:1", "cfgscale:4", "steps:14"]));
-        Register(models, new("pixart-ms-sigma-xl-2-2k", ModelType.TextToImage, ModelArchitecture.Dit, PredictionType.Epsilon, ["t5xxl"], "sd3", "sdxl-vae", UniqueModelLoader: "PixArtCheckpointLoader", DefaultParameters: ["sidelength:2048", "aspectratio:1:1", "cfgscale:4", "steps:14"]));
-        Register(models, new("nvidia-sana-1600", ModelType.TextToImage, ModelArchitecture.Dit, PredictionType.Epsilon, [], null, "sana-dcae", LatentNode: "EmptySanaLatentImage", UniqueClipLoader: "GemmaLoader", UniqueModelLoader: "SanaCheckpointLoader", DefaultParameters: ["sidelength:1024", "aspectratio:1:1", "cfgscale:7", "steps:20"]));
+        Register(models, new("pixart-ms-sigma-xl-2", ModelType.TextToImage, ModelArchitecture.Dit, PredictionType.Epsilon, ["t5xxl"], "sd3", "sdxl-vae", DefaultParameters: ["sidelength:1024", "aspectratio:1:1", "cfgscale:4", "steps:14"]));
+        Register(models, new("pixart-ms-sigma-xl-2-2k", ModelType.TextToImage, ModelArchitecture.Dit, PredictionType.Epsilon, ["t5xxl"], "sd3", "sdxl-vae", DefaultParameters: ["sidelength:2048", "aspectratio:1:1", "cfgscale:4", "steps:14"]));
+        Register(models, new("nvidia-sana-1600", ModelType.TextToImage, ModelArchitecture.Dit, PredictionType.Epsilon, [], null, "sana-dcae", LatentNode: "EmptySanaLatentImage", DefaultParameters: ["sidelength:1024", "aspectratio:1:1", "cfgscale:7", "steps:20"]));
         Register(models, new("auraflow-v1", ModelType.TextToImage, ModelArchitecture.Dit, PredictionType.RectifiedFlow, ["pile-t5xxl"], "chroma", "sdxl-vae", "ModelSamplingAuraFlow", DefaultParameters: ["sidelength:1024", "aspectratio:1:1", "cfgscale:3.5", "steps:20", "sigmashift:1.73"]));
         Register(models, new("lumina-2", ModelType.TextToImage, ModelArchitecture.Dit, PredictionType.RectifiedFlow, ["gemma2-2b"], "lumina", "flux-ae", DefaultParameters: ["sidelength:1024", "aspectratio:1:1", "cfgscale:4", "steps:25", "sampler:res_multistep", "sigmashift:6.0"]));
         Register(models, new("hidream-i1", ModelType.TextToImage, ModelArchitecture.Dit, PredictionType.RectifiedFlow, ["clip-l-hidream", "clip-g-hidream", "t5xxl", "llama3.1-8b"], "hidream", "flux-ae", LatentNode: "EmptySD3LatentImage", "ModelSamplingSD3", DefaultParameters: ["sidelength:1024", "aspectratio:1:1", "cfgscale:5", "steps:50", "sampler:uni_pc", "sigmashift:3.0"]));
