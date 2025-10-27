@@ -15,6 +15,8 @@
 [Nvidia Sana](#nvidia-sana) | DiT | 2024 | NVIDIA | 1.6B | No | Just Bad |
 [AuraFlow](#auraflow) | MMDiT | 2024 | Fal.AI | 6B | Yes | Outdated |
 [Flux.1](#black-forest-labs-flux1-models) | MMDiT | 2024 | Black Forest Labs | 12B | Partial | Recent, High Quality |
+[Chroma](#chroma) | MMDiT | 2025 | Lodestone Rock | 8.9B  | No | Recent, Decent Quality |
+[Chroma Radiance](#chroma-radiance) | Pixel MMDiT | 2025 | Lodestone Rock | 8.9B  | No | Recent, Bad Quality (WIP) |
 [Lumina 2.0](#lumina-2) | NextDiT | 2025 | Alpha-VLLM | 2.6B | Partial | Modern, Passable Quality |
 [HiDream i1](#hidream-i1) | MMDiT | 2025 | HiDream AI (Vivago) | 17B | Minimal | Modern, High Quality, very memory intense |
 [Nvidia Cosmos Predict2](#cosmos-predict2) | DiT | 2025 | NVIDIA | 2B/14B | Partial | Just Bad |
@@ -309,7 +311,7 @@ These steps are not friendly to beginners (if Sana gains popularity, likely more
     - Add a Mask, draw a dot anywhere in the empty area (this is just a trick to tell the editor to automask all the empty area to the side, you don't need to mask it manually)
     - Type your prompt, hit generate
 
-### Chroma
+# Chroma
 
 - Chroma is a derivative of Flux, and is supported in SwarmUI
     - FP8 Scaled versions here: <https://huggingface.co/silveroxides/Chroma1-HD-fp8-scaled/tree/main>
@@ -333,6 +335,22 @@ These steps are not friendly to beginners (if Sana gains popularity, likely more
     - **Sigma Shift:** Defaults to `1`
     - **Resolution:** `1024x1024` or nearby values. The *HD* models were trained extra on `1152x1152`.
 
+# Chroma Radiance
+
+- Chroma Radiance is a pixel-space model derived from Flux, and is supported in SwarmUI
+    - It is a work in progress, expect quality to be limited for now
+    - Download here <https://huggingface.co/lodestones/Chroma1-Radiance/tree/main>
+        - Model files goes in `diffusion_models`
+    - It does not use a VAE
+- **Parameters**
+    - **CFG Scale:** around `3.5`
+    - **Sampler:** Defaults to regular `Euler`
+    - **Scheduler:** Defaults to `Beta`
+    - **Steps:** Normal step counts work, higher is recommended to reduce quality issues
+    - **Sigma Shift:** Defaults to `1`
+    - **Prompt:** Long and detailed prompts are recommended.
+    - **Negative Prompt:** Due to the model's experimental early train status, a good negative prompt is essential.
+        - Official example: `This low quality greyscale unfinished sketch is inaccurate and flawed. The image is very blurred and lacks detail with excessive chromatic aberrations and artifacts. The image is overly saturated with excessive bloom. It has a toony aesthetic with bold outlines and flat colors.`
 
 # Lumina 2
 

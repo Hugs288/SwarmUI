@@ -201,6 +201,13 @@ public class WorkflowGenerator
         return clazz is not null && clazz == "chroma";
     }
 
+    /// <summary>Returns true if the current model is Chroma Radiance.</summary>
+    public bool IsChromaRadiance()
+    {
+        string clazz = CurrentCompatClass();
+        return clazz is not null && clazz == "chroma-radiance";
+    }
+
     /// <summary>Returns true if the current model is HiDream-i1.</summary>
     public bool IsHiDream()
     {
@@ -1023,7 +1030,7 @@ public class WorkflowGenerator
                 string dtype = UserInput.Get(ComfyUIBackendExtension.PreferredDType, "automatic");
                 if (dtype == "automatic")
                 {
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || model.Metadata?.SpecialFormat == "fp8_scaled" || IsNvidiaCosmos2() || IsOmniGen() || IsChroma()) // TODO: Or AMD?
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || model.Metadata?.SpecialFormat == "fp8_scaled" || IsNvidiaCosmos2() || IsOmniGen() || IsChroma() || IsChromaRadiance()) // TODO: Or AMD?
                     {
                         dtype = "default";
                     }
@@ -1169,7 +1176,7 @@ public class WorkflowGenerator
             LoadingClip = [t5Patch, 0];
             doVaeLoader(null, "stable-diffusion-xl-v1", "sdxl-vae");
         }
-        else if (IsChroma())
+        else if (IsChroma() || IsChromaRadiance())
         {
             string loaderType = "CLIPLoader";
             if (requireClipModel("t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf"))
@@ -1195,7 +1202,14 @@ public class WorkflowGenerator
                 ["shift"] = UserInput.Get(T2IParamTypes.SigmaShift, 1)
             });
             LoadingModel = [samplingNode, 0];
-            doVaeLoader(null, "flux-1", "flux-ae");
+            if (IsChromaRadiance())
+            {
+                LoadingVAE = CreateVAELoader("pixel_space");
+            }
+            else
+            {
+                doVaeLoader(null, "flux-1", "flux-ae");
+            }
         }
         else if (IsHiDream())
         {
@@ -1592,7 +1606,7 @@ public class WorkflowGenerator
         {
             defscheduler ??= "simple";
         }
-        else if (IsChroma())
+        else if (IsChroma() || IsChromaRadiance())
         {
             defscheduler ??= "beta";
         }
@@ -2087,7 +2101,110 @@ public class WorkflowGenerator
     /// <summary>Creates an Empty Latent Image node.</summary>
     public string CreateEmptyImage(int width, int height, int batchSize, string id = null)
     {
-        if (UserInput.Get(ComfyUIBackendExtension.ShiftedLatentAverageInit, false))
+        if (IsCascade())
+        {
+            return CreateNode("StableCascade_EmptyLatentImage", new JObject()
+            {
+                ["batch_size"] = batchSize,
+                ["compression"] = UserInput.Get(T2IParamTypes.CascadeLatentCompression, 32),
+                ["height"] = height,
+                ["width"] = width
+            }, id);
+        }
+        else if (IsSD3() || IsFlux() || IsHiDream() || IsChroma() || IsOmniGen() || IsQwenImage())
+        {
+            return CreateNode("EmptySD3LatentImage", new JObject()
+            {
+                ["batch_size"] = batchSize,
+                ["height"] = height,
+                ["width"] = width
+            }, id);
+        }
+        else if (IsHunyuanImage() || IsHunyuanImageRefiner())
+        {
+            return CreateNode("EmptyHunyuanImageLatent", new JObject()
+            {
+                ["batch_size"] = batchSize,
+                ["height"] = height,
+                ["width"] = width
+            }, id);
+        }
+        else if (IsSana())
+        {
+            return CreateNode("EmptySanaLatentImage", new JObject()
+            {
+                ["batch_size"] = batchSize,
+                ["height"] = height,
+                ["width"] = width
+            }, id);
+        }
+        else if (IsMochi())
+        {
+            return CreateNode("EmptyMochiLatentVideo", new JObject()
+            {
+                ["batch_size"] = batchSize,
+                ["length"] = UserInput.Get(T2IParamTypes.Text2VideoFrames, 25),
+                ["height"] = height,
+                ["width"] = width
+            }, id);
+        }
+        else if (IsLTXV())
+        {
+            return CreateNode("EmptyLTXVLatentVideo", new JObject()
+            {
+                ["batch_size"] = batchSize,
+                ["length"] = UserInput.Get(T2IParamTypes.Text2VideoFrames, 97),
+                ["height"] = height,
+                ["width"] = width
+            }, id);
+        }
+        else if (IsWanVideo22())
+        {
+            return CreateNode("Wan22ImageToVideoLatent", new JObject()
+            {
+                ["batch_size"] = batchSize,
+                ["length"] = UserInput.Get(T2IParamTypes.Text2VideoFrames, 81),
+                ["height"] = height,
+                ["width"] = width,
+                ["vae"] = FinalVae
+            }, id);
+        }
+        else if (IsHunyuanVideo() || IsWanVideo())
+        {
+            int frames = 73;
+            if (IsWanVideo())
+            {
+                frames = 81;
+            }
+            return CreateNode("EmptyHunyuanLatentVideo", new JObject()
+            {
+                ["batch_size"] = batchSize,
+                ["length"] = UserInput.Get(T2IParamTypes.Text2VideoFrames, frames),
+                ["height"] = height,
+                ["width"] = width
+            }, id);
+        }
+        else if (IsNvidiaCosmos1())
+        {
+
+            return CreateNode("EmptyCosmosLatentVideo", new JObject()
+            {
+                ["batch_size"] = batchSize,
+                ["length"] = UserInput.Get(T2IParamTypes.Text2VideoFrames, 121),
+                ["height"] = height,
+                ["width"] = width
+            }, id);
+        }
+        else if (IsChromaRadiance())
+        {
+            return CreateNode("EmptyChromaRadianceLatentImage", new JObject()
+            {
+                ["batch_size"] = batchSize,
+                ["height"] = height,
+                ["width"] = width
+            }, id);
+        }
+        else if (UserInput.Get(ComfyUIBackendExtension.ShiftedLatentAverageInit, false))
         {
             double offA = 0, offB = 0, offC = 0, offD = 0;
             switch (CurrentCompatClass())
