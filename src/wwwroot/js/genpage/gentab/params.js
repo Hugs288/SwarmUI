@@ -25,74 +25,6 @@ function setGroupAdvancedOverride(groupId, enable) {
     }
 }
 
-class AspectRatio {
-    constructor(id, width, height, altLogic = null) {
-        this.id = id;
-        this.width = width;
-        this.height = height;
-        this.ratio = width / height;
-        this.altLogic = altLogic;
-    }
-
-    read(inWidth, inHeight, doAltLogic = true) {
-        if (this.altLogic && doAltLogic) {
-            let [newWidth, newHeight] = this.altLogic(inWidth, inHeight);
-            if (newWidth && newHeight) {
-                return [newWidth, newHeight];
-            }
-        }
-        if (inWidth != inHeight) {
-            inWidth = roundTo(Math.sqrt(inWidth * inHeight), 16);
-            inHeight = inWidth;
-        }
-        // NOTE: This math must match T2IParamInput GetImageWidth
-        let width = roundTo(this.width * (inWidth <= 0 ? 512 : inWidth) / 512, 16);
-        let height = roundTo(this.height * (inHeight <= 0 ? 512 : inHeight) / 512, 16);
-        return [width, height];
-    }
-}
-
-let aspectRatios = [
-    new AspectRatio("1:1", 512, 512),
-    new AspectRatio("4:3", 576, 448),
-    new AspectRatio("3:2", 608, 416, (w, h) => {
-        if (w == 768 && h == 512) {
-            return [768, 512];
-        }
-        return [null, null];
-    }),
-    new AspectRatio("8:5", 608, 384),
-    new AspectRatio("16:9", 672, 384, (w, h) => {
-        if (w == 640 && h == 640) {
-            return [832, 480]; // Wan 2.1, 1.3b
-        }
-        else if (w == 960 && h == 960) {
-            return [1280, 720]; // Wan 2.1, 14b
-        }
-        return [null, null];
-    }),
-    new AspectRatio("21:9", 768, 320),
-    new AspectRatio("3:4", 448, 576),
-    new AspectRatio("2:3", 416, 608, (w, h) => {
-        if (w == 768 && h == 512) {
-            return [768, 512];
-        }
-        return [null, null];
-    }),
-    new AspectRatio("5:8", 384, 608),
-    new AspectRatio("9:16", 384, 672, (w, h) => {
-        if (w == 640 && h == 640) {
-            return [480, 832]; // Wan 2.1, 1.3b
-        }
-        else if (w == 960 && h == 960) {
-            return [720, 1280]; // Wan 2.1, 14b
-        }
-        return [null, null];
-    }),
-    new AspectRatio("9:21", 320, 768)
-];
-
-
 function getHtmlForParam(param, prefix) {
     try {
         let example = param.examples ? `<br><span class="translate">Examples</span>: <code>${param.examples.map(escapeHtmlNoBr).join(`</code>,&emsp;<code>`)}</code>` : '';
@@ -501,23 +433,29 @@ function genInputs(delay_final = false) {
             inputAspectRatio.addEventListener('change', () => {
                 if (inputAspectRatio.value != "Custom") {
                     let aspectRatio = inputAspectRatio.value;
-                    let targetWidth = curModelWidth;
-                    let targetHeight = curModelHeight;
-                    let doAltLogic = true;
+                    let sideLen;
                     if (inputSideLength.value && inputSideLengthToggle.checked) {
-                        targetWidth = inputSideLength.value;
-                        targetHeight = inputSideLength.value;
-                        doAltLogic = false;
+                        sideLen = parseInt(inputSideLength.value);
                     }
-                    let width, height;
-                    for (let ratio of aspectRatios) {
-                        if (ratio.id == aspectRatio) {
-                            [width, height] = ratio.read(targetWidth, targetHeight, doAltLogic);
-                            break;
+                    else {
+                        sideLen = curModelWidth;
+                        if (curModelWidth != curModelHeight) {
+                            sideLen = Math.round(Math.sqrt(curModelWidth * curModelHeight));
                         }
                     }
-                    inputWidth.value = width;
-                    inputHeight.value = height;
+                    let width, height;
+                    let parts = aspectRatio.split(':', 2);
+                    if (parts.length == 2) {
+                        let aspectW = parseFloat(parts[0]);
+                        let aspectH = parseFloat(parts[1]);
+                        if (aspectW > 0 && aspectH > 0) {
+                            let ratio = aspectW / aspectH;
+                            width = roundTo(sideLen * Math.sqrt(ratio), 16);
+                            height = roundTo(sideLen / Math.sqrt(ratio), 16);
+                        }
+                    }
+                    inputWidth.value = width ?? curModelWidth;
+                    inputHeight.value = height ?? curModelHeight;
                     triggerChangeFor(inputWidth);
                     triggerChangeFor(inputHeight);
                 }
@@ -645,10 +583,16 @@ function genInputs(delay_final = false) {
                             action: () => {
                                 let closest = "1:1";
                                 let closestDiff = 999999;
-                                for (let ratio of aspectRatios) {
-                                    let diff = Math.abs(ratio.ratio - (imageWidth / imageHeight));
+                                let imageRatio = imageWidth / imageHeight;
+                                for (let option of inputAspectRatio.options) {
+                                    if (option.value == "Custom" || !option.value.includes(':')) {
+                                        continue;
+                                    }
+                                    let parts = option.value.split(':');
+                                    let ratio = parseFloat(parts[0]) / parseFloat(parts[1]);
+                                    let diff = Math.abs(ratio - imageRatio);
                                     if (diff < closestDiff) {
-                                        closest = ratio.id;
+                                        closest = option.value;
                                         closestDiff = diff;
                                     }
                                 }

@@ -189,28 +189,19 @@ public class T2IParamInput
         }
     }
 
-    /// <summary>Reference sheet of 512x512 aspect ratio approximations for custom Aspect Ratio selection.</summary>
-    public static Dictionary<string, (int, int)> ResolutionAspectReferences = new()
-    {
-        ["1:1"] = (512, 512),
-        ["4:3"] = (576, 448),
-        ["3:2"] = (608, 416),
-        ["8:5"] = (608, 384),
-        ["16:9"] = (672, 384),
-        ["21:9"] = (768, 320),
-        ["2:3"] = (416, 608),
-        ["5:8"] = (384, 608),
-        ["9:16"] = (384, 672),
-        ["9:21"] = (320, 768)
-    };
-
     /// <summary>Gets the desired image width.</summary>
     public int GetImageWidth(int def = 512)
     {
-        if (TryGet(T2IParamTypes.SideLength, out int sideLen) && TryGet(T2IParamTypes.AspectRatio, out string aspect) && ResolutionAspectReferences.TryGetValue(aspect, out (int, int) resRef))
+        if (TryGet(T2IParamTypes.SideLength, out int sideLen) && TryGet(T2IParamTypes.AspectRatio, out string aspect) && aspect.Contains(':'))
         {
             // NOTE: This math must match params.js AspectRatio
-            return (int)Utilities.RoundToPrecision(resRef.Item1 * (sideLen / 512.0), 16);
+            string[] parts = aspect.Split(':', 2);
+            if (parts.Length == 2 && double.TryParse(parts[0], out double aspectW) && double.TryParse(parts[1], out double aspectH) && aspectW > 0 && aspectH > 0)
+            {
+                double ratio = aspectW / aspectH;
+                double width = sideLen * Math.Sqrt(ratio);
+                return (int)Utilities.RoundToPrecision(width, 16);
+            }
         }
         return Get(T2IParamTypes.Width, def);
     }
@@ -218,9 +209,15 @@ public class T2IParamInput
     /// <summary>Gets the desired image height, automatically using alt-res parameter if needed.</summary>
     public int GetImageHeight(int def = 512)
     {
-        if (TryGet(T2IParamTypes.SideLength, out int sideLen) && TryGet(T2IParamTypes.AspectRatio, out string aspect) && ResolutionAspectReferences.TryGetValue(aspect, out (int, int) resRef))
+        if (TryGet(T2IParamTypes.SideLength, out int sideLen) && TryGet(T2IParamTypes.AspectRatio, out string aspect) && aspect.Contains(':'))
         {
-            return (int)Utilities.RoundToPrecision(resRef.Item2 * (sideLen / 512.0), 16);
+            string[] parts = aspect.Split(':', 2);
+            if (parts.Length == 2 && double.TryParse(parts[0], out double aspectW) && double.TryParse(parts[1], out double aspectH) && aspectW > 0 && aspectH > 0)
+            {
+                double ratio = aspectW / aspectH;
+                double height = sideLen * Math.Sqrt(1.0 / ratio);
+                return (int)Utilities.RoundToPrecision(height, 16);
+            }
         }
         return Get(T2IParamTypes.Height, def);
     }
