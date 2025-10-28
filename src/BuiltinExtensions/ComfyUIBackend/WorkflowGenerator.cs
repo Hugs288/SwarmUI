@@ -2252,11 +2252,11 @@ public class WorkflowGenerator
             };
             if (info.Type is ModelType.TextToVideo or ModelType.ImageToVideo or ModelType.TextAndImageToVideo)
             {
-                inputs["length"] = UserInput.Get(T2IParamTypes.Text2VideoFrames, info.DefaultFrames);
+                inputs["length"] = UserInput.Get(T2IParamTypes.Text2VideoFrames);
             }
             if (info.Architecture == ModelArchitecture.Cascade)
             {
-                inputs["compression"] = UserInput.Get(T2IParamTypes.CascadeLatentCompression, 32);
+                inputs["compression"] = UserInput.Get(T2IParamTypes.CascadeLatentCompression);
             }
             if (latentNode == "Wan22ImageToVideoLatent")
             {
