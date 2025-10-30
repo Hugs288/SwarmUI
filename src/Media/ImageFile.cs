@@ -320,7 +320,7 @@ public class ImageFile : MediaFile
                 break;
             case "WEBP_LOSSLESS":
                 type = MediaType.ImageWebp;
-                img.SaveAsWebp(ms, new WebpEncoder() { NearLossless = true, FileFormat = WebpFileFormatType.Lossless, Quality = 100 });
+                img.SaveAsWebp(ms, new WebpEncoder() { NearLossless = false, FileFormat = WebpFileFormatType.Lossless, Quality = 100 });
                 break;
             case "WEBP":
                 type = MediaType.ImageWebp;
