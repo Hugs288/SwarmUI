@@ -139,7 +139,7 @@ public class WebServer
         {
             options.Limits.MaxRequestHeadersTotalSize = 1024 * 1024;
             options.Limits.MaxRequestHeaderCount = 200;
-            options.Limits.MaxRequestBodySize = 100 * 1024 * 1024;
+            options.Limits.MaxRequestBodySize = 1024 * 1024 * 1024;
         });
         timer.Check("[Web] WebApp builder prep");
         builder.Services.AddRazorPages();
@@ -560,7 +560,7 @@ public class WebServer
         {
             if (context.Request.Query.TryGetValue("preview", out StringValues previewToken) && $"{previewToken}" == "true" && user.Settings.ImageHistoryUsePreviews)
             {
-                ImageMetadataTracker.ImagePreviewEntry entry = ImageMetadataTracker.GetOrCreatePreviewFor(path);
+                OutputMetadataTracker.OutputPreviewEntry entry = OutputMetadataTracker.GetOrCreatePreviewFor(path);
                 if (entry is not null)
                 {
                     data = entry.PreviewData;

@@ -343,7 +343,7 @@ public abstract class ComfyUIAPIAbstractBackend : AbstractT2IBackend
                     await doInterruptNow();
                     return;
                 }
-                Task<byte[]> getData = socket.ReceiveData(100 * 1024 * 1024, Program.GlobalProgramCancel);
+                Task<byte[]> getData = socket.ReceiveData(1024 * 1024 * 1024, Program.GlobalProgramCancel);
                 Task t = await Task.WhenAny(getData, interruptTask);
                 if (t == interruptTask)
                 {
@@ -652,11 +652,16 @@ public abstract class ComfyUIAPIAbstractBackend : AbstractT2IBackend
                 {
                     imType = "temp";
                 }
+                string url = $"filename={HttpUtility.UrlEncode(fname)}&type={imType}";
+                if (outImage.TryGetValue("subfolder", out JToken subFolder) && !string.IsNullOrWhiteSpace($"{subFolder}"))
+                {
+                    url += $"&subfolder={HttpUtility.UrlEncode($"{subFolder}")}"; // TODO: Wtf, comfy? Cursed api. Just use paths.
+                }
                 string ext = fname.AfterLast('.');
                 string format = (outImage.TryGetValue("format", out JToken formatTok) ? formatTok.ToString() : "") ?? "";
                 MediaType type = MediaType.GetByExtension(ext) ?? MediaType.TypesByMimeType.GetValueOrDefault(format) ?? MediaType.ImageJpg;
-                byte[] image = await(await HttpClient.GetAsync($"{APIAddress}/view?filename={HttpUtility.UrlEncode(fname)}&type={imType}", interrupt)).Content.ReadAsByteArrayAsync(interrupt);
-                if (image == null || image.Length == 0)
+                byte[] image = await(await HttpClient.GetAsync($"{APIAddress}/view?{url}", interrupt)).Content.ReadAsByteArrayAsync(interrupt);
+                if (image is null || image.Length == 0)
                 {
                     Logs.Error($"Invalid/null/empty image data from ComfyUI server for '{fname}', under {outData.ToDenseDebugString()}");
                     return;
@@ -775,9 +780,9 @@ public abstract class ComfyUIAPIAbstractBackend : AbstractT2IBackend
                     {
                         return model.ToString(ModelFolderFormat);
                     }
-                    else if (val is Image image)
+                    else if (val is MediaFile file)
                     {
-                        return image.AsBase64;
+                        return file.AsBase64;
                     }
                     else if (val is List<string> list)
                     {
@@ -827,7 +832,7 @@ public abstract class ComfyUIAPIAbstractBackend : AbstractT2IBackend
                 filled ??= defVal;
                 if (Logs.MinimumLevel <= Logs.LogLevel.Verbose)
                 {
-                    Logs.Verbose($"Filled tag '{tag}' with '{filled}'");
+                    Logs.Verbose($"Filled tag '{tag}' with '{(filled.Length > 512 ? $"{filled[..512]}...": filled)}'");
                 }
                 return Utilities.EscapeJsonString(filled);
             }, false);

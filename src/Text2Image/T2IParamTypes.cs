@@ -30,7 +30,11 @@ public enum T2IParamDataType
     /// <summary>Multi-select or comma-separated data list.</summary>
     LIST,
     /// <summary>List of images.</summary>
-    IMAGE_LIST
+    IMAGE_LIST,
+    /// <summary>Raw audio data file.</summary>
+    AUDIO,
+    /// <summary>Raw video data file.</summary>
+    VIDEO,
 }
 
 /// <summary>Which format to display a number in.</summary>
@@ -216,10 +220,12 @@ public class T2IParamTypes
         if (t == typeof(float) || t == typeof(double)) return T2IParamDataType.DECIMAL;
         if (t == typeof(bool)) return T2IParamDataType.BOOLEAN;
         if (t == typeof(string)) return hasValues ? T2IParamDataType.DROPDOWN : T2IParamDataType.TEXT;
-        if (t == typeof(Image)) return T2IParamDataType.IMAGE;
-        if (t == typeof(T2IModel)) return T2IParamDataType.MODEL;
-        if (t == typeof(List<string>)) return T2IParamDataType.LIST;
-        if (t == typeof(List<Image>)) return T2IParamDataType.IMAGE_LIST;
+        if (t.IsAssignableTo(typeof(ImageFile))) return T2IParamDataType.IMAGE;
+        if (t.IsAssignableTo(typeof(T2IModel))) return T2IParamDataType.MODEL;
+        if (t.IsAssignableTo(typeof(List<string>))) return T2IParamDataType.LIST;
+        if (t.IsAssignableTo(typeof(List<Image>))) return T2IParamDataType.IMAGE_LIST;
+        if (t.IsAssignableTo(typeof(AudioFile))) return T2IParamDataType.AUDIO;
+        if (t.IsAssignableTo(typeof(VideoFile))) return T2IParamDataType.VIDEO;
         return T2IParamDataType.UNSET;
     }
 
@@ -235,6 +241,8 @@ public class T2IParamTypes
             T2IParamDataType.MODEL => typeof(T2IModel),
             T2IParamDataType.LIST => typeof(List<string>),
             T2IParamDataType.IMAGE_LIST => typeof(List<Image>),
+            T2IParamDataType.AUDIO => typeof(AudioFile),
+            T2IParamDataType.VIDEO => typeof(VideoFile),
             _ => null
         };
     }
@@ -928,6 +936,8 @@ public class T2IParamTypes
                 }
                 return val;
             case T2IParamDataType.IMAGE:
+            case T2IParamDataType.AUDIO:
+            case T2IParamDataType.VIDEO:
                 if (val.StartsWith("data:"))
                 {
                     val = val.After(',');
@@ -939,7 +949,7 @@ public class T2IParamTypes
                 if (!ValidBase64Matcher.IsOnlyMatches(val) || val.Length < 10)
                 {
                     string shortText = val.Length > 10 ? val[..10] + "..." : val;
-                    throw new SwarmUserErrorException($"Invalid image value for param {type.Name} - '{origVal}' - must be a valid base64 string - got '{shortText}'");
+                    throw new SwarmUserErrorException($"Invalid {type.Type} value for param {type.Name} - '{origVal}' - must be a valid base64 string - got '{shortText}'");
                 }
                 return origVal;
             case T2IParamDataType.IMAGE_LIST:
