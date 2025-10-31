@@ -447,7 +447,7 @@ public class WorkflowGeneratorSteps
                 }
                 if (g.UserInput.TryGet(T2IParamTypes.InitImageResetToNorm, out double resetFactor))
                 {
-                    string emptyImg = g.CreateEmptyImage(g.UserInput.GetImageWidth(), g.UserInput.GetImageHeight(), g.UserInput.Get(T2IParamTypes.BatchSize, 1));
+                    string emptyImg = g.CreateEmptyImage(g.UserInput.GetImageResolution().Width, g.UserInput.GetImageResolution().Width, g.UserInput.Get(T2IParamTypes.BatchSize, 1));
                     if (g.Features.Contains("comfy_latent_blend_masked") && currentMask is not null)
                     {
                         string blended = g.CreateNode("SwarmLatentBlendMasked", new JObject()
@@ -482,7 +482,7 @@ public class WorkflowGeneratorSteps
             }
             else
             {
-                g.CreateEmptyImage(g.UserInput.GetImageWidth(), g.UserInput.GetImageHeight(), g.UserInput.Get(T2IParamTypes.BatchSize, 1), "5");
+                g.CreateEmptyImage(g.UserInput.GetImageResolution().Width, g.UserInput.GetImageResolution().Height, g.UserInput.Get(T2IParamTypes.BatchSize, 1), "5");
             }
         }, -9);
         #endregion
@@ -1086,8 +1086,8 @@ public class WorkflowGeneratorSteps
                     ["negative"] = g.FinalNegativePrompt,
                     ["vae"] = g.FinalVae,
                     ["reference_image"] = g.FinalInputImage,
-                    ["width"] = g.UserInput.GetImageWidth(),
-                    ["height"] = g.UserInput.GetImageHeight(),
+                    ["width"] = g.UserInput.GetImageResolution().Width,
+                    ["height"] = g.UserInput.GetImageResolution().Height,
                     ["length"] = g.UserInput.Get(T2IParamTypes.Text2VideoFrames, 81),
                     ["batch_size"] = g.UserInput.Get(T2IParamTypes.BatchSize, 1),
                     ["strength"] = 1 // TODO: ? Maybe hijack and redirect the creativity param?
@@ -1223,8 +1223,8 @@ public class WorkflowGeneratorSteps
                     }
                     if (doPixelUpscale)
                     {
-                        int width = (int)Math.Round(g.UserInput.GetImageWidth() * refineUpscale);
-                        int height = (int)Math.Round(g.UserInput.GetImageHeight() * refineUpscale);
+                        int width = (int)Math.Round(g.UserInput.GetImageResolution().Width * refineUpscale);
+                        int height = (int)Math.Round(g.UserInput.GetImageResolution().Height * refineUpscale);
                         width = (width / 16) * 16; // avoid unworkable output sizes
                         height = (height / 16) * 16;
                         if (upscaleMethod.StartsWith("pixel-"))
@@ -1589,8 +1589,8 @@ public class WorkflowGeneratorSteps
                 }
                 int width = vidModel.StandardWidth <= 0 ? 1024 : vidModel.StandardWidth;
                 int height = vidModel.StandardHeight <= 0 ? 576 : vidModel.StandardHeight;
-                int imageWidth = g.UserInput.GetImageWidth();
-                int imageHeight = g.UserInput.GetImageHeight();
+                int imageWidth = g.UserInput.GetImageResolution().Width;
+                int imageHeight = g.UserInput.GetImageResolution().Height;
                 int resPrecision = 64;
                 if (vidModel.ModelClass?.CompatClass == "hunyuan-video")
                 {

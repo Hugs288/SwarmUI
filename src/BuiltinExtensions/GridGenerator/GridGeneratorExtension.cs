@@ -71,13 +71,9 @@ public class GridGeneratorExtension : Extension
         };
         GridCallParamAddHook = (call, param, val) =>
         {
-            if (call.Grid.MinWidth == 0)
+            if (call.Grid.MinWidth == 0 || call.Grid.MinHeight == 0)
             {
-                call.Grid.MinWidth = call.Grid.InitialParams.GetImageWidth();
-            }
-            if (call.Grid.MinHeight == 0)
-            {
-                call.Grid.MinHeight = call.Grid.InitialParams.GetImageHeight();
+                (call.Grid.MinWidth, call.Grid.MinHeight) = call.Grid.InitialParams.GetImageResolution();
             }
             string cleaned = T2IParamTypes.CleanTypeName(param);
             if (cleaned == PromptReplaceParameter.Type.ID)
@@ -100,10 +96,10 @@ public class GridGeneratorExtension : Extension
             }
             else if (cleaned == "aspectratio")
             {
-                (int width, int height) = T2IParamTypes.AspectRatioToSizeReference(val);
+                (int width, int height) = T2IParamTypes.CalculateAspectRatio(val);
                 if (width > 0)
                 {
-                    (width, height) = Utilities.ResToModelFit(width, height, call.Grid.InitialParams.GetImageWidth() * call.Grid.InitialParams.GetImageHeight());
+                    (width, height) = Utilities.ResToModelFit(width, height, call.Grid.InitialParams.GetImageResolution().Width * call.Grid.InitialParams.GetImageResolution().Height);
                     call.Grid.MinWidth = Math.Min(call.Grid.MinWidth, width);
                     call.Grid.MinHeight = Math.Min(call.Grid.MinHeight, height);
                     call.Params["width"] = $"{width}";

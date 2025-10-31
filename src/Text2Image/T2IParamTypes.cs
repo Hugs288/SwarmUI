@@ -1041,23 +1041,24 @@ public class T2IParamTypes
         return type is not null;
     }
 
-    /// <summary>Gets the actual width,height value for a given aspect ratio, based on a 512x512 base scale.</summary>
-    public static (int, int) AspectRatioToSizeReference(string aspectRatio)
+    /// <summary>Gets the actual width,height value for a given aspect ratio.</summary>
+    public static (int, int) CalculateAspectRatio(string aspectRatio, int sideLength = 512)
     {
-        int width, height;
-        if (aspectRatio == "1:1") { width = 512; height = 512; }
-        else if (aspectRatio == "4:3") { width = 576; height = 448; }
-        else if (aspectRatio == "3:2") { width = 608; height = 416; }
-        else if (aspectRatio == "8:5") { width = 608; height = 384; }
-        else if (aspectRatio == "16:9") { width = 672; height = 384; }
-        else if (aspectRatio == "21:9") { width = 768; height = 320; }
-        else if (aspectRatio == "3:4") { width = 448; height = 576; }
-        else if (aspectRatio == "2:3") { width = 416; height = 608; }
-        else if (aspectRatio == "5:8") { width = 384; height = 608; }
-        else if (aspectRatio == "9:16") { width = 384; height = 672; }
-        else if (aspectRatio == "9:21") { width = 320; height = 768; }
-        else { width = -1; height = -1; }
-        return (width, height);
+        if (string.IsNullOrWhiteSpace(aspectRatio) || !aspectRatio.Contains(':'))
+        {
+            return (-1, -1);
+        }
+
+        string[] parts = aspectRatio.Split(':', 2);
+        if (parts.Length == 2 && double.TryParse(parts[0], out double aspectW) && double.TryParse(parts[1], out double aspectH) && aspectW > 0 && aspectH > 0)
+        {
+            double ratio = aspectW / aspectH;
+            double width = sideLength * Math.Sqrt(ratio);
+            double height = sideLength * Math.Sqrt(1.0 / ratio);
+            return ((int)Utilities.RoundToPrecision(width, 16), (int)Utilities.RoundToPrecision(height, 16));
+        }
+
+        return (-1, -1);
     }
 
     /// <summary>Adds new entries to a list of dropdown values, in a clean way that avoids breaking from display names, and applying an async-safe concat.</summary>

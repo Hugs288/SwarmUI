@@ -575,7 +575,7 @@ public class WorkflowGenerator
             {
                 result = CreateNode("SwarmLoadImageB64", new JObject()
                 {
-                    ["image_base64"] = (resize ? img.Resize(width ?? UserInput.GetImageWidth(), height ?? UserInput.GetImageHeight()) : img).AsBase64
+                    ["image_base64"] = (resize ? img.Resize(width ?? UserInput.GetImageResolution().Width, height ?? UserInput.GetImageResolution().Height) : img).AsBase64
                 }, nodeId);
             }
             else
@@ -589,8 +589,8 @@ public class WorkflowGenerator
                     result = CreateNode("ImageScale", new JObject()
                     {
                         ["image"] = new JArray() { result, 0 },
-                        ["width"] = UserInput.GetImageWidth(),
-                        ["height"] = UserInput.GetImageHeight(),
+                        ["width"] = UserInput.GetImageResolution().Height,
+                        ["height"] = UserInput.GetImageResolution().Width,
                         ["upscale_method"] = "lanczos",
                         ["crop"] = "disabled"
                     }, nodeId);
@@ -663,8 +663,8 @@ public class WorkflowGenerator
         string scaledImage = CreateNode("SwarmImageScaleForMP", new JObject()
         {
             ["image"] = new JArray() { croppedImage, 0 },
-            ["width"] = isCustomRes ? targetX : model?.StandardWidth <= 0 ? UserInput.GetImageWidth() : model.StandardWidth,
-            ["height"] = isCustomRes ? targetY : model?.StandardHeight <= 0 ? UserInput.GetImageHeight() : model.StandardHeight,
+            ["width"] = isCustomRes ? targetX : model?.StandardWidth <= 0 ? UserInput.GetImageResolution().Width : model.StandardWidth,
+            ["height"] = isCustomRes ? targetY : model?.StandardHeight <= 0 ? UserInput.GetImageResolution().Height : model.StandardHeight,
             ["can_shrink"] = true
         });
         JArray encoded = DoMaskedVAEEncode(vae, [scaledImage, 0], [croppedMask, 0], null);
@@ -1448,8 +1448,8 @@ public class WorkflowGenerator
                 string samplingNode = CreateNode("ModelSamplingFlux", new JObject()
                 {
                     ["model"] = LoadingModel,
-                    ["width"] = UserInput.GetImageWidth(),
-                    ["height"] = UserInput.GetImageHeight(),
+                    ["width"] = UserInput.GetImageResolution().Width,
+                    ["height"] = UserInput.GetImageResolution().Height,
                     ["max_shift"] = shiftVal,
                     ["base_shift"] = 0.5 // TODO: Does this need an input?
                 });
@@ -1664,8 +1664,8 @@ public class WorkflowGenerator
                 string maskNode = CreateNode("SolidMask", new JObject()
                 {
                     ["value"] = 1,
-                    ["width"] = UserInput.GetImageWidth(),
-                    ["height"] = UserInput.GetImageHeight()
+                    ["width"] = UserInput.GetImageResolution().Width,
+                    ["height"] = UserInput.GetImageResolution().Height
                 });
                 mask = [maskNode, 0];
             }
@@ -1817,8 +1817,8 @@ public class WorkflowGenerator
                     });
                     img = [batched, 0];
                 }
-                double width = UserInput.GetImageWidth();
-                double height = UserInput.GetImageHeight();
+                double width = UserInput.GetImageResolution().Width;
+                double height = UserInput.GetImageResolution().Height;
                 if (IsRefinerStage)
                 {
                     double scale = UserInput.Get(T2IParamTypes.RefinerUpscale, 1);
@@ -2010,7 +2010,7 @@ public class WorkflowGenerator
             string img1 = CreateLoadImageNode(images[index], "${promptimages." + index + "}", false);
             JArray img = [img1, 0];
             (int width, int height) = images[index].GetResolution();
-            int genWidth = UserInput.GetImageWidth(), genHeight = UserInput.GetImageHeight();
+            int genWidth = UserInput.GetImageResolution().Width, genHeight = UserInput.GetImageResolution().Height;
             int actual = (int)Math.Sqrt(width * height), target = (int)Math.Sqrt(genWidth * genHeight);
             bool doesFit = true;
             if (!UserInput.Get(T2IParamTypes.SmartImagePromptResizing, true))
@@ -2886,7 +2886,7 @@ public class WorkflowGenerator
                         }
                         else if (key == "resolution")
                         {
-                            n["inputs"]["resolution"] = (int)Math.Round(Math.Sqrt(UserInput.GetImageWidth() * UserInput.GetImageHeight()) / 64) * 64;
+                            n["inputs"]["resolution"] = (int)Math.Round(Math.Sqrt(UserInput.GetImageResolution().Width * UserInput.GetImageResolution().Height) / 64) * 64;
                         }
                         else if (data.Count() == 2 && data[1] is JObject settings && settings.TryGetValue("default", out JToken defaultValue))
                         {
@@ -3003,8 +3003,8 @@ public class WorkflowGenerator
         }
         string node;
         double mult = isPositive ? 1.5 : 0.8;
-        int width = UserInput.GetImageWidth();
-        int height = UserInput.GetImageHeight();
+        int width = UserInput.GetImageResolution().Width;
+        int height = UserInput.GetImageResolution().Height;
         bool enhance = UserInput.Get(T2IParamTypes.ModelSpecificEnhancements, true);
         bool needsAdvancedEncode = (prompt.Contains('[') && prompt.Contains(']')) || prompt.Contains("<break>");
         double defaultGuidance = -1;
@@ -3241,8 +3241,8 @@ public class WorkflowGenerator
                     ["gligen_name"] = gligenModel
                 });
             });
-            int width = UserInput.GetImageWidth();
-            int height = UserInput.GetImageHeight();
+            int width = UserInput.GetImageResolution().Width;
+            int height = UserInput.GetImageResolution().Height;
             JArray lastCond = globalCond;
             foreach (PromptRegion.Part part in parts)
             {

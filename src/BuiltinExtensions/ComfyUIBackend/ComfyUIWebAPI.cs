@@ -280,7 +280,7 @@ public static class ComfyUIWebAPI
             await ws.SendJson(new JObject() { ["error"] = "Batch size must be from 1 to 64." }, API.WebsocketTimeout);
             return null;
         }
-        (int aspectX, int aspectY) = T2IParamTypes.AspectRatioToSizeReference(aspect);
+        (int aspectX, int aspectY) = T2IParamTypes.CalculateAspectRatio(aspect);
         if (aspectX <= 0 || aspectY <= 0)
         {
             await ws.SendJson(new JObject() { ["error"] = "Invalid aspect ratio." }, API.WebsocketTimeout);

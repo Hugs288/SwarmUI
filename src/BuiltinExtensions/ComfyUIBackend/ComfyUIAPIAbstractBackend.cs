@@ -810,8 +810,8 @@ public abstract class ComfyUIAPIAbstractBackend : AbstractT2IBackend
                     "negative_prompt" => user_input.Get(T2IParamTypes.NegativePrompt),
                     "seed" => $"{fixSeed(user_input.Get(T2IParamTypes.Seed)) + (int.TryParse(tagExtra, out int add) ? add : 0)}",
                     "steps" => $"{user_input.Get(T2IParamTypes.Steps)}",
-                    "width" => $"{user_input.GetImageWidth()}",
-                    "height" => $"{user_input.GetImageHeight()}",
+                    "width" => $"{user_input.GetImageResolution().Width}",
+                    "height" => $"{user_input.GetImageResolution().Height}",
                     "cfg_scale" => $"{user_input.Get(T2IParamTypes.CFGScale)}",
                     "subseed" => $"{user_input.Get(T2IParamTypes.VariationSeed)}",
                     "subseed_strength" => user_input.GetString(T2IParamTypes.VariationSeedStrength),
@@ -857,7 +857,7 @@ public abstract class ComfyUIAPIAbstractBackend : AbstractT2IBackend
         {
             void TryApply(string key, ImageFile img, bool resize)
             {
-                int width = user_input.GetImageWidth(-1), height = user_input.GetImageHeight(-1);
+                (int width, int height) = user_input.GetImageResolution();
                 if (width <= 0 || height <= 0)
                 {
                     resize = false;

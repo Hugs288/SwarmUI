@@ -189,37 +189,25 @@ public class T2IParamInput
         }
     }
 
-    /// <summary>Gets the desired image width.</summary>
-    public int GetImageWidth(int def = 512)
+    /// <summary>Gets the desired image resolution, automatically using alt-res parameters if needed.</summary>
+    public (int Width, int Height) GetImageResolution(int defWidth = 512, int defHeight = 512)
     {
-        if (TryGet(T2IParamTypes.SideLength, out int sideLen) && TryGet(T2IParamTypes.AspectRatio, out string aspect) && aspect.Contains(':'))
+        if (TryGet(T2IParamTypes.SideLength, out int sideLen) && TryGet(T2IParamTypes.AspectRatio, out string aspectRatio))
         {
-            // NOTE: This math must match params.js AspectRatio
-            string[] parts = aspect.Split(':', 2);
-            if (parts.Length == 2 && double.TryParse(parts[0], out double aspectW) && double.TryParse(parts[1], out double aspectH) && aspectW > 0 && aspectH > 0)
+            if (!string.IsNullOrWhiteSpace(aspectRatio) && aspectRatio.Contains(':'))
             {
-                double ratio = aspectW / aspectH;
-                double width = sideLen * Math.Sqrt(ratio);
-                return (int)Utilities.RoundToPrecision(width, 16);
+                string[] parts = aspectRatio.Split(':', 2);
+                if (parts.Length == 2 && double.TryParse(parts[0], out double aspectW) && double.TryParse(parts[1], out double aspectH) && aspectW > 0 && aspectH > 0)
+                {
+                    double ratio = aspectW / aspectH;
+                    double width = sideLen * Math.Sqrt(ratio);
+                    double height = sideLen * Math.Sqrt(1.0 / ratio);
+                    return ((int)Utilities.RoundToPrecision(width, 16), (int)Utilities.RoundToPrecision(height, 16));
+                }
             }
         }
-        return Get(T2IParamTypes.Width, def);
-    }
 
-    /// <summary>Gets the desired image height, automatically using alt-res parameter if needed.</summary>
-    public int GetImageHeight(int def = 512)
-    {
-        if (TryGet(T2IParamTypes.SideLength, out int sideLen) && TryGet(T2IParamTypes.AspectRatio, out string aspect) && aspect.Contains(':'))
-        {
-            string[] parts = aspect.Split(':', 2);
-            if (parts.Length == 2 && double.TryParse(parts[0], out double aspectW) && double.TryParse(parts[1], out double aspectH) && aspectW > 0 && aspectH > 0)
-            {
-                double ratio = aspectW / aspectH;
-                double height = sideLen * Math.Sqrt(1.0 / ratio);
-                return (int)Utilities.RoundToPrecision(height, 16);
-            }
-        }
-        return Get(T2IParamTypes.Height, def);
+        return (Get(T2IParamTypes.Width, defWidth), Get(T2IParamTypes.Height, defHeight));
     }
 
     /// <summary>Returns a perfect duplicate of this parameter input, with new reference addresses.</summary>
