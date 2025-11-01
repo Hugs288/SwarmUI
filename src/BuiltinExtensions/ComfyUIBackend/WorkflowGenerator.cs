@@ -1117,12 +1117,6 @@ public class WorkflowGenerator
         string predType = model.Metadata?.PredictionType;
         if (IsSD3())
         {
-            string sd3Node = CreateNode("ModelSamplingSD3", new JObject()
-            {
-                ["model"] = LoadingModel,
-                ["shift"] = UserInput.Get(T2IParamTypes.SigmaShift, 3)
-            });
-            LoadingModel = [sd3Node, 0];
             string loaderType = "TripleCLIPLoader";
             if (requireClipModel("t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf"))
             {
@@ -1135,14 +1129,7 @@ public class WorkflowGenerator
                 ["clip_name3"] = requireClipModel("t5xxl", T2IParamTypes.T5XXLModel)
             });
             LoadingClip = [tripleClipLoader, 0];
-            if (LoadingClip is null)
-            {
-                throw new SwarmUserErrorException($"Model '{model.Name}' is a full checkpoint format model, but was placed in the diffusion_models backbone folder. Please move it to the standard Stable Diffusion models folder.");
-            }
-            if (LoadingVAE is null)
-            {
-                doVaeLoader(null, "stable-diffusion-v3", "sd35-vae");
-            }
+            doVaeLoader(null, "stable-diffusion-v3", "sd35-vae");
         }
         else if (IsFlux() && (LoadingClip is null || LoadingVAE is null || UserInput.Get(T2IParamTypes.T5XXLModel) is not null || UserInput.Get(T2IParamTypes.ClipLModel) is not null))
         {
@@ -1455,7 +1442,7 @@ public class WorkflowGenerator
                 });
                 LoadingModel = [samplingNode, 0];
             }
-            else if (IsHunyuanVideo() || IsHunyuanImage() || IsWanVideo() || IsWanVideo22() || IsHiDream())
+            else if (IsHunyuanVideo() || IsHunyuanImage() || IsWanVideo() || IsWanVideo22() || IsHiDream() || IsSD3())
             {
                 string samplingNode = CreateNode("ModelSamplingSD3", new JObject()
                 {
