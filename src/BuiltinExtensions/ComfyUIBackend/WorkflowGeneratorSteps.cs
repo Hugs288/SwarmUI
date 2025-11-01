@@ -238,18 +238,18 @@ public class WorkflowGeneratorSteps
                         g.LoadingModel = [teaCacheNode, 0];
                     }
                 }
-                else if (g.IsHunyuanVideo() || g.IsLTXV() || g.IsWanVideo() || g.IsHiDream())
+                else if (g.CurrentCompatClass() == "hunyuan-video" || g.CurrentCompatClass() == "lightricks-ltx-video" || g.IsWanVideo() || g.CurrentCompatClass() == "hidream-i1")
                 {
                     string type = "";
-                    if (g.IsHunyuanVideo())
+                    if (g.CurrentCompatClass() == "hunyuan-video")
                     {
                         type = "hunyuan_video";
                     }
-                    else if (g.IsLTXV())
+                    else if (g.CurrentCompatClass() == "lightricks-ltx-video")
                     {
                         type = "ltxv";
                     }
-                    else if (g.IsHiDream())
+                    else if (g.CurrentCompatClass() == "hidream-i1")
                     {
                         type = "hidream_i1_dev";
                     }
@@ -1047,7 +1047,7 @@ public class WorkflowGeneratorSteps
                             ["end_percent"] = g.UserInput.Get(controlnetParams.End, 1)
                         });
                     }
-                    else if (g.IsSD3() || g.IsFlux() || g.IsChroma() || g.IsQwenImage())
+                    else if (g.IsSD3() || g.IsFlux() || g.CurrentCompatClass() == "chroma" || g.IsQwenImage())
                     {
                         applyNode = g.CreateNode("ControlNetApplyAdvanced", new JObject()
                         {
