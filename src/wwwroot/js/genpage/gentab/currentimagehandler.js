@@ -181,6 +181,7 @@ class ImageFullViewHelper {
         this.currentSrc = src;
         this.currentMetadata = metadata;
         this.currentBatchId = batchId;
+        let wasAlreadyOpen = this.isOpen();
         let isVideo = isVideoExt(src);
         let isAudio = isAudioExt(src);
         let encodedSrc = escapeHtmlForUrl(src);
@@ -228,7 +229,7 @@ class ImageFullViewHelper {
         if (this.fixButtonDelay) {
             clearTimeout(this.fixButtonDelay);
         }
-        if (Date.now() - this.lastClosed > 200) {
+        if (Date.now() - this.lastClosed > 200 && !wasAlreadyOpen) {
             subDiv.style.pointerEvents = 'none';
             for (let button of subDiv.getElementsByTagName('button')) {
                 button.disabled = true;
@@ -321,14 +322,14 @@ function clickImageInBatch(div) {
 }
 
 /** Removes a preview thumbnail and moves to either previous or next image. */
-function removeImageBlockFromBatch(div) {
+function removeImageBlockFromBatch(div, shift = false) {
     if (!div.classList.contains('image-block-current')) {
         div.remove();
         return;
     }
     let chosen = div.previousElementSibling || div.nextElementSibling;
     div.remove();
-    if (chosen) {
+    if (shift && chosen) {
         clickImageInBatch(chosen);
     }
 }
@@ -349,7 +350,7 @@ function rightClickImageInBatch(e, div) {
             popoverActions.push({ key: added.label, action: added.onclick, title: added.title });
         }
     }
-    popoverActions.push({ key: 'Remove From Batch View', action: () => removeImageBlockFromBatch(div) })
+    popoverActions.push({ key: 'Remove From Batch View', action: () => removeImageBlockFromBatch(div, true) })
     let popover = new AdvancedPopover('image_batch_context_menu', popoverActions, false, mouseX, mouseY, document.body, null);
     e.preventDefault();
     e.stopPropagation();
@@ -462,25 +463,39 @@ function copy_current_image_params() {
     hideUnsupportableParams();
 }
 
+/**
+ * Shifts the current image view (and full-view if open) to the next or previous image.
+ * Returns true if the shift was successful, returns false if there was nothing to shift to.
+ */
 function shiftToNextImagePreview(next = true, expand = false) {
     let curImgElem = document.getElementById('current_image_img');
     if (!curImgElem) {
-        return;
+        return false;
     }
+    let doCycle = getUserSetting('ui.imageshiftingcycles', true);
     let expandedState = imageFullView.isOpen() ? imageFullView.copyState() : {};
     if (curImgElem.dataset.batch_id == 'history') {
         let divs = [...lastHistoryImageDiv.parentElement.children].filter(div => div.classList.contains('image-block'));
         let index = divs.findIndex(div => div == lastHistoryImageDiv);
         if (index == -1) {
             console.log(`Image preview shift failed as current image ${lastHistoryImage} is not in history area`);
-            return;
+            return false;
         }
         let newIndex = index + (next ? 1 : -1);
         if (newIndex < 0) {
+            if (!doCycle) {
+                return false;
+            }
             newIndex = divs.length - 1;
         }
         else if (newIndex >= divs.length) {
+            if (!doCycle) {
+                return false;
+            }
             newIndex = 0;
+        }
+        if (newIndex == index) {
+            return false;
         }
         divs[newIndex].querySelector('img').click();
         if (expand) {
@@ -488,7 +503,7 @@ function shiftToNextImagePreview(next = true, expand = false) {
             imageFullView.showImage(currentImgSrc, currentMetadataVal, 'history');
             imageFullView.pasteState(expandedState);
         }
-        return;
+        return true;
     }
     let batch_area = getRequiredElementById('current_image_batch');
     let imgs = [...batch_area.getElementsByTagName('img')].filter(i => findParentOfClass(i, 'image-block-placeholder') == null);
@@ -496,14 +511,23 @@ function shiftToNextImagePreview(next = true, expand = false) {
     if (index == -1) {
         let cleanSrc = (img) => img.src.length > 100 ? img.src.substring(0, 100) + '...' : img.src;
         console.log(`Image preview shift failed as current image ${cleanSrc(curImgElem)} is not in batch area set ${imgs.map(cleanSrc)}`);
-        return;
+        return false;
     }
     let newIndex = index + (next ? 1 : -1);
     if (newIndex < 0) {
+        if (!doCycle) {
+            return false;
+        }
         newIndex = imgs.length - 1;
     }
     else if (newIndex >= imgs.length) {
+        if (!doCycle) {
+            return false;
+        }
         newIndex = 0;
+    }
+    if (newIndex == index) {
+        return false;
     }
     let newImg = imgs[newIndex];
     let block = findParentOfClass(newImg, 'image-block');
@@ -512,6 +536,7 @@ function shiftToNextImagePreview(next = true, expand = false) {
         imageFullView.showImage(block.dataset.src, block.dataset.metadata, block.dataset.batch_id);
         imageFullView.pasteState(expandedState);
     }
+    return true;
 }
 
 window.addEventListener('keydown', function(kbevent) {
