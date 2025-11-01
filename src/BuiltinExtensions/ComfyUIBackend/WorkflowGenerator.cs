@@ -2002,11 +2002,6 @@ public class WorkflowGenerator
             {
                 case "stable-diffusion-v1": // https://github.com/Birch-san/sdxl-diffusion-decoder/blob/4ba89847c02db070b766969c0eca3686a1e7512e/script/inference_decoder.py#L112
                 case "stable-diffusion-v2-512":
-                    offA = 2.1335;
-                    offB = 0.1237;
-                    offC = 0.4052;
-                    offD = -0.0940;
-                    break;
                 case "stable-diffusion-v2-768-v":
                     offA = 2.1335;
                     offB = 0.1237;
