@@ -1398,6 +1398,7 @@ public class WorkflowGenerator
             defscheduler ??= "simple";
         }
         else if (CurrentCompatClass() == "chroma" || CurrentCompatClass() == "chroma-radiance")
+        else if (CurrentCompatClass() == "chroma" || CurrentCompatClass() == "chroma-radiance")
         {
             defscheduler ??= "beta";
         }
@@ -1823,6 +1824,7 @@ public class WorkflowGenerator
                 doesFit = false;
             }
             else if (CurrentCompatClass().StartsWith("qwen-image"))
+            else if (CurrentCompatClass().StartsWith("qwen-image"))
             {
                 target = 1024; // Qwen image targets 1328 for gen but wants 1024 inputs.
                 doesFit = Math.Abs(actual - target) <= 64;
@@ -2002,11 +2004,6 @@ public class WorkflowGenerator
             {
                 case "stable-diffusion-v1": // https://github.com/Birch-san/sdxl-diffusion-decoder/blob/4ba89847c02db070b766969c0eca3686a1e7512e/script/inference_decoder.py#L112
                 case "stable-diffusion-v2-512":
-                    offA = 2.1335;
-                    offB = 0.1237;
-                    offC = 0.4052;
-                    offD = -0.0940;
-                    break;
                 case "stable-diffusion-v2-768-v":
                     offA = 2.1335;
                     offB = 0.1237;
@@ -2799,6 +2796,7 @@ public class WorkflowGenerator
         }
         bool wantsSwarmCustom = Features.Contains("variation_seed") && (needsAdvancedEncode || (UserInput.TryGet(T2IParamTypes.FluxGuidanceScale, out _) && (CurrentCompatClass().StartsWith("flux-1") && CurrentModelClass().ID != "Flux.1-schnell") || CurrentCompatClass() == "hunyuan-video") || CurrentModelClass().ID is "hunyuan-video-skyreels" or "hunyuan-video-skyreels-i2v");
         JArray qwenImage;
+        if (CurrentCompatClass() == "nvidia-sana-1600")
         if (CurrentCompatClass() == "nvidia-sana-1600")
         {
             node = CreateNode("SanaTextEncode", new JObject()
