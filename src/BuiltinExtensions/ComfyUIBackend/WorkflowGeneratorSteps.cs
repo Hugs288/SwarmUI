@@ -222,7 +222,6 @@ public class WorkflowGeneratorSteps
                     Logs.Warning($"Ignore TeaCache Mode parameter because the current model is Nunchaku which does not support TeaCache. Use 'Nunchaku Cache Threshold' for a similar effect to TeaCache.");
                 }
                 else if (g.CurrentCompatClass().StartsWith("flux-1"))
-                else if (g.CurrentCompatClass().StartsWith("flux-1"))
                 {
                     if (teaCacheMode != "video only")
                     {

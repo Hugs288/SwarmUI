@@ -1398,7 +1398,6 @@ public class WorkflowGenerator
             defscheduler ??= "simple";
         }
         else if (CurrentCompatClass() == "chroma" || CurrentCompatClass() == "chroma-radiance")
-        else if (CurrentCompatClass() == "chroma" || CurrentCompatClass() == "chroma-radiance")
         {
             defscheduler ??= "beta";
         }
@@ -1823,7 +1822,6 @@ public class WorkflowGenerator
                 target = 384;
                 doesFit = false;
             }
-            else if (CurrentCompatClass().StartsWith("qwen-image"))
             else if (CurrentCompatClass().StartsWith("qwen-image"))
             {
                 target = 1024; // Qwen image targets 1328 for gen but wants 1024 inputs.
@@ -2796,7 +2794,6 @@ public class WorkflowGenerator
         }
         bool wantsSwarmCustom = Features.Contains("variation_seed") && (needsAdvancedEncode || (UserInput.TryGet(T2IParamTypes.FluxGuidanceScale, out _) && (CurrentCompatClass().StartsWith("flux-1") && CurrentModelClass().ID != "Flux.1-schnell") || CurrentCompatClass() == "hunyuan-video") || CurrentModelClass().ID is "hunyuan-video-skyreels" or "hunyuan-video-skyreels-i2v");
         JArray qwenImage;
-        if (CurrentCompatClass() == "nvidia-sana-1600")
         if (CurrentCompatClass() == "nvidia-sana-1600")
         {
             node = CreateNode("SanaTextEncode", new JObject()
