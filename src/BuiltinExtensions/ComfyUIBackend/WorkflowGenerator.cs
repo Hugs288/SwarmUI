@@ -137,212 +137,10 @@ public class WorkflowGenerator
         return CurrentModelClass()?.CompatClass;
     }
 
-    /// <summary>Returns true if the current model is Stable Cascade.</summary>
-    public bool IsCascade()
-    {
-        string clazz = CurrentCompatClass();
-        return clazz is not null && clazz == "stable-cascade-v1";
-    }
-
-    /// <summary>Returns true if the current model is Stable Diffusion 3.</summary>
-    public bool IsSD3()
-    {
-        string clazz = CurrentCompatClass();
-        if (clazz is null)
-        {
-            return false;
-        }
-        return clazz.StartsWith("stable-diffusion-v3");
-    }
-
-    /// <summary>Returns true if the current model is Mochi Text2Video.</summary>
-    public bool IsMochi()
-    {
-        string clazz = CurrentCompatClass();
-        if (clazz is null)
-        {
-            return false;
-        }
-        return clazz is not null && clazz == "genmo-mochi-1";
-    }
-
-    /// <summary>Returns true if the current model is Lightricks LTX Video.</summary>
-    public bool IsLTXV()
-    {
-        string clazz = CurrentCompatClass();
-        return clazz is not null && clazz == "lightricks-ltx-video";
-    }
-
-    /// <summary>Returns true if the current model is Black Forest Labs' Flux.1.</summary>
-    public bool IsFlux()
-    {
-        string clazz = CurrentCompatClass();
-        return clazz is not null && clazz.StartsWith("flux-1");
-    }
-
-    /// <summary>Returns true if the current model is AuraFlow.</summary>
-    public bool IsAuraFlow()
-    {
-        string clazz = CurrentCompatClass();
-        return clazz is not null && clazz == "auraflow-v1";
-    }
-
-    /// <summary>Returns true if the current model is a Kontext model (eg Flux.1 Kontext Dev).</summary>
-    public bool IsKontext()
-    {
-        string clazz = CurrentCompatClass();
-        return clazz is not null && clazz == "flux-1-kontext";
-    }
-
-    /// <summary>Returns true if the current model is Chroma.</summary>
-    public bool IsChroma()
-    {
-        string clazz = CurrentCompatClass();
-        return clazz is not null && clazz == "chroma";
-    }
-
-    /// <summary>Returns true if the current model is Chroma Radiance.</summary>
-    public bool IsChromaRadiance()
-    {
-        string clazz = CurrentCompatClass();
-        return clazz is not null && clazz == "chroma-radiance";
-    }
-
-    /// <summary>Returns true if the current model is HiDream-i1.</summary>
-    public bool IsHiDream()
-    {
-        string clazz = CurrentCompatClass();
-        return clazz is not null && clazz == "hidream-i1";
-    }
-
-    /// <summary>Returns true if the current model supports Flux Guidance.</summary>
-    public bool HasFluxGuidance()
-    {
-        return (IsFlux() && CurrentModelClass()?.ID != "Flux.1-schnell") || IsHunyuanVideo();
-    }
-
-    /// <summary>Returns true if the current model is NVIDIA Sana.</summary>
-    public bool IsSana()
-    {
-        string clazz = CurrentCompatClass();
-        return clazz is not null && clazz == "nvidia-sana-1600";
-    }
-
-    /// <summary>Returns true if the current model is Alpha-VLLM's Lumina 2.</summary>
-    public bool IsLumina()
-    {
-        string clazz = CurrentCompatClass();
-        return clazz is not null && clazz == "lumina-2";
-    }
-
-    /// <summary>Returns true if the current model is OmniGen.</summary>
-    public bool IsOmniGen()
-    {
-        string clazz = CurrentCompatClass();
-        return clazz is not null && clazz.StartsWith("omnigen-");
-    }
-
-    /// <summary>Returns true if the current model is Qwen Image.</summary>
-    public bool IsQwenImage()
-    {
-        string clazz = CurrentCompatClass();
-        return clazz is not null && clazz.StartsWith("qwen-image");
-    }
-
-    /// <summary>Returns true if the current model is Qwen Image Edit.</summary>
-    public bool IsQwenImageEdit()
-    {
-        string clazz = CurrentCompatClass();
-        return clazz is not null && clazz == "qwen-image-edit";
-    }
-
-    /// <summary>Returns true if the current model is Qwen Image Edit Plus.</summary>
-    public bool IsQwenImageEditPlus()
-    {
-        string clazz = CurrentModelClass()?.ID;
-        return clazz is not null && clazz.StartsWith("qwen-image-edit-plus");
-    }
-
-    /// <summary>Returns true if the current model is Hunyuan Video.</summary>
-    public bool IsHunyuanVideo()
-    {
-        string clazz = CurrentCompatClass();
-        return clazz is not null && clazz == "hunyuan-video";
-    }
-
-    /// <summary>Returns true if the current model is Hunyuan Image 2.1 Base.</summary>
-    public bool IsHunyuanImage()
-    {
-        string clazz = CurrentCompatClass();
-        return clazz is not null && clazz == "hunyuan-image-2_1";
-    }
-
-    /// <summary>Returns true if the current model is Hunyuan Image 2.1 Refiner.</summary>
-    public bool IsHunyuanImageRefiner()
-    {
-        string clazz = CurrentCompatClass();
-        return clazz is not null && clazz == "hunyuan-image-2_1-refiner";
-    }
-
-    /// <summary>Returns true if the current model is Hunyuan Video Image2Video.</summary>
-    public bool IsHunyuanVideoI2V()
-    {
-        string clazz = CurrentModelClass()?.ID;
-        return clazz is not null && (clazz == "hunyuan-video-i2v" || clazz == "hunyuan-video-i2v-v2");
-    }
-
-    /// <summary>Returns true if the current model is Hunyuan Video - Skyreels.</summary>
-    public bool IsHunyuanVideoSkyreels()
-    {
-        string clazz = CurrentModelClass()?.ID;
-        return clazz is not null && (clazz == "hunyuan-video-skyreels" || clazz == "hunyuan-video-skyreels-i2v");
-    }
-
-    /// <summary>Returns true if the current model is Nvidia Cosmos v1.</summary>
-    public bool IsNvidiaCosmos1()
-    {
-        string clazz = CurrentCompatClass();
-        return clazz is not null && clazz == "nvidia-cosmos-1";
-    }
-
-    /// <summary>Returns true if the current model is Nvidia Cosmos v2.</summary>
-    public bool IsNvidiaCosmos2()
-    {
-        string clazz = CurrentCompatClass();
-        return clazz is not null && clazz == "nvidia-cosmos-predict2";
-    }
-
-    /// <summary>Returns true if the current model is any Wan-2.1 variant.</summary>
-    public bool IsWanVideo()
-    {
-        string clazz = CurrentCompatClass();
-        return clazz is not null && clazz.StartsWith("wan-21");
-    }
-
-    /// <summary>Returns true if the current model is any Wan-2.2 variant.</summary>
-    public bool IsWanVideo22()
-    {
-        string clazz = CurrentCompatClass();
-        return clazz is not null && clazz.StartsWith("wan-22");
-    }
-
-    /// <summary>Returns true if the current model is any Wan-2.1 VACE variant.</summary>
-    public bool IsWanVace()
-    {
-        string clazz = CurrentModelClass()?.ID;
-        return clazz is not null && clazz.StartsWith("wan-2_1-vace-");
-    }
-
-    /// <summary>Returns true if the current model is any Wan variant.</summary>
-    public bool IsAnyWanModel()
-    {
-        return IsWanVideo() || IsWanVideo22();
-    }
-
     /// <summary>Returns true if the current main text input model model is a Video model (as opposed to image).</summary>
     public bool IsVideoModel()
     {
-        return IsLTXV() || IsMochi() || IsHunyuanVideo() || IsNvidiaCosmos1() || IsAnyWanModel();
+        return CurrentCompatClass() == "lightricks-ltx-video" || CurrentCompatClass() == "genmo-mochi-1" || CurrentCompatClass() == "hunyuan-video" || CurrentCompatClass() == "nvidia-cosmos-1" || CurrentCompatClass().StartsWith("wan-21") || CurrentCompatClass().StartsWith("wan-22");
     }
 
     /// <summary>Gets a dynamic ID within a semi-stable registration set.</summary>
@@ -771,7 +569,7 @@ public class WorkflowGenerator
             return T2VFPSOverride;
         }
         int fpsDefault = 24;
-        if (IsWanVideo())
+        if (CurrentCompatClass().StartsWith("wan-21"))
         {
             // TODO: Detect CausVid (24 fps LoRA) and/or Wan 2.2 (also 24fps) somehow, to be able to set the base to 16 and leave the rest at 24.
             //fpsDefault = 16;
@@ -983,7 +781,7 @@ public class WorkflowGenerator
                 {
                     throw new SwarmUserErrorException($"Model '{model.Name}' is in Nunchaku format, but the server does not have Nunchaku support installed. Cannot run.");
                 }
-                if (IsFlux())
+                if (CurrentCompatClass().StartsWith("flux-1"))
                 {
                     // TODO: Configuration of these params?
                     string modelNode = CreateNode("NunchakuFluxDiTLoader", new JObject()
@@ -998,7 +796,7 @@ public class WorkflowGenerator
                     }, id);
                     LoadingModel = [modelNode, 0];
                 }
-                else if (IsQwenImage())
+                else if (CurrentCompatClass().StartsWith("qwen-image"))
                 {
                     string modelNode = CreateNode("NunchakuQwenImageDiTLoader", new JObject()
                     {
@@ -1036,14 +834,14 @@ public class WorkflowGenerator
                 string dtype = UserInput.Get(ComfyUIBackendExtension.PreferredDType, "automatic");
                 if (dtype == "automatic")
                 {
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || model.Metadata?.SpecialFormat == "fp8_scaled" || IsNvidiaCosmos2() || IsOmniGen() || IsChroma() || IsChromaRadiance()) // TODO: Or AMD?
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || model.Metadata?.SpecialFormat == "fp8_scaled" || CurrentCompatClass() == "nvidia-cosmos-predict2" || CurrentCompatClass().StartsWith("omnigen-") || CurrentCompatClass() == "chroma" || CurrentCompatClass() == "chroma-radiance") // TODO: Or AMD?
                     {
                         dtype = "default";
                     }
                     else
                     {
                         dtype = "fp8_e4m3fn";
-                        if (Utilities.PresumeNVidia30xx && Program.ServerSettings.Performance.AllowGpuSpecificOptimizations && !IsQwenImage())
+                        if (Utilities.PresumeNVidia30xx && Program.ServerSettings.Performance.AllowGpuSpecificOptimizations && !CurrentCompatClass().StartsWith("qwen-image"))
                         {
                             dtype = "fp8_e4m3fn_fast";
                         }
@@ -1074,7 +872,7 @@ public class WorkflowGenerator
             LoadingClip = [modelNode, 1];
             LoadingVAE = [modelNode, 2];
         }
-        else if (IsSana())
+        else if (CurrentCompatClass() == "nvidia-sana-1600")
         {
             string sanaNode = CreateNode("SanaCheckpointLoader", new JObject()
             {
@@ -1108,14 +906,14 @@ public class WorkflowGenerator
             LoadingModel = [modelNode, 0];
             LoadingClip = [modelNode, 1];
             LoadingVAE = [modelNode, 2];
-            if (IsFlux() && (model.Metadata?.TextEncoders ?? "") == "")
+            if (CurrentCompatClass().StartsWith("flux-1") && (model.Metadata?.TextEncoders ?? "") == "")
             {
                 LoadingClip = null;
                 LoadingVAE = null;
             }
         }
         string predType = model.Metadata?.PredictionType;
-        if (IsSD3())
+        if (CurrentCompatClass().StartsWith("stable-diffusion-v3"))
         {
             string loaderType = "TripleCLIPLoader";
             if (requireClipModel("t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf"))
@@ -1131,7 +929,7 @@ public class WorkflowGenerator
             LoadingClip = [tripleClipLoader, 0];
             doVaeLoader(null, "stable-diffusion-v3", "sd35-vae");
         }
-        else if (IsFlux() && (LoadingClip is null || LoadingVAE is null || UserInput.Get(T2IParamTypes.T5XXLModel) is not null || UserInput.Get(T2IParamTypes.ClipLModel) is not null))
+        else if (CurrentCompatClass().StartsWith("flux-1") && (LoadingClip is null || LoadingVAE is null || UserInput.Get(T2IParamTypes.T5XXLModel) is not null || UserInput.Get(T2IParamTypes.ClipLModel) is not null))
         {
             string loaderType = "DualCLIPLoader";
             if (requireClipModel("t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf"))
@@ -1147,7 +945,7 @@ public class WorkflowGenerator
             LoadingClip = [dualClipLoader, 0];
             doVaeLoader(null, "flux-1", "flux-ae");
         }
-        else if (IsAuraFlow() && (LoadingClip is null || LoadingVAE is null || UserInput.Get(T2IParamTypes.T5XXLModel) is not null))
+        else if (CurrentCompatClass() == "auraflow-v1" && (LoadingClip is null || LoadingVAE is null || UserInput.Get(T2IParamTypes.T5XXLModel) is not null))
         {
             string loaderType = "CLIPLoader";
             if (requireClipModel("pile-t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf"))
@@ -1169,7 +967,7 @@ public class WorkflowGenerator
             LoadingClip = [t5Patch, 0];
             doVaeLoader(null, "stable-diffusion-xl-v1", "sdxl-vae");
         }
-        else if (IsChroma() || IsChromaRadiance())
+        else if (CurrentCompatClass() == "chroma" || CurrentCompatClass() == "chroma-radiance")
         {
             string loaderType = "CLIPLoader";
             if (requireClipModel("t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf"))
@@ -1195,7 +993,7 @@ public class WorkflowGenerator
                 ["shift"] = UserInput.Get(T2IParamTypes.SigmaShift, 1)
             });
             LoadingModel = [samplingNode, 0];
-            if (IsChromaRadiance())
+            if (CurrentCompatClass() == "chroma-radiance")
             {
                 LoadingVAE = CreateVAELoader("pixel_space");
             }
@@ -1204,7 +1002,7 @@ public class WorkflowGenerator
                 doVaeLoader(null, "flux-1", "flux-ae");
             }
         }
-        else if (IsHiDream())
+        else if (CurrentCompatClass() == "hidream-i1")
         {
             string loaderType = "QuadrupleCLIPLoader";
             if (requireClipModel("t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf") || requireClipModel("llama3.1-8b", T2IParamTypes.LLaMAModel).EndsWith(".gguf"))
@@ -1221,7 +1019,7 @@ public class WorkflowGenerator
             LoadingClip = [quadClipLoader, 0];
             doVaeLoader(null, "flux-1", "flux-ae");
         }
-        else if (IsOmniGen())
+        else if (CurrentCompatClass().StartsWith("omnigen-"))
         {
             string loaderType = "CLIPLoader";
             if (requireClipModel("qwen-2.5-vl-fp16", T2IParamTypes.QwenModel).EndsWith(".gguf"))
@@ -1235,7 +1033,7 @@ public class WorkflowGenerator
             LoadingClip = [clipLoader, 0];
             doVaeLoader(null, "flux-1", "flux-ae");
         }
-        else if (IsQwenImage())
+        else if (CurrentCompatClass().StartsWith("qwen-image"))
         {
             string loaderType = "CLIPLoader";
             if (requireClipModel("qwen-2.5-vl-7b", T2IParamTypes.QwenModel).EndsWith(".gguf"))
@@ -1255,7 +1053,7 @@ public class WorkflowGenerator
             });
             LoadingModel = [samplingNode, 0];
         }
-        else if (IsHunyuanImage())
+        else if (CurrentCompatClass() == "hunyuan-image-2_1")
         {
             string loaderType = "DualCLIPLoader";
             if (requireClipModel("qwen-2.5-vl-7b", T2IParamTypes.QwenModel).EndsWith(".gguf"))
@@ -1272,7 +1070,7 @@ public class WorkflowGenerator
             LoadingClip = [clipLoader, 0];
             doVaeLoader(null, "hunyuan-image-2_1", "hunyuan-image-2_1-vae");
         }
-        else if (IsHunyuanImageRefiner())
+        else if (CurrentCompatClass() == "hunyuan-image-2_1-refiner")
         {
             string loaderType = "DualCLIPLoader";
             if (requireClipModel("qwen-2.5-vl-7b", T2IParamTypes.QwenModel).EndsWith(".gguf"))
@@ -1289,7 +1087,7 @@ public class WorkflowGenerator
             LoadingClip = [clipLoader, 0];
             doVaeLoader(null, "hunyuan-image-2_1-refiner", "hunyuan-image-2_1-refiner-vae");
         }
-        else if (IsMochi() && (LoadingClip is null || LoadingVAE is null || UserInput.Get(T2IParamTypes.T5XXLModel) is not null))
+        else if (CurrentCompatClass() == "genmo-mochi-1" && (LoadingClip is null || LoadingVAE is null || UserInput.Get(T2IParamTypes.T5XXLModel) is not null))
         {
             string loaderType = "CLIPLoader";
             if (requireClipModel("t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf"))
@@ -1304,7 +1102,7 @@ public class WorkflowGenerator
             LoadingClip = [clipLoader, 0];
             doVaeLoader(null, "genmo-mochi-1", "mochi-vae");
         }
-        else if (IsLTXV())
+        else if (CurrentCompatClass() == "lightricks-ltx-video")
         {
             string loaderType = "CLIPLoader";
             if (requireClipModel("t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf"))
@@ -1319,7 +1117,7 @@ public class WorkflowGenerator
             LoadingClip = [clipLoader, 0];
             doVaeLoader(null, "lightricks-ltx-video", "ltxv-vae");
         }
-        else if (IsHunyuanVideo())
+        else if (CurrentCompatClass() == "hunyuan-video")
         {
             string loaderType = "DualCLIPLoader";
             if (requireClipModel("clip-l", T2IParamTypes.ClipLModel).EndsWith(".gguf") || requireClipModel("llava-llama3", T2IParamTypes.LLaVAModel).EndsWith(".gguf"))
@@ -1335,7 +1133,7 @@ public class WorkflowGenerator
             LoadingClip = [dualClipLoader, 0];
             doVaeLoader(null, "hunyuan-video", "hunyuan-video-vae");
         }
-        else if (IsNvidiaCosmos1())
+        else if (CurrentCompatClass() == "nvidia-cosmos-1")
         {
             string clipLoader = CreateNode("CLIPLoader", new JObject()
             {
@@ -1345,7 +1143,7 @@ public class WorkflowGenerator
             LoadingClip = [clipLoader, 0];
             doVaeLoader(null, "nvidia-cosmos-1", "cosmos-vae");
         }
-        else if (IsNvidiaCosmos2())
+        else if (CurrentCompatClass() == "nvidia-cosmos-predict2")
         {
             string clipLoader = CreateNode("CLIPLoader", new JObject()
             {
@@ -1355,7 +1153,7 @@ public class WorkflowGenerator
             LoadingClip = [clipLoader, 0];
             doVaeLoader(null, "wan-21", "wan21-vae");
         }
-        else if (IsWanVideo())
+        else if (CurrentCompatClass().StartsWith("wan-21"))
         {
             string clipLoader = CreateNode("CLIPLoader", new JObject()
             {
@@ -1365,7 +1163,7 @@ public class WorkflowGenerator
             LoadingClip = [clipLoader, 0];
             doVaeLoader(null, "wan-21", "wan21-vae");
         }
-        else if (IsWanVideo22())
+        else if (CurrentCompatClass().StartsWith("wan-22"))
         {
             string clipLoader = CreateNode("CLIPLoader", new JObject()
             {
@@ -1384,7 +1182,7 @@ public class WorkflowGenerator
             });
             LoadingModel = [auraNode, 0];
         }
-        else if (IsLumina())
+        else if (CurrentCompatClass() == "lumina-2")
         {
             string samplingNode = CreateNode("ModelSamplingAuraFlow", new JObject()
             {
@@ -1430,7 +1228,7 @@ public class WorkflowGenerator
         }
         if (UserInput.TryGet(T2IParamTypes.SigmaShift, out double shiftVal))
         {
-            if (IsFlux())
+            if (CurrentCompatClass().StartsWith("flux-1"))
             {
                 string samplingNode = CreateNode("ModelSamplingFlux", new JObject()
                 {
@@ -1442,7 +1240,7 @@ public class WorkflowGenerator
                 });
                 LoadingModel = [samplingNode, 0];
             }
-            else if (IsHunyuanVideo() || IsHunyuanImage() || IsWanVideo() || IsWanVideo22() || IsHiDream() || IsSD3())
+            else if (CurrentCompatClass() == "hunyuan-video" || CurrentCompatClass() == "hunyuan-image-2_1" || CurrentCompatClass().StartsWith("wan-21") || CurrentCompatClass().StartsWith("wan-22") || CurrentCompatClass() == "hidream-i1" || CurrentCompatClass().StartsWith("stable-diffusion-v3"))
             {
                 string samplingNode = CreateNode("ModelSamplingSD3", new JObject()
                 {
@@ -1477,7 +1275,7 @@ public class WorkflowGenerator
             return [helper, 0];
         }
         string vaeLoader;
-        if (IsSana())
+        if (CurrentCompatClass() == "nvidia-sana-1600")
         {
             vaeLoader = CreateNode("ExtraVAELoader", new JObject()
             {
@@ -1508,11 +1306,11 @@ public class WorkflowGenerator
                 ["samples"] = latent,
                 ["tile_size"] = UserInput.Get(T2IParamTypes.VAETileSize, 256),
                 ["overlap"] = UserInput.Get(T2IParamTypes.VAETileOverlap, 64),
-                ["temporal_size"] = UserInput.Get(T2IParamTypes.VAETemporalTileSize, IsAnyWanModel() ? 9999 : 32),
+                ["temporal_size"] = UserInput.Get(T2IParamTypes.VAETemporalTileSize, CurrentCompatClass().StartsWith("wan-21") || CurrentCompatClass().StartsWith("wan-22") ? 9999 : 32),
                 ["temporal_overlap"] = UserInput.Get(T2IParamTypes.VAETemporalTileOverlap, 4)
             }, id);
         }
-        else if (IsHunyuanVideo()) // The VAE requirements for hunyuan are basically unobtainable, so force tiling as stupidproofing
+        else if (CurrentCompatClass() == "hunyuan-video") // The VAE requirements for hunyuan are basically unobtainable, so force tiling as stupidproofing
         {
             return CreateNode("VAEDecodeTiled", new JObject()
             {
@@ -1547,7 +1345,7 @@ public class WorkflowGenerator
         {
             previews ??= UserInput.Get(ComfyUIBackendExtension.VideoPreviewType, "animate");
         }
-        if (IsLTXV())
+        if (CurrentCompatClass() == "lightricks-ltx-video")
         {
             if (!hadSpecialCond)
             {
@@ -1562,7 +1360,7 @@ public class WorkflowGenerator
             }
             defscheduler ??= "ltxv";
         }
-        else if (IsNvidiaCosmos1())
+        else if (CurrentCompatClass() == "nvidia-cosmos-1")
         {
             if (!hadSpecialCond)
             {
@@ -1578,7 +1376,7 @@ public class WorkflowGenerator
             defsampler ??= "res_multistep";
             defscheduler ??= "karras";
         }
-        else if (IsHunyuanImageRefiner())
+        else if (CurrentCompatClass() == "hunyuan-image-2_1-refiner")
         {
             if (!hadSpecialCond)
             {
@@ -1595,17 +1393,17 @@ public class WorkflowGenerator
             }
             defscheduler ??= "simple";
         }
-        else if (IsFlux() || IsWanVideo() || IsWanVideo22() || IsOmniGen() || IsQwenImage())
+        else if (CurrentCompatClass().StartsWith("flux-1") || CurrentCompatClass().StartsWith("wan-21") || CurrentCompatClass().StartsWith("wan-22") || CurrentCompatClass().StartsWith("omnigen-") || CurrentCompatClass().StartsWith("qwen-image"))
         {
             defscheduler ??= "simple";
         }
-        else if (IsChroma() || IsChromaRadiance())
+        else if (CurrentCompatClass() == "chroma" || CurrentCompatClass() == "chroma-radiance")
         {
             defscheduler ??= "beta";
         }
             bool willCascadeFix = false;
         JArray cascadeModel = null;
-        if (!rawSampler && IsCascade() && FinalLoadedModel.Name.Contains("stage_c") && Program.MainSDModels.Models.TryGetValue(FinalLoadedModel.Name.Replace("stage_c", "stage_b"), out T2IModel bModel))
+        if (!rawSampler && CurrentCompatClass() == "stable-cascade-v1" && FinalLoadedModel.Name.Contains("stage_c") && Program.MainSDModels.Models.TryGetValue(FinalLoadedModel.Name.Replace("stage_c", "stage_b"), out T2IModel bModel))
         {
             (_, cascadeModel, _, FinalVae) = CreateStandardModelLoader(bModel, LoadingModelType, null, true);
             willCascadeFix = true;
@@ -1688,13 +1486,13 @@ public class WorkflowGenerator
             neg = [ip2p2condNode, 1];
             latent = [ip2p2condNode, 2];
         }
-        else if (IsKontext() || IsOmniGen() || IsQwenImage())
+        else if (CurrentCompatClass() == "flux-1-kontext" || CurrentCompatClass().StartsWith("omnigen-") || CurrentCompatClass().StartsWith("qwen-image"))
         {
             JArray img = null;
             JArray imgNeg = null;
-            bool doLatentChain = !IsKontext(); // Arguably even kontext should just do this?
-            bool onlyExplicit = IsQwenImage() && !IsQwenImageEdit();
-            if (IsOmniGen() || IsQwenImageEditPlus())
+            bool doLatentChain = CurrentCompatClass() != "flux-1-kontext"; // Arguably even kontext should just do this?
+            bool onlyExplicit = CurrentCompatClass().StartsWith("qwen-image") && !CurrentCompatClass().StartsWith("qwen-image-edit");
+            if (CurrentCompatClass().StartsWith("omnigen-") || CurrentModelClass().ID.StartsWith("qwen-image-edit-plus"))
             {
                 imgNeg = neg;
             }
@@ -1762,7 +1560,7 @@ public class WorkflowGenerator
             }
             if (img is not null)
             {
-                if (IsOmniGen())
+                if (CurrentCompatClass().StartsWith("omnigen-"))
                 {
                     if (UserInput.TryGet(T2IParamTypes.IP2PCFG2, out double cfg2))
                     {
@@ -1782,13 +1580,13 @@ public class WorkflowGenerator
                         neg = imgNeg;
                     }
                 }
-                else if (IsQwenImageEditPlus())
+                else if (CurrentModelClass().ID.StartsWith("qwen-image-edit-plus"))
                 {
                     neg = imgNeg;
                 }
             }
         }
-        else if (IsWanVideo()) // TODO: Somehow check if this is actually a phantom model?
+        else if (CurrentCompatClass().StartsWith("wan-21")) // TODO: Somehow check if this is actually a phantom model?
         {
             if (UserInput.TryGet(T2IParamTypes.PromptImages, out List<Image> images) && images.Count > 0)
             {
@@ -2004,7 +1802,7 @@ public class WorkflowGenerator
             {
                 doesFit = Math.Abs(actual - target) <= 64;
             }
-            else if (IsKontext()) // Kontext needs <= target gen size, and is sufficient once input hits 1024.
+            else if (CurrentCompatClass() == "flux-1-kontext") // Kontext needs <= target gen size, and is sufficient once input hits 1024.
             {
                 if (target < 1024)
                 {
@@ -2019,12 +1817,12 @@ public class WorkflowGenerator
                     } // else does fit
                 }
             }
-            else if (IsQwenImageEditPlus() && promptSize)
+            else if (CurrentModelClass().ID.StartsWith("qwen-image-edit-plus") && promptSize)
             {
                 target = 384;
                 doesFit = false;
             }
-            else if (IsQwenImage())
+            else if (CurrentCompatClass().StartsWith("qwen-image"))
             {
                 target = 1024; // Qwen image targets 1328 for gen but wants 1024 inputs.
                 doesFit = Math.Abs(actual - target) <= 64;
@@ -2062,7 +1860,7 @@ public class WorkflowGenerator
     /// <summary>Creates a VAE Encode node.</summary>
     public string CreateVAEEncode(JArray vae, JArray image, string id = null, bool noCascade = false, JArray mask = null)
     {
-        if (!noCascade && IsCascade())
+        if (!noCascade && CurrentCompatClass() == "stable-cascade-v1")
         {
             return CreateNode("StableCascade_StageC_VAEEncode", new JObject()
             {
@@ -2094,7 +1892,7 @@ public class WorkflowGenerator
     /// <summary>Creates an Empty Latent Image node.</summary>
     public string CreateEmptyImage(int width, int height, int batchSize, string id = null)
     {
-        if (IsCascade())
+        if (CurrentCompatClass() == "stable-cascade-v1")
         {
             return CreateNode("StableCascade_EmptyLatentImage", new JObject()
             {
@@ -2104,7 +1902,7 @@ public class WorkflowGenerator
                 ["width"] = width
             }, id);
         }
-        else if (IsSD3() || IsFlux() || IsHiDream() || IsChroma() || IsOmniGen() || IsQwenImage())
+        else if (CurrentCompatClass().StartsWith("stable-diffusion-v3") || CurrentCompatClass().StartsWith("flux-1") || CurrentCompatClass() == "hidream-i1" || CurrentCompatClass() == "chroma" || CurrentCompatClass().StartsWith("omnigen-") || CurrentCompatClass().StartsWith("qwen-image"))
         {
             return CreateNode("EmptySD3LatentImage", new JObject()
             {
@@ -2113,7 +1911,7 @@ public class WorkflowGenerator
                 ["width"] = width
             }, id);
         }
-        else if (IsHunyuanImage() || IsHunyuanImageRefiner())
+        else if (CurrentCompatClass() == "hunyuan-image-2_1" || CurrentCompatClass() == "hunyuan-image-2_1-refiner")
         {
             return CreateNode("EmptyHunyuanImageLatent", new JObject()
             {
@@ -2122,7 +1920,7 @@ public class WorkflowGenerator
                 ["width"] = width
             }, id);
         }
-        else if (IsSana())
+        else if (CurrentCompatClass() == "nvidia-sana-1600")
         {
             return CreateNode("EmptySanaLatentImage", new JObject()
             {
@@ -2131,7 +1929,7 @@ public class WorkflowGenerator
                 ["width"] = width
             }, id);
         }
-        else if (IsMochi())
+        else if (CurrentCompatClass() == "genmo-mochi-1")
         {
             return CreateNode("EmptyMochiLatentVideo", new JObject()
             {
@@ -2141,7 +1939,7 @@ public class WorkflowGenerator
                 ["width"] = width
             }, id);
         }
-        else if (IsLTXV())
+        else if (CurrentCompatClass() == "lightricks-ltx-video")
         {
             return CreateNode("EmptyLTXVLatentVideo", new JObject()
             {
@@ -2151,7 +1949,7 @@ public class WorkflowGenerator
                 ["width"] = width
             }, id);
         }
-        else if (IsWanVideo22())
+        else if (CurrentCompatClass().StartsWith("wan-22"))
         {
             return CreateNode("Wan22ImageToVideoLatent", new JObject()
             {
@@ -2162,10 +1960,10 @@ public class WorkflowGenerator
                 ["vae"] = FinalVae
             }, id);
         }
-        else if (IsHunyuanVideo() || IsWanVideo())
+        else if (CurrentCompatClass() == "hunyuan-video" || CurrentCompatClass().StartsWith("wan-21"))
         {
             int frames = 73;
-            if (IsWanVideo())
+            if (CurrentCompatClass().StartsWith("wan-21"))
             {
                 frames = 81;
             }
@@ -2177,7 +1975,7 @@ public class WorkflowGenerator
                 ["width"] = width
             }, id);
         }
-        else if (IsNvidiaCosmos1())
+        else if (CurrentCompatClass() == "nvidia-cosmos-1")
         {
 
             return CreateNode("EmptyCosmosLatentVideo", new JObject()
@@ -2188,7 +1986,7 @@ public class WorkflowGenerator
                 ["width"] = width
             }, id);
         }
-        else if (IsChromaRadiance())
+        else if (CurrentCompatClass() == "chroma-radiance")
         {
             return CreateNode("EmptyChromaRadianceLatentImage", new JObject()
             {
@@ -2995,13 +2793,13 @@ public class WorkflowGenerator
         bool enhance = UserInput.Get(T2IParamTypes.ModelSpecificEnhancements, true);
         bool needsAdvancedEncode = (prompt.Contains('[') && prompt.Contains(']')) || prompt.Contains("<break>");
         double defaultGuidance = -1;
-        if (IsHunyuanVideoSkyreels())
+        if (CurrentModelClass().ID is "hunyuan-video-skyreels" or "hunyuan-video-skyreels-i2v")
         {
             defaultGuidance = 1;
         }
-        bool wantsSwarmCustom = Features.Contains("variation_seed") && (needsAdvancedEncode || (UserInput.TryGet(T2IParamTypes.FluxGuidanceScale, out _) && HasFluxGuidance()) || IsHunyuanVideoSkyreels());
+        bool wantsSwarmCustom = Features.Contains("variation_seed") && (needsAdvancedEncode || (UserInput.TryGet(T2IParamTypes.FluxGuidanceScale, out _) && (CurrentCompatClass().StartsWith("flux-1") && CurrentModelClass().ID != "Flux.1-schnell") || CurrentCompatClass() == "hunyuan-video") || CurrentModelClass().ID is "hunyuan-video-skyreels" or "hunyuan-video-skyreels-i2v");
         JArray qwenImage;
-        if (IsSana())
+        if (CurrentCompatClass() == "nvidia-sana-1600")
         {
             node = CreateNode("SanaTextEncode", new JObject()
             {
@@ -3009,12 +2807,12 @@ public class WorkflowGenerator
                 ["text"] = prompt
             }, id);
         }
-        else if (IsQwenImageEdit() && (isPositive || IsQwenImageEditPlus()) && (qwenImage = GetPromptImage(true, true)) is not null)
+        else if (CurrentCompatClass().StartsWith("qwen-image-edit") && (isPositive || CurrentModelClass().ID.StartsWith("qwen-image-edit-plus")) && (qwenImage = GetPromptImage(true, true)) is not null)
         {
             if (wantsSwarmCustom)
             {
                 JArray image2 = GetPromptImage(true, true, 1);
-                if (IsQwenImageEditPlus() && image2 is not null)
+                if (CurrentModelClass().ID.StartsWith("qwen-image-edit-plus") && image2 is not null)
                 {
                     string batched = CreateNode("ImageBatch", new JObject()
                     {
@@ -3047,7 +2845,7 @@ public class WorkflowGenerator
                     ["llama_template"] = "qwen_image_edit_plus"
                 }, id);
             }
-            else if (IsQwenImageEditPlus())
+            else if (CurrentModelClass().ID.StartsWith("qwen-image-edit-plus"))
             {
                 node = CreateNode("TextEncodeQwenImageEditPlus", new JObject()
                 {
@@ -3070,7 +2868,7 @@ public class WorkflowGenerator
                 }, id);
             }
         }
-        else if (IsHunyuanVideoI2V() && prompt.StartsWith("<image:"))
+        else if (CurrentModelClass().ID is "hunyuan-video-i2v" or "hunyuan-video-i2v-v2" && prompt.StartsWith("<image:"))
         {
             (string prefix, string content) = prompt.BeforeAndAfter('>');
             (string imgNodeId, string imgNodePart) = prefix.After(':').BeforeAndAfter(',');

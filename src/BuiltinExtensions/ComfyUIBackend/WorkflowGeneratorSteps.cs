@@ -221,7 +221,7 @@ public class WorkflowGeneratorSteps
                 {
                     Logs.Warning($"Ignore TeaCache Mode parameter because the current model is Nunchaku which does not support TeaCache. Use 'Nunchaku Cache Threshold' for a similar effect to TeaCache.");
                 }
-                else if (g.IsFlux())
+                else if (g.CurrentCompatClass().StartsWith("flux-1"))
                 {
                     if (teaCacheMode != "video only")
                     {
@@ -238,18 +238,18 @@ public class WorkflowGeneratorSteps
                         g.LoadingModel = [teaCacheNode, 0];
                     }
                 }
-                else if (g.IsHunyuanVideo() || g.IsLTXV() || g.IsWanVideo() || g.IsHiDream())
+                else if (g.CurrentCompatClass() == "hunyuan-video" || g.CurrentCompatClass() == "lightricks-ltx-video" || g.CurrentCompatClass().StartsWith("wan-21") || g.CurrentCompatClass() == "hidream-i1")
                 {
                     string type = "";
-                    if (g.IsHunyuanVideo())
+                    if (g.CurrentCompatClass() == "hunyuan-video")
                     {
                         type = "hunyuan_video";
                     }
-                    else if (g.IsLTXV())
+                    else if (g.CurrentCompatClass() == "lightricks-ltx-video")
                     {
                         type = "ltxv";
                     }
-                    else if (g.IsHiDream())
+                    else if (g.CurrentCompatClass() == "hidream-i1")
                     {
                         type = "hidream_i1_dev";
                     }
@@ -1047,7 +1047,7 @@ public class WorkflowGeneratorSteps
                             ["end_percent"] = g.UserInput.Get(controlnetParams.End, 1)
                         });
                     }
-                    else if (g.IsSD3() || g.IsFlux() || g.IsChroma() || g.IsQwenImage())
+                    else if (g.CurrentCompatClass().StartsWith("stable-diffusion-v3") || g.CurrentCompatClass().StartsWith("flux-1") || g.CurrentCompatClass() == "chroma" || g.CurrentCompatClass().StartsWith("qwen-image"))
                     {
                         applyNode = g.CreateNode("ControlNetApplyAdvanced", new JObject()
                         {
@@ -1078,7 +1078,7 @@ public class WorkflowGeneratorSteps
                     g.FinalNegativePrompt = [applyNode, 1];
                 }
             }
-            if (g.IsWanVace() && g.FinalInputImage is not null)
+            if (g.CurrentModelClass().ID == "wan-2_1-vace-" && g.FinalInputImage is not null)
             {
                 string vaceNode = g.CreateNode("WanVaceToVideo", new JObject()
                 {
