@@ -1491,7 +1491,7 @@ public class WorkflowGenerator
             JArray img = null;
             JArray imgNeg = null;
             bool doLatentChain = CurrentCompatClass() != "flux-1-kontext"; // Arguably even kontext should just do this?
-            bool onlyExplicit = CurrentCompatClass().StartsWith("qwen-image") && !CurrentCompatClass().StartsWith("qwen-image-edit");
+            bool onlyExplicit = CurrentCompatClass() == "qwen-image";
             if (CurrentCompatClass().StartsWith("omnigen-") || CurrentModelClass().ID.StartsWith("qwen-image-edit-plus"))
             {
                 imgNeg = neg;
