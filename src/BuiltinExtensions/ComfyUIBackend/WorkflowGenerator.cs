@@ -862,7 +862,7 @@ public class WorkflowGenerator
                     }, id);
                     LoadingModel = [modelNode, 0];
                 }
-                else if (IsQwenImage())
+                else if (CurrentCompatClass().StartsWith("qwen-image"))
                 {
                     string modelNode = CreateNode("NunchakuQwenImageDiTLoader", new JObject()
                     {
@@ -907,7 +907,7 @@ public class WorkflowGenerator
                     else
                     {
                         dtype = "fp8_e4m3fn";
-                        if (Utilities.PresumeNVidia30xx && Program.ServerSettings.Performance.AllowGpuSpecificOptimizations && !IsQwenImage())
+                        if (Utilities.PresumeNVidia30xx && Program.ServerSettings.Performance.AllowGpuSpecificOptimizations && !CurrentCompatClass().StartsWith("qwen-image"))
                         {
                             dtype = "fp8_e4m3fn_fast";
                         }
@@ -1085,7 +1085,7 @@ public class WorkflowGenerator
             LoadingClip = [quadClipLoader, 0];
             doVaeLoader(null, "flux-1", "flux-ae");
         }
-        else if (IsOmniGen())
+        else if (CurrentCompatClass().StartsWith("omnigen-"))
         {
             string loaderType = "CLIPLoader";
             if (requireClipModel("qwen-2.5-vl-fp16", T2IParamTypes.QwenModel).EndsWith(".gguf"))
@@ -1099,7 +1099,7 @@ public class WorkflowGenerator
             LoadingClip = [clipLoader, 0];
             doVaeLoader(null, "flux-1", "flux-ae");
         }
-        else if (IsQwenImage())
+        else if (CurrentCompatClass().StartsWith("qwen-image"))
         {
             string loaderType = "CLIPLoader";
             if (requireClipModel("qwen-2.5-vl-7b", T2IParamTypes.QwenModel).EndsWith(".gguf"))
@@ -1372,7 +1372,7 @@ public class WorkflowGenerator
                 ["samples"] = latent,
                 ["tile_size"] = UserInput.Get(T2IParamTypes.VAETileSize, 256),
                 ["overlap"] = UserInput.Get(T2IParamTypes.VAETileOverlap, 64),
-                ["temporal_size"] = UserInput.Get(T2IParamTypes.VAETemporalTileSize, IsAnyWanModel() ? 9999 : 32),
+                ["temporal_size"] = UserInput.Get(T2IParamTypes.VAETemporalTileSize, CurrentCompatClass().StartsWith("wan-21") || CurrentCompatClass().StartsWith("wan-22") ? 9999 : 32),
                 ["temporal_overlap"] = UserInput.Get(T2IParamTypes.VAETemporalTileOverlap, 4)
             }, id);
         }
@@ -1552,13 +1552,13 @@ public class WorkflowGenerator
             neg = [ip2p2condNode, 1];
             latent = [ip2p2condNode, 2];
         }
-        else if (IsKontext() || IsOmniGen() || IsQwenImage())
+        else if (CurrentCompatClass() == "flux-1-kontext" || CurrentCompatClass().StartsWith("omnigen-") || CurrentCompatClass().StartsWith("qwen-image"))
         {
             JArray img = null;
             JArray imgNeg = null;
-            bool doLatentChain = !IsKontext(); // Arguably even kontext should just do this?
-            bool onlyExplicit = IsQwenImage() && !IsQwenImageEdit();
-            if (IsOmniGen() || IsQwenImageEditPlus())
+            bool doLatentChain = CurrentCompatClass() != "flux-1-kontext"; // Arguably even kontext should just do this?
+            bool onlyExplicit = CurrentCompatClass() == "qwen-image";
+            if (CurrentCompatClass().StartsWith("omnigen-") || CurrentCompatClass().StartsWith("qwen-image-edit-plus"))
             {
                 imgNeg = neg;
             }
@@ -1626,7 +1626,7 @@ public class WorkflowGenerator
             }
             if (img is not null)
             {
-                if (IsOmniGen())
+                if (CurrentCompatClass().StartsWith("omnigen-"))
                 {
                     if (UserInput.TryGet(T2IParamTypes.IP2PCFG2, out double cfg2))
                     {
@@ -1646,7 +1646,7 @@ public class WorkflowGenerator
                         neg = imgNeg;
                     }
                 }
-                else if (IsQwenImageEditPlus())
+                else if (CurrentCompatClass().StartsWith("qwen-image-edit-plus"))
                 {
                     neg = imgNeg;
                 }
@@ -1868,7 +1868,7 @@ public class WorkflowGenerator
             {
                 doesFit = Math.Abs(actual - target) <= 64;
             }
-            else if (IsKontext()) // Kontext needs <= target gen size, and is sufficient once input hits 1024.
+            else if (CurrentCompatClass() == "flux-1-kontext") // Kontext needs <= target gen size, and is sufficient once input hits 1024.
             {
                 if (target < 1024)
                 {
@@ -1883,12 +1883,12 @@ public class WorkflowGenerator
                     } // else does fit
                 }
             }
-            else if (IsQwenImageEditPlus() && promptSize)
+            else if (CurrentCompatClass().StartsWith("qwen-image-edit-plus") && promptSize)
             {
                 target = 384;
                 doesFit = false;
             }
-            else if (IsQwenImage())
+            else if (CurrentCompatClass().StartsWith("qwen-image"))
             {
                 target = 1024; // Qwen image targets 1328 for gen but wants 1024 inputs.
                 doesFit = Math.Abs(actual - target) <= 64;
@@ -2068,11 +2068,6 @@ public class WorkflowGenerator
             {
                 case "stable-diffusion-v1": // https://github.com/Birch-san/sdxl-diffusion-decoder/blob/4ba89847c02db070b766969c0eca3686a1e7512e/script/inference_decoder.py#L112
                 case "stable-diffusion-v2-512":
-                    offA = 2.1335;
-                    offB = 0.1237;
-                    offC = 0.4052;
-                    offD = -0.0940;
-                    break;
                 case "stable-diffusion-v2-768-v":
                     offA = 2.1335;
                     offB = 0.1237;
@@ -2859,11 +2854,11 @@ public class WorkflowGenerator
         bool enhance = UserInput.Get(T2IParamTypes.ModelSpecificEnhancements, true);
         bool needsAdvancedEncode = (prompt.Contains('[') && prompt.Contains(']')) || prompt.Contains("<break>");
         double defaultGuidance = -1;
-        if (IsHunyuanVideoSkyreels())
+        if ((CurrentModelClass()?.ID == "hunyuan-video-skyreels" || CurrentModelClass()?.ID == "hunyuan-video-skyreels-i2v"))
         {
             defaultGuidance = 1;
         }
-        bool wantsSwarmCustom = Features.Contains("variation_seed") && (needsAdvancedEncode || (UserInput.TryGet(T2IParamTypes.FluxGuidanceScale, out _) && HasFluxGuidance()) || IsHunyuanVideoSkyreels());
+        bool wantsSwarmCustom = Features.Contains("variation_seed") && (needsAdvancedEncode || (UserInput.TryGet(T2IParamTypes.FluxGuidanceScale, out _) && (CurrentCompatClass().StartsWith("flux-1") && CurrentModelClass()?.ID != "Flux.1-schnell") || CurrentCompatClass() == "hunyuan-video") || (CurrentModelClass()?.ID == "hunyuan-video-skyreels" || CurrentModelClass()?.ID == "hunyuan-video-skyreels-i2v"));
         JArray qwenImage;
         if (CurrentCompatClass() == "nvidia-sana-1600")
         {
@@ -2873,12 +2868,12 @@ public class WorkflowGenerator
                 ["text"] = prompt
             }, id);
         }
-        else if (IsQwenImageEdit() && (isPositive || IsQwenImageEditPlus()) && (qwenImage = GetPromptImage(true, true)) is not null)
+        else if (CurrentCompatClass() == "qwen-image-edit" && (isPositive || CurrentCompatClass().StartsWith("qwen-image-edit-plus")) && (qwenImage = GetPromptImage(true, true)) is not null)
         {
             if (wantsSwarmCustom)
             {
                 JArray image2 = GetPromptImage(true, true, 1);
-                if (IsQwenImageEditPlus() && image2 is not null)
+                if (CurrentCompatClass().StartsWith("qwen-image-edit-plus") && image2 is not null)
                 {
                     string batched = CreateNode("ImageBatch", new JObject()
                     {
@@ -2911,7 +2906,7 @@ public class WorkflowGenerator
                     ["llama_template"] = "qwen_image_edit_plus"
                 }, id);
             }
-            else if (IsQwenImageEditPlus())
+            else if (CurrentCompatClass().StartsWith("qwen-image-edit-plus"))
             {
                 node = CreateNode("TextEncodeQwenImageEditPlus", new JObject()
                 {
@@ -2934,7 +2929,7 @@ public class WorkflowGenerator
                 }, id);
             }
         }
-        else if (IsHunyuanVideoI2V() && prompt.StartsWith("<image:"))
+        else if ((CurrentModelClass()?.ID == "hunyuan-video-i2v" || CurrentModelClass()?.ID == "hunyuan-video-i2v-v2") && prompt.StartsWith("<image:"))
         {
             (string prefix, string content) = prompt.BeforeAndAfter('>');
             (string imgNodeId, string imgNodePart) = prefix.After(':').BeforeAndAfter(',');

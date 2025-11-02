@@ -1078,7 +1078,7 @@ public class WorkflowGeneratorSteps
                     g.FinalNegativePrompt = [applyNode, 1];
                 }
             }
-            if (g.IsWanVace() && g.FinalInputImage is not null)
+            if (g.CurrentCompatClass().StartsWith("wan-2_1-vace-") && g.FinalInputImage is not null)
             {
                 string vaceNode = g.CreateNode("WanVaceToVideo", new JObject()
                 {
