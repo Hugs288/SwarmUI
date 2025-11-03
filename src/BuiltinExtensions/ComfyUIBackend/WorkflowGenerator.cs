@@ -1819,7 +1819,7 @@ public class WorkflowGenerator
             }
             else if (CurrentModelClass().ID.StartsWith("qwen-image-edit-plus") && promptSize)
             {
-                target = 384;
+                target = 1024;
                 doesFit = false;
             }
             else if (CurrentCompatClass().StartsWith("qwen-image"))

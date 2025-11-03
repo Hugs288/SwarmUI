@@ -976,7 +976,7 @@ public static class Utilities
     }
 
     /// <summary>Modifies a width/height resolution to get the nearest valid resolution for the given megapixel target scale, and rounds to a factor of x64.</summary>
-    public static (int, int) ResToModelFit(int width, int height, int mpTarget, int precision = 64)
+    public static (int, int) ResToModelFit(int width, int height, int mpTarget, int precision = 16)
     {
         int mp = width * height;
         double scale = Math.Sqrt(mpTarget / (double)mp);
