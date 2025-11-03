@@ -1795,51 +1795,17 @@ public class WorkflowGenerator
             string img1 = CreateLoadImageNode(images[index], "${promptimages." + index + "}", false);
             JArray img = [img1, 0];
             (int width, int height) = images[index].GetResolution();
-            int genWidth = UserInput.GetImageResolution().Width, genHeight = UserInput.GetImageResolution().Height;
-            int actual = (int)Math.Sqrt(width * height), target = (int)Math.Sqrt(genWidth * genHeight);
-            bool doesFit = true;
-            if (!UserInput.Get(T2IParamTypes.SmartImagePromptResizing, true))
+            int target = UserInput.Get(T2IParamTypes.ResizeImagePrompts);
+            (width, height) = Utilities.ResToModelFit(width, height, target * target);
+            string scaleFix = CreateNode("ImageScale", new JObject()
             {
-                doesFit = Math.Abs(actual - target) <= 64;
-            }
-            else if (CurrentCompatClass() == "flux-1-kontext") // Kontext needs <= target gen size, and is sufficient once input hits 1024.
-            {
-                if (target < 1024)
-                {
-                    doesFit = Math.Abs(actual - target) <= 32;
-                }
-                else if (target >= 1024)
-                {
-                    if (actual < 1024)
-                    {
-                        target = 1024;
-                        doesFit = false;
-                    } // else does fit
-                }
-            }
-            else if (CurrentModelClass().ID.StartsWith("qwen-image-edit-plus") && promptSize)
-            {
-                target = 1024;
-                doesFit = false;
-            }
-            else if (CurrentCompatClass().StartsWith("qwen-image"))
-            {
-                target = 1024; // Qwen image targets 1328 for gen but wants 1024 inputs.
-                doesFit = Math.Abs(actual - target) <= 64;
-            }
-            if (fixSize && !doesFit)
-            {
-                (width, height) = Utilities.ResToModelFit(width, height, target * target);
-                string scaleFix = CreateNode("ImageScale", new JObject()
-                {
-                    ["image"] = img,
-                    ["width"] = width,
-                    ["height"] = height,
-                    ["crop"] = "disabled",
-                    ["upscale_method"] = "lanczos"
+                ["image"] = img,
+                ["width"] = width,
+                ["height"] = height,
+                ["crop"] = "disabled",
+                ["upscale_method"] = "lanczos"
                 });
                 img = [scaleFix, 0];
-            }
             return img;
         }
         return null;
