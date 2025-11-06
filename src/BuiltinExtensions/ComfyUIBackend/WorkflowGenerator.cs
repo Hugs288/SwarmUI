@@ -626,7 +626,7 @@ public class WorkflowGenerator
     public (T2IModel, JArray, JArray, JArray) CreateStandardModelLoader(T2IModel model, string type, string id = null, bool noCascadeFix = false)
     {
         string helper = $"modelloader_{model.Name}_{type}";
-        ModelInfo modelInfo = ModelDictionary.GetModel(CurrentCompatClass());
+        ModelInfo info = ModelDictionary.GetModel(CurrentCompatClass());
         if (NodeHelpers.TryGetValue(helper, out string alreadyLoaded))
         {
             string[] parts = alreadyLoaded.SplitFast(':');
@@ -712,7 +712,6 @@ public class WorkflowGenerator
         {
             step.Action(this);
         }
-        ModelInfo info = ModelDictionary.GetModel(CurrentCompatClass());
         if (LoadingModel is not null)
         {
             // Custom action has loaded it for us.
