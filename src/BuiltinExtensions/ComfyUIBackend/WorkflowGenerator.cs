@@ -745,22 +745,6 @@ public class WorkflowGenerator
         {
             throw new SwarmUserErrorException($"Model {model.Name} appears to be TensorRT lacks metadata to identify its architecture, cannot load");
         }
-        else if (model.ModelClass?.CompatClass == "pixart-ms-sigma-xl-2")
-        {
-            string pixartNode = CreateNode("PixArtCheckpointLoader", new JObject()
-            {
-                ["ckpt_name"] = model.ToString(ModelFolderFormat),
-                ["model"] = model.ModelClass.ID == "pixart-ms-sigma-xl-2-2k" ? "PixArtMS_Sigma_XL_2_2K" : "PixArtMS_Sigma_XL_2"
-            }, id);
-            LoadingModel = [pixartNode, 0];
-            string singleClipLoader = CreateNode("CLIPLoader", new JObject()
-            {
-                ["clip_name"] = requireClipModel("t5xxl", T2IParamTypes.T5XXLModel),
-                ["type"] = "sd3"
-            });
-            LoadingClip = [singleClipLoader, 0];
-            doVaeLoader(null, "stable-diffusion-xl-v1", "sdxl-vae");
-        }
         else if (model.IsDiffusionModelsFormat)
         {
             if (model.Metadata?.SpecialFormat == "gguf")
@@ -889,15 +873,27 @@ public class WorkflowGenerator
             LoadingClip = [clipLoader, 0];
             doVaeLoader(null, "nvidia-sana-1600", "sana-dcae");
         }
+        else if (model.ModelClass?.CompatClass == "pixart-ms-sigma-xl-2")
+        {
+            string pixartNode = CreateNode("PixArtCheckpointLoader", new JObject()
+            {
+                ["ckpt_name"] = model.ToString(ModelFolderFormat),
+                ["model"] = model.ModelClass.ID == "pixart-ms-sigma-xl-2-2k" ? "PixArtMS_Sigma_XL_2_2K" : "PixArtMS_Sigma_XL_2"
+            }, id);
+            LoadingModel = [pixartNode, 0];
+            string singleClipLoader = CreateNode("CLIPLoader", new JObject()
+            {
+                ["clip_name"] = requireClipModel("t5xxl", T2IParamTypes.T5XXLModel),
+                ["type"] = "sd3"
+            });
+            LoadingClip = [singleClipLoader, 0];
+            doVaeLoader(null, "stable-diffusion-xl-v1", "sdxl-vae");
+        }
         else
         {
-            if (model.Metadata?.SpecialFormat == "gguf")
+            if (model.Metadata?.SpecialFormat is "gguf" or "nunchaku" or "nunchaku-fp4")
             {
-                throw new SwarmUserErrorException($"Model '{model.Name}' is in GGUF format, but it's in your main Stable-Diffusion models folder. GGUF files are weird, and need to go in the special 'diffusion_models' folder.");
-            }
-            if (model.Metadata?.SpecialFormat == "nunchaku" || model.Metadata?.SpecialFormat == "nunchaku-fp4")
-            {
-                throw new SwarmUserErrorException($"Model '{model.Name}' is in Nunchaku format, but it's in your main Stable-Diffusion models folder. Nunchaku files are weird, and need to go in the special 'diffusion_models' folder with their own special subfolder.");
+                throw new SwarmUserErrorException($"Model '{model.Name}' is in '{model.Metadata.SpecialFormat}' format, but it's in your main Stable-Diffusion models folder. You should move it into the 'diffusion_models' folder.");
             }
             string modelNode = CreateNode("CheckpointLoaderSimple", new JObject()
             {
@@ -906,301 +902,60 @@ public class WorkflowGenerator
             LoadingModel = [modelNode, 0];
             LoadingClip = [modelNode, 1];
             LoadingVAE = [modelNode, 2];
-            if (CurrentCompatClass().StartsWith("flux-1") && (model.Metadata?.TextEncoders ?? "") == "")
-            {
-                LoadingClip = null;
-                LoadingVAE = null;
-            }
         }
-        if (CurrentCompatClass().StartsWith("stable-diffusion-v3"))
+        if (CurrentCompatClass() is not null)
         {
-            string loaderType = "TripleCLIPLoader";
-            if (requireClipModel("t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf"))
-            {
-                loaderType = "TripleCLIPLoaderGGUF";
-            }
-            string tripleClipLoader = CreateNode(loaderType, new JObject()
-            {
-                ["clip_name1"] = requireClipModel("clip-g", T2IParamTypes.ClipGModel),
-                ["clip_name2"] = requireClipModel("clip-l", T2IParamTypes.ClipLModel),
-                ["clip_name3"] = requireClipModel("t5xxl", T2IParamTypes.T5XXLModel)
-            });
-            LoadingClip = [tripleClipLoader, 0];
-            doVaeLoader(null, "stable-diffusion-v3", "sd35-vae");
-        }
-        else if (CurrentCompatClass().StartsWith("flux-1") && (LoadingClip is null || LoadingVAE is null || UserInput.Get(T2IParamTypes.T5XXLModel) is not null || UserInput.Get(T2IParamTypes.ClipLModel) is not null))
-        {
-            string loaderType = "DualCLIPLoader";
-            if (requireClipModel("t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf"))
-            {
-                loaderType = "DualCLIPLoaderGGUF";
-            }
-            string dualClipLoader = CreateNode(loaderType, new JObject()
-            {
-                ["clip_name1"] = requireClipModel("t5xxl", T2IParamTypes.T5XXLModel),
-                ["clip_name2"] = requireClipModel("clip-l", T2IParamTypes.ClipLModel),
-                ["type"] = "flux"
-            });
-            LoadingClip = [dualClipLoader, 0];
-            doVaeLoader(null, "flux-1", "flux-ae");
-        }
-        else if (CurrentCompatClass() == "auraflow-v1" && (LoadingClip is null || LoadingVAE is null || UserInput.Get(T2IParamTypes.T5XXLModel) is not null))
-        {
-            string loaderType = "CLIPLoader";
-            if (requireClipModel("pile-t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf"))
-            {
-                loaderType = "CLIPLoaderGGUF";
-            }
-            string dualClipLoader = CreateNode(loaderType, new JObject()
-            {
-                ["clip_name"] = requireClipModel("pile-t5xxl", T2IParamTypes.T5XXLModel),
-                ["type"] = "chroma"
-            });
-            LoadingClip = [dualClipLoader, 0];
-            string t5Patch = CreateNode("T5TokenizerOptions", new JObject()
-            {
-                ["clip"] = LoadingClip,
-                ["min_padding"] = 768,
-                ["min_length"] = 768
-            });
-            LoadingClip = [t5Patch, 0];
-            doVaeLoader(null, "stable-diffusion-xl-v1", "sdxl-vae");
-        }
-        else if (CurrentCompatClass() == "chroma" || CurrentCompatClass() == "chroma-radiance")
-        {
-            string loaderType = "CLIPLoader";
-            if (requireClipModel("t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf"))
-            {
-                loaderType = "CLIPLoaderGGUF";
-            }
-            string clipLoader = CreateNode(loaderType, new JObject()
-            {
-                ["clip_name"] = requireClipModel("t5xxl", T2IParamTypes.T5XXLModel),
-                ["type"] = "chroma"
-            });
-            LoadingClip = [clipLoader, 0];
-            string t5Patch = CreateNode("T5TokenizerOptions", new JObject() // TODO: This node is a temp patch
-            {
-                ["clip"] = LoadingClip,
-                ["min_padding"] = 0,
-                ["min_length"] = 0
-            });
-            LoadingClip = [t5Patch, 0];
-            string samplingNode = CreateNode("ModelSamplingAuraFlow", new JObject()
-            {
-                ["model"] = LoadingModel,
-                ["shift"] = UserInput.Get(T2IParamTypes.SigmaShift, 1)
-            });
-            LoadingModel = [samplingNode, 0];
-            if (CurrentCompatClass() == "chroma-radiance")
-            {
-                LoadingVAE = CreateVAELoader("pixel_space");
-            }
-            else
-            {
-                doVaeLoader(null, "flux-1", "flux-ae");
-            }
-        }
-        else if (CurrentCompatClass() == "hidream-i1")
-        {
-            string loaderType = "QuadrupleCLIPLoader";
-            if (requireClipModel("t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf") || requireClipModel("llama3.1-8b", T2IParamTypes.LLaMAModel).EndsWith(".gguf"))
-            {
-                loaderType = "QuadrupleCLIPLoaderGGUF";
-            }
-            string quadClipLoader = CreateNode(loaderType, new JObject()
-            {
-                ["clip_name1"] = requireClipModel("clip-l-hidream", T2IParamTypes.ClipLModel),
-                ["clip_name2"] = requireClipModel("clip-g-hidream", T2IParamTypes.ClipGModel),
-                ["clip_name3"] = requireClipModel("t5xxl", T2IParamTypes.T5XXLModel),
-                ["clip_name4"] = requireClipModel("llama3.1-8b", T2IParamTypes.LLaMAModel)
-            });
-            LoadingClip = [quadClipLoader, 0];
-            doVaeLoader(null, "flux-1", "flux-ae");
-        }
-        else if (CurrentCompatClass().StartsWith("omnigen-"))
-        {
-            string loaderType = "CLIPLoader";
-            if (requireClipModel("qwen-2.5-vl-fp16", T2IParamTypes.QwenModel).EndsWith(".gguf"))
-            {
-                loaderType = "CLIPLoaderGGUF";
-            }
-            string clipLoader = CreateNode(loaderType, new JObject()
-            {
-                ["clip_name"] = requireClipModel("qwen-2.5-vl-fp16", T2IParamTypes.QwenModel),
-            });
-            LoadingClip = [clipLoader, 0];
-            doVaeLoader(null, "flux-1", "flux-ae");
-        }
-        else if (CurrentCompatClass().StartsWith("qwen-image"))
-        {
-            string loaderType = "CLIPLoader";
-            if (requireClipModel("qwen-2.5-vl-7b", T2IParamTypes.QwenModel).EndsWith(".gguf"))
-            {
-                loaderType = "CLIPLoaderGGUF";
-            }
-            string clipLoader = CreateNode(loaderType, new JObject()
-            {
-                ["clip_name"] = requireClipModel("qwen-2.5-vl-7b", T2IParamTypes.QwenModel),
-            });
-            LoadingClip = [clipLoader, 0];
-            doVaeLoader(null, "qwen-image", "qwen-image-vae");
-            string samplingNode = CreateNode("ModelSamplingAuraFlow", new JObject()
-            {
-                ["model"] = LoadingModel,
-                ["shift"] = UserInput.Get(T2IParamTypes.SigmaShift, 3)
-            });
-            LoadingModel = [samplingNode, 0];
-        }
-        else if (CurrentCompatClass() == "hunyuan-image-2_1")
-        {
-            string loaderType = "DualCLIPLoader";
-            if (requireClipModel("qwen-2.5-vl-7b", T2IParamTypes.QwenModel).EndsWith(".gguf"))
-            {
-                loaderType = "DualCLIPLoaderGGUF";
-            }
-            string clipLoader = CreateNode(loaderType, new JObject()
-            {
-                ["clip_name1"] = requireClipModel("qwen-2.5-vl-7b", T2IParamTypes.QwenModel),
-                ["clip_name2"] = requireClipModel("byt5-small-glyphxl", T2IParamTypes.T5XXLModel),
-                ["type"] = "hunyuan_image",
-                ["device"] = "default"
-            });
-            LoadingClip = [clipLoader, 0];
-            doVaeLoader(null, "hunyuan-image-2_1", "hunyuan-image-2_1-vae");
-        }
-        else if (CurrentCompatClass() == "hunyuan-image-2_1-refiner")
-        {
-            string loaderType = "DualCLIPLoader";
-            if (requireClipModel("qwen-2.5-vl-7b", T2IParamTypes.QwenModel).EndsWith(".gguf"))
-            {
-                loaderType = "DualCLIPLoaderGGUF";
-            }
-            string clipLoader = CreateNode(loaderType, new JObject()
-            {
-                ["clip_name1"] = requireClipModel("qwen-2.5-vl-7b", T2IParamTypes.QwenModel),
-                ["clip_name2"] = requireClipModel("byt5-small-glyphxl", T2IParamTypes.T5XXLModel),
-                ["type"] = "hunyuan_image",
-                ["device"] = "default"
-            });
-            LoadingClip = [clipLoader, 0];
-            doVaeLoader(null, "hunyuan-image-2_1-refiner", "hunyuan-image-2_1-refiner-vae");
-        }
-        else if (CurrentCompatClass() == "genmo-mochi-1" && (LoadingClip is null || LoadingVAE is null || UserInput.Get(T2IParamTypes.T5XXLModel) is not null))
-        {
-            string loaderType = "CLIPLoader";
-            if (requireClipModel("t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf"))
-            {
-                loaderType = "CLIPLoaderGGUF";
-            }
-            string clipLoader = CreateNode(loaderType, new JObject()
-            {
-                ["clip_name"] = requireClipModel("t5xxl", T2IParamTypes.T5XXLModel),
-                ["type"] = "mochi"
-            });
-            LoadingClip = [clipLoader, 0];
-            doVaeLoader(null, "genmo-mochi-1", "mochi-vae");
-        }
-        else if (CurrentCompatClass() == "lightricks-ltx-video")
-        {
-            string loaderType = "CLIPLoader";
-            if (requireClipModel("t5xxl", T2IParamTypes.T5XXLModel).EndsWith(".gguf"))
-            {
-                loaderType = "CLIPLoaderGGUF";
-            }
-            string clipLoader = CreateNode(loaderType, new JObject()
-            {
-                ["clip_name"] = requireClipModel("t5xxl", T2IParamTypes.T5XXLModel),
-                ["type"] = "ltxv"
-            });
-            LoadingClip = [clipLoader, 0];
-            doVaeLoader(null, "lightricks-ltx-video", "ltxv-vae");
-        }
-        else if (CurrentCompatClass() == "hunyuan-video")
-        {
-            string loaderType = "DualCLIPLoader";
-            if (requireClipModel("clip-l", T2IParamTypes.ClipLModel).EndsWith(".gguf") || requireClipModel("llava-llama3", T2IParamTypes.LLaVAModel).EndsWith(".gguf"))
-            {
-                loaderType = "DualCLIPLoaderGGUF";
-            }
-            string dualClipLoader = CreateNode(loaderType, new JObject()
-            {
-                ["clip_name1"] = requireClipModel("clip-l", T2IParamTypes.ClipLModel),
-                ["clip_name2"] = requireClipModel("llava-llama3", T2IParamTypes.LLaVAModel),
-                ["type"] = "hunyuan_video"
-            });
-            LoadingClip = [dualClipLoader, 0];
-            doVaeLoader(null, "hunyuan-video", "hunyuan-video-vae");
-        }
-        else if (CurrentCompatClass() == "nvidia-cosmos-1")
-        {
-            string clipLoader = CreateNode("CLIPLoader", new JObject()
-            {
-                ["clip_name"] = requireClipModel("old-t5xxl", T2IParamTypes.T5XXLModel),
-                ["type"] = "cosmos"
-            });
-            LoadingClip = [clipLoader, 0];
-            doVaeLoader(null, "nvidia-cosmos-1", "cosmos-vae");
-        }
-        else if (CurrentCompatClass() == "nvidia-cosmos-predict2")
-        {
-            string clipLoader = CreateNode("CLIPLoader", new JObject()
-            {
-                ["clip_name"] = requireClipModel("old-t5xxl", T2IParamTypes.T5XXLModel),
-                ["type"] = "cosmos"
-            });
-            LoadingClip = [clipLoader, 0];
-            doVaeLoader(null, "wan-21", "wan21-vae");
-        }
-        else if (CurrentCompatClass().StartsWith("wan-21"))
-        {
-            string clipLoader = CreateNode("CLIPLoader", new JObject()
-            {
-                ["clip_name"] = requireClipModel("umt5xxl", T2IParamTypes.T5XXLModel),
-                ["type"] = "wan"
-            });
-            LoadingClip = [clipLoader, 0];
-            doVaeLoader(null, "wan-21", "wan21-vae");
-        }
-        else if (CurrentCompatClass().StartsWith("wan-22"))
-        {
-            string clipLoader = CreateNode("CLIPLoader", new JObject()
-            {
-                ["clip_name"] = requireClipModel("umt5xxl", T2IParamTypes.T5XXLModel),
-                ["type"] = "wan"
-            });
-            LoadingClip = [clipLoader, 0];
-            doVaeLoader(null, "wan-22", "wan22-vae");
-        }
-        else if (CurrentCompatClass() == "auraflow-v1")
-        {
-            string auraNode = CreateNode("ModelSamplingAuraFlow", new JObject()
-            {
-                ["model"] = LoadingModel,
-                ["shift"] = UserInput.Get(T2IParamTypes.SigmaShift, 1.73)
-            });
-            LoadingModel = [auraNode, 0];
-        }
-        else if (CurrentCompatClass() == "lumina-2")
-        {
-            string samplingNode = CreateNode("ModelSamplingAuraFlow", new JObject()
-            {
-                ["model"] = LoadingModel,
-                ["shift"] = UserInput.Get(T2IParamTypes.SigmaShift, 6)
-            });
-            LoadingModel = [samplingNode, 0];
-            if (LoadingClip is null)
-            {
-                string dualClipLoader = CreateNode("CLIPLoader", new JObject()
+            // text encoders
+            if (LoadingClip is null) {
+                Dictionary<string, T2IRegisteredParam<T2IModel>> encoderParams = new()
                 {
-                    ["clip_name"] = requireClipModel("gemma2-2b", null),
-                    ["type"] = "lumina2"
-                });
-                LoadingClip = [dualClipLoader, 0];
+                    ["clip-l"] = T2IParamTypes.ClipLModel, ["clip-g"] = T2IParamTypes.ClipGModel, ["t5xxl"] = T2IParamTypes.T5XXLModel,
+                    ["llava-llama3"] = T2IParamTypes.LLaVAModel, ["llama3.1-8b"] = T2IParamTypes.LLaMAModel, ["qwen-2.5-vl-7b"] = T2IParamTypes.QwenModel,
+                    ["clip-l-hidream"] = T2IParamTypes.ClipLModel, ["clip-g-hidream"] = T2IParamTypes.ClipGModel, ["old-t5xxl"] = T2IParamTypes.T5XXLModel,
+                    ["umt5xxl"] = T2IParamTypes.T5XXLModel, ["gemma2-2b"] = null, ["pile-t5xxl"] = T2IParamTypes.T5XXLModel, ["byt5-small-glyphxl"] = T2IParamTypes.T5XXLModel,
+                    ["qwen-2.5-vl-fp16"] = T2IParamTypes.QwenModel
+                };
+                List<string> encoders = info.TextEncoders ?? [];
+                string[] encoderFiles = encoders.Select(e => requireClipModel(e, encoderParams.GetValueOrDefault(e))).ToArray();
+                bool anyGguf = encoderFiles.Any(f => f.EndsWith(".gguf"));
+                string loaderType = (encoders.Count, anyGguf) switch
+                {
+                    (1, false) => "CLIPLoader", (1, true) => "CLIPLoaderGGUF",
+                    (2, false) => "DualCLIPLoader", (2, true) => "DualCLIPLoaderGGUF",
+                    (3, false) => "TripleCLIPLoader", (3, true) => "TripleCLIPLoaderGGUF",
+                    (4, false) => "QuadrupleCLIPLoader", (4, true) => "QuadrupleCLIPLoaderGGUF",
+                    _ => throw new SwarmUserErrorException($"Unsupported text encoder count: {encoders.Count}")
+                };
+                JObject clipInputs = [];
+                for (int i = 0; i < encoders.Count; i++)
+                {
+                    clipInputs[$"clip_name{i + 1}"] = encoderFiles[i];
+                }
+                if (info.ClipType is not null)
+                {
+                    clipInputs["type"] = info.ClipType;
+                }
+                string clipLoaderNode = CreateNode(loaderType, clipInputs);
+                LoadingClip = [clipLoaderNode, 0];
             }
+            if (info.BaseModel == "auraflow-v1" || info.BaseModel == "chroma" || info.BaseModel == "chroma-radiance")
+            {
+                string t5Patch = CreateNode("T5TokenizerOptions", new JObject()
+                {
+                    ["clip"] = LoadingClip,
+                    ["min_padding"] = info.BaseModel == "auraflow-v1" ? 768 : 0,
+                    ["min_length"] = info.BaseModel == "auraflow-v1" ? 768 : 0
+                });
+                LoadingClip = [t5Patch, 0];
+            }
+            // vae
             if (LoadingVAE is null)
             {
-                doVaeLoader(null, "flux-1", "flux-ae");
+                if (CurrentCompatClass() == "chroma-radiance")
+                {
+                    LoadingVAE = CreateVAELoader("pixel_space");
+                }
+                else doVaeLoader(null, CurrentCompatClass(), info.VAE);
             }
         }
         string predType = model.Metadata?.PredictionType == null ? info.PredType.ToString() : model.Metadata?.PredictionType;
@@ -1230,7 +985,7 @@ public class WorkflowGenerator
                     LoadingModel = [samplingNode, 0];
                 }
             }
-            if (model.Metadata?.PredictionType != null && model.Metadata?.PredictionType != info.PredType.ToString())
+            else if (model.Metadata?.PredictionType != null && model.Metadata?.PredictionType != info.PredType.ToString())
             {
                 string discreteNode = CreateNode("ModelSamplingDiscrete", new JObject()
                 {
