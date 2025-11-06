@@ -1854,7 +1854,7 @@ public class WorkflowGenerator
                 ["pixels"] = image,
                 ["tile_size"] = UserInput.Get(T2IParamTypes.VAETileSize, 256),
                 ["overlap"] = UserInput.Get(T2IParamTypes.VAETileOverlap, 64),
-                ["temporal_size"] = UserInput.Get(T2IParamTypes.VAETemporalTileSize, IsAnyWanModel() ? 9999 : 32),
+                ["temporal_size"] = UserInput.Get(T2IParamTypes.VAETemporalTileSize, CurrentCompatClass().StartsWith("wan-22") || CurrentCompatClass().StartsWith("wan-21") ? 9999 : 32),
                 ["temporal_overlap"] = UserInput.Get(T2IParamTypes.VAETemporalTileOverlap, 4)
             }, id);
         }
