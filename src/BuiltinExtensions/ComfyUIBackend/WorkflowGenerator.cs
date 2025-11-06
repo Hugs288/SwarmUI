@@ -1,5 +1,6 @@
 ﻿using FreneticUtilities.FreneticExtensions;
 using FreneticUtilities.FreneticToolkit;
+using Microsoft.AspNetCore.Identity.Data;
 using Newtonsoft.Json.Linq;
 using SwarmUI.Core;
 using SwarmUI.Media;
@@ -1615,110 +1616,8 @@ public class WorkflowGenerator
     /// <summary>Creates an Empty Latent Image node.</summary>
     public string CreateEmptyImage(int width, int height, int batchSize, string id = null)
     {
-        if (CurrentCompatClass() == "stable-cascade-v1")
-        {
-            return CreateNode("StableCascade_EmptyLatentImage", new JObject()
-            {
-                ["batch_size"] = batchSize,
-                ["compression"] = UserInput.Get(T2IParamTypes.CascadeLatentCompression, 32),
-                ["height"] = height,
-                ["width"] = width
-            }, id);
-        }
-        else if (CurrentCompatClass().StartsWith("stable-diffusion-v3") || CurrentCompatClass().StartsWith("flux-1") || CurrentCompatClass() == "hidream-i1" || CurrentCompatClass() == "chroma" || CurrentCompatClass().StartsWith("omnigen-") || CurrentCompatClass().StartsWith("qwen-image"))
-        {
-            return CreateNode("EmptySD3LatentImage", new JObject()
-            {
-                ["batch_size"] = batchSize,
-                ["height"] = height,
-                ["width"] = width
-            }, id);
-        }
-        else if (CurrentCompatClass() == "hunyuan-image-2_1" || CurrentCompatClass() == "hunyuan-image-2_1-refiner")
-        {
-            return CreateNode("EmptyHunyuanImageLatent", new JObject()
-            {
-                ["batch_size"] = batchSize,
-                ["height"] = height,
-                ["width"] = width
-            }, id);
-        }
-        else if (CurrentCompatClass() == "nvidia-sana-1600")
-        {
-            return CreateNode("EmptySanaLatentImage", new JObject()
-            {
-                ["batch_size"] = batchSize,
-                ["height"] = height,
-                ["width"] = width
-            }, id);
-        }
-        else if (CurrentCompatClass() == "genmo-mochi-1")
-        {
-            return CreateNode("EmptyMochiLatentVideo", new JObject()
-            {
-                ["batch_size"] = batchSize,
-                ["length"] = UserInput.Get(T2IParamTypes.Text2VideoFrames, 25),
-                ["height"] = height,
-                ["width"] = width
-            }, id);
-        }
-        else if (CurrentCompatClass() == "lightricks-ltx-video")
-        {
-            return CreateNode("EmptyLTXVLatentVideo", new JObject()
-            {
-                ["batch_size"] = batchSize,
-                ["length"] = UserInput.Get(T2IParamTypes.Text2VideoFrames, 97),
-                ["height"] = height,
-                ["width"] = width
-            }, id);
-        }
-        else if (CurrentCompatClass().StartsWith("wan-22"))
-        {
-            return CreateNode("Wan22ImageToVideoLatent", new JObject()
-            {
-                ["batch_size"] = batchSize,
-                ["length"] = UserInput.Get(T2IParamTypes.Text2VideoFrames, 81),
-                ["height"] = height,
-                ["width"] = width,
-                ["vae"] = FinalVae
-            }, id);
-        }
-        else if (CurrentCompatClass() == "hunyuan-video" || CurrentCompatClass().StartsWith("wan-21"))
-        {
-            int frames = 73;
-            if (CurrentCompatClass().StartsWith("wan-21"))
-            {
-                frames = 81;
-            }
-            return CreateNode("EmptyHunyuanLatentVideo", new JObject()
-            {
-                ["batch_size"] = batchSize,
-                ["length"] = UserInput.Get(T2IParamTypes.Text2VideoFrames, frames),
-                ["height"] = height,
-                ["width"] = width
-            }, id);
-        }
-        else if (CurrentCompatClass() == "nvidia-cosmos-1")
-        {
-
-            return CreateNode("EmptyCosmosLatentVideo", new JObject()
-            {
-                ["batch_size"] = batchSize,
-                ["length"] = UserInput.Get(T2IParamTypes.Text2VideoFrames, 121),
-                ["height"] = height,
-                ["width"] = width
-            }, id);
-        }
-        else if (CurrentCompatClass() == "chroma-radiance")
-        {
-            return CreateNode("EmptyChromaRadianceLatentImage", new JObject()
-            {
-                ["batch_size"] = batchSize,
-                ["height"] = height,
-                ["width"] = width
-            }, id);
-        }
-        else if (UserInput.Get(ComfyUIBackendExtension.ShiftedLatentAverageInit, false))
+        ModelInfo info = ModelDictionary.GetModel(CurrentCompatClass());
+        if (info.Architecture.ToString() == "UNet" && UserInput.Get(ComfyUIBackendExtension.ShiftedLatentAverageInit, false))
         {
             double offA = 0, offB = 0, offC = 0, offD = 0;
             switch (CurrentCompatClass())
@@ -1749,36 +1648,26 @@ public class WorkflowGenerator
                 ["off_d"] = offD
             }, id);
         }
-        ModelInfo info = ModelDictionary.GetModel(CurrentCompatClass());
-        string latentNode = info?.LatentNode;
-        if (!string.IsNullOrEmpty(latentNode))
-        {
-            JObject inputs = new()
-            {
-                ["batch_size"] = batchSize,
-                ["height"] = height,
-                ["width"] = width
-            };
-            if (info.Type is ModelType.TextToVideo or ModelType.ImageToVideo or ModelType.TextAndImageToVideo)
-            {
-                inputs["length"] = UserInput.Get(T2IParamTypes.Text2VideoFrames);
-            }
-            if (info.Architecture == ModelArchitecture.Cascade)
-            {
-                inputs["compression"] = UserInput.Get(T2IParamTypes.CascadeLatentCompression);
-            }
-            if (latentNode == "Wan22ImageToVideoLatent")
-            {
-                inputs["vae"] = FinalVae;
-            }
-            return CreateNode(latentNode, inputs, id);
-        }
-        return CreateNode("EmptyLatentImage", new JObject()
+        string latentNode = info.LatentNode;
+        JObject inputs = new()
         {
             ["batch_size"] = batchSize,
             ["height"] = height,
             ["width"] = width
-        }, id);
+        };
+        if (info.Type is ModelType.TextToVideo or ModelType.ImageToVideo or ModelType.TextAndImageToVideo)
+        {
+            inputs["length"] = UserInput.Get(T2IParamTypes.Text2VideoFrames, 25);
+        }
+        if (info.Architecture == ModelArchitecture.Cascade)
+        {
+            inputs["compression"] = UserInput.Get(T2IParamTypes.CascadeLatentCompression, 32);
+        }
+        if (latentNode == "Wan22ImageToVideoLatent")
+        {
+            inputs["vae"] = FinalVae;
+        }
+        return CreateNode(latentNode, inputs, id);
     }
 
     /// <summary>Enables Differential Diffusion on the current model if is enabled in user settings.</summary>
