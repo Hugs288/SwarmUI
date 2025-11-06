@@ -903,7 +903,7 @@ public class WorkflowGenerator
             LoadingClip = [modelNode, 1];
             LoadingVAE = [modelNode, 2];
         }
-        if (CurrentCompatClass() is not null)
+        if (info is not null)
         {
             // text encoders
             if (LoadingClip is null) {
@@ -929,7 +929,7 @@ public class WorkflowGenerator
                 JObject clipInputs = [];
                 for (int i = 0; i < encoders.Count; i++)
                 {
-                    clipInputs[$"clip_name{i + 1}"] = encoderFiles[i];
+                    clipInputs[$"clip_name{(i == 0 ? "" : (i + 1))}"] = encoderFiles[i];
                 }
                 if (info.ClipType is not null)
                 {
