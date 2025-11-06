@@ -1540,18 +1540,20 @@ public class WorkflowGenerator
         {
             string img1 = CreateLoadImageNode(images[index], "${promptimages." + index + "}", false);
             JArray img = [img1, 0];
-            (int width, int height) = images[index].GetResolution();
-            int target = UserInput.Get(T2IParamTypes.ResizeImagePrompts);
-            (width, height) = Utilities.ResToModelFit(width, height, target * target);
-            string scaleFix = CreateNode("ImageScale", new JObject()
+            if (UserInput.TryGet(T2IParamTypes.ResizeImagePrompts, out int target))
             {
-                ["image"] = img,
-                ["width"] = width,
-                ["height"] = height,
-                ["crop"] = "disabled",
-                ["upscale_method"] = "lanczos"
+                (int width, int height) = images[index].GetResolution();
+                (width, height) = Utilities.ResToModelFit(width, height, target * target);
+                string scaleFix = CreateNode("ImageScale", new JObject()
+                {
+                    ["image"] = img,
+                    ["width"] = width,
+                    ["height"] = height,
+                    ["crop"] = "disabled",
+                    ["upscale_method"] = "lanczos"
                 });
                 img = [scaleFix, 0];
+            }
             return img;
         }
         return null;
