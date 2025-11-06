@@ -1209,12 +1209,27 @@ public class WorkflowGenerator
         {
             if (predType == "sd3")
             {
-                string samplingNode = CreateNode(info.SigmaShiftNode, new JObject()
+                if (CurrentCompatClass().StartsWith("flux-1"))
                 {
-                    ["model"] = LoadingModel,
-                    ["shift"] = UserInput.Get(T2IParamTypes.SigmaShift, 3)
-                });
-                LoadingModel = [samplingNode, 0];
+                    string samplingNode = CreateNode("ModelSamplingFlux", new JObject()
+                    {
+                        ["model"] = LoadingModel,
+                        ["width"] = UserInput.GetImageResolution().Width,
+                        ["height"] = UserInput.GetImageResolution().Height,
+                        ["max_shift"] = UserInput.Get(T2IParamTypes.SigmaShift, 3),
+                        ["base_shift"] = 0.5 // TODO: Does this need an input?
+                    });
+                    LoadingModel = [samplingNode, 0];
+                }
+                else
+                {
+                    string samplingNode = CreateNode(info.SigmaShiftNode, new JObject()
+                    {
+                        ["model"] = LoadingModel,
+                        ["shift"] = UserInput.Get(T2IParamTypes.SigmaShift, 3)
+                    });
+                    LoadingModel = [samplingNode, 0];
+                }
             }
             if (model.Metadata?.PredictionType != null && model.Metadata?.PredictionType != info.PredType.ToString())
             {
@@ -1225,30 +1240,6 @@ public class WorkflowGenerator
                     ["zsnr"] = predType.Contains("zsnr")
                 });
                 LoadingModel = [discreteNode, 0];
-            }
-        }
-        if (UserInput.TryGet(T2IParamTypes.SigmaShift, out double shiftVal))
-        {
-            if (CurrentCompatClass().StartsWith("flux-1"))
-            {
-                string samplingNode = CreateNode("ModelSamplingFlux", new JObject()
-                {
-                    ["model"] = LoadingModel,
-                    ["width"] = UserInput.GetImageResolution().Width,
-                    ["height"] = UserInput.GetImageResolution().Height,
-                    ["max_shift"] = shiftVal,
-                    ["base_shift"] = 0.5 // TODO: Does this need an input?
-                });
-                LoadingModel = [samplingNode, 0];
-            }
-            else if (CurrentCompatClass() == "hunyuan-video" || CurrentCompatClass() == "hunyuan-image-2_1" || CurrentCompatClass().StartsWith("wan-21") || CurrentCompatClass().StartsWith("wan-22") || CurrentCompatClass() == "hidream-i1" || CurrentCompatClass().StartsWith("stable-diffusion-v3"))
-            {
-                string samplingNode = CreateNode("ModelSamplingSD3", new JObject()
-                {
-                    ["model"] = LoadingModel,
-                    ["shift"] = shiftVal
-                });
-                LoadingModel = [samplingNode, 0];
             }
         }
         foreach (WorkflowGenStep step in ModelGenSteps.Where(s => s.Priority > -100))
