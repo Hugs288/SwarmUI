@@ -626,6 +626,7 @@ public class WorkflowGenerator
     public (T2IModel, JArray, JArray, JArray) CreateStandardModelLoader(T2IModel model, string type, string id = null, bool noCascadeFix = false)
     {
         string helper = $"modelloader_{model.Name}_{type}";
+        ModelInfo modelInfo = ModelDictionary.GetModel(CurrentCompatClass());
         if (NodeHelpers.TryGetValue(helper, out string alreadyLoaded))
         {
             string[] parts = alreadyLoaded.SplitFast(':');
@@ -912,7 +913,6 @@ public class WorkflowGenerator
                 LoadingVAE = null;
             }
         }
-        string predType = model.Metadata?.PredictionType;
         if (CurrentCompatClass().StartsWith("stable-diffusion-v3"))
         {
             string loaderType = "TripleCLIPLoader";
@@ -1204,18 +1204,19 @@ public class WorkflowGenerator
                 doVaeLoader(null, "flux-1", "flux-ae");
             }
         }
-        else if (!string.IsNullOrWhiteSpace(predType) && LoadingModel is not null)
+        string predType = model.Metadata?.PredictionType == null ? info.PredType.ToString() : model.Metadata?.PredictionType;
+        if (!string.IsNullOrWhiteSpace(predType) && LoadingModel is not null)
         {
             if (predType == "sd3")
             {
-                string samplingNode = CreateNode("ModelSamplingSD3", new JObject()
+                string samplingNode = CreateNode(info.SigmaShiftNode, new JObject()
                 {
                     ["model"] = LoadingModel,
                     ["shift"] = UserInput.Get(T2IParamTypes.SigmaShift, 3)
                 });
                 LoadingModel = [samplingNode, 0];
             }
-            else
+            if (model.Metadata?.PredictionType != null && model.Metadata?.PredictionType != info.PredType.ToString())
             {
                 string discreteNode = CreateNode("ModelSamplingDiscrete", new JObject()
                 {
