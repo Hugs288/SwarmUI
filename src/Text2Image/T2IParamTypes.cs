@@ -374,6 +374,9 @@ public class T2IParamTypes
         ResizeImagePrompts = Register<int>(new("Resize Image Prompts", "When enabled, Resizes input image prompt(s) will be resized scale with the chosen resolution.\nIf disabled, images will be either unscaled, or scaled to the current generation parameter size.\nThis is mostly to prevent overly large images being used as conditioning, which can cause issues.\nIt is recommended to leave this at default.",
             "1024", IgnoreIf: "false", Min: 64, ViewMin: 256, Max: 16384, ViewMax: 4096, Step: 32, Examples: ["512", "768", "1024"], ViewType: ParamViewType.POT_SLIDER, Group: GroupImagePrompting, Toggleable: true
             ));
+        ClipVisionModel = Register<T2IModel>(new("CLIP-Vision Model", "Which CLIP-Vision model to use as an image encoder, for certain image-input tasks.",
+            "", IgnoreIf: "", Group: GroupImagePrompting, Subtype: "ClipVision", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 16.5, ChangeWeight: 7
+            ));
         // ================================================ Core ================================================
         GroupCore = new("Core Parameters", Toggles: false, Open: true, OrderPriority: -50);
         Images = Register<int>(new("Images", "How many images to generate at once.",
@@ -678,9 +681,6 @@ public class T2IParamTypes
             ));
         ClipGModel = Register<T2IModel>(new("CLIP-G Model", "Which CLIP-G model to use as a text encoder, for SD3 style 'diffusion_models' folder models.",
             "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 16, ChangeWeight: 7
-            ));
-        ClipVisionModel = Register<T2IModel>(new("CLIP-Vision Model", "Which CLIP-Vision model to use as an image encoder, for certain image-input tasks.",
-            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "ClipVision", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 16.5, ChangeWeight: 7
             ));
         T5XXLModel = Register<T2IModel>(new("T5-XXL Model", "Which T5-XXL model to use as a text encoder, for SD3/Flux style 'diffusion_models' folder models.\nAlso used for Wan's umt5, and Hunyuan Image's ByT5 small glyph XL.",
             "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 17, ChangeWeight: 7
