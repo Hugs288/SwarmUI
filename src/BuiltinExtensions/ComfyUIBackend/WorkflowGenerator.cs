@@ -141,7 +141,7 @@ public class WorkflowGenerator
     /// <summary>Returns true if the current main text input model model is a Video model (as opposed to image).</summary>
     public bool IsVideoModel()
     {
-        return CurrentCompatClass() == "lightricks-ltx-video" || CurrentCompatClass() == "genmo-mochi-1" || CurrentCompatClass() == "hunyuan-video" || CurrentCompatClass() == "nvidia-cosmos-1" || CurrentCompatClass().StartsWith("wan-21") || CurrentCompatClass().StartsWith("wan-22");
+        return CurrentCompatClass() is "lightricks-ltx-video" or "genmo-mochi-1" or "hunyuan-video" or "nvidia-cosmos-1" || CurrentCompatClass().StartsWith("wan-21") || CurrentCompatClass().StartsWith("wan-22");
     }
 
     /// <summary>Gets a dynamic ID within a semi-stable registration set.</summary>
@@ -332,7 +332,7 @@ public class WorkflowGenerator
             float tencWeight = tencWeights is null || i >= tencWeights.Count ? weight : float.Parse(tencWeights[i]);
             string id = GetStableDynamicID(2000, i);
             string specialFormat = FinalLoadedModel?.Metadata?.SpecialFormat;
-            if (specialFormat == "nunchaku" || specialFormat == "nunchaku-fp4")
+            if (specialFormat is "nunchaku" or "nunchaku-fp4")
             {
                 // This is dirty to use this alt node, but it seems required for Nunchaku.
                 string newId = CreateNode("NunchakuFluxLoraLoader", new JObject()
@@ -748,7 +748,7 @@ public class WorkflowGenerator
         }
         else if (model.IsDiffusionModelsFormat)
         {
-            if (model.Metadata?.SpecialFormat == "gguf")
+            if (model.Metadata?.SpecialFormat is "gguf")
             {
                 if (!Features.Contains("gguf"))
                 {
@@ -760,7 +760,7 @@ public class WorkflowGenerator
                 }, id);
                 LoadingModel = [modelNode, 0];
             }
-            else if (model.Metadata?.SpecialFormat == "nunchaku" || model.Metadata?.SpecialFormat == "nunchaku-fp4")
+            else if (model.Metadata?.SpecialFormat is "nunchaku" or "nunchaku-fp4")
             {
                 if (!Features.Contains("nunchaku"))
                 {
@@ -797,7 +797,7 @@ public class WorkflowGenerator
                     throw new SwarmUserErrorException($"Cannot load nunchaku for model architecture '{model.ModelClass?.ID}'. If other model architectures are supported in the Nunchaku source, please report this on the SwarmUI GitHub or Discord.");
                 }
             }
-            else if (model.Metadata?.SpecialFormat == "bnb_nf4" || model.Metadata?.SpecialFormat == "bnb_fp4")
+            else if (model.Metadata?.SpecialFormat is "bnb_nf4" or "bnb_fp4")
             {
                 if (!Features.Contains("bnb_nf4"))
                 {
@@ -819,7 +819,7 @@ public class WorkflowGenerator
                 string dtype = UserInput.Get(ComfyUIBackendExtension.PreferredDType, "automatic");
                 if (dtype == "automatic")
                 {
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || model.Metadata?.SpecialFormat == "fp8_scaled" || CurrentCompatClass() == "nvidia-cosmos-predict2" || CurrentCompatClass().StartsWith("omnigen-") || CurrentCompatClass() == "chroma" || CurrentCompatClass() == "chroma-radiance") // TODO: Or AMD?
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || model.Metadata?.SpecialFormat == "fp8_scaled" || CurrentCompatClass() is "nvidia-cosmos-predict2" or "chroma" or "chroma-radiance" || CurrentCompatClass().StartsWith("omnigen-")) // TODO: Or AMD?
                     {
                         dtype = "default";
                     }
@@ -842,7 +842,7 @@ public class WorkflowGenerator
             LoadingClip = null;
             LoadingVAE = null;
         }
-        else if (model.Metadata?.SpecialFormat == "bnb_nf4" || model.Metadata?.SpecialFormat == "bnb_fp4")
+        else if (model.Metadata?.SpecialFormat is "bnb_nf4" or "bnb_fp4")
         {
             if (!Features.Contains("bnb_nf4"))
             {
@@ -857,7 +857,7 @@ public class WorkflowGenerator
             LoadingClip = [modelNode, 1];
             LoadingVAE = [modelNode, 2];
         }
-        else if (CurrentCompatClass() == "nvidia-sana-1600")
+        else if (CurrentCompatClass() is "nvidia-sana-1600")
         {
             string sanaNode = CreateNode("SanaCheckpointLoader", new JObject()
             {
@@ -874,7 +874,7 @@ public class WorkflowGenerator
             LoadingClip = [clipLoader, 0];
             doVaeLoader(null, "nvidia-sana-1600", "sana-dcae");
         }
-        else if (model.ModelClass?.CompatClass == "pixart-ms-sigma-xl-2")
+        else if (CurrentCompatClass() is "pixart-ms-sigma-xl-2")
         {
             string pixartNode = CreateNode("PixArtCheckpointLoader", new JObject()
             {
@@ -939,7 +939,7 @@ public class WorkflowGenerator
                 string clipLoaderNode = CreateNode(loaderType, clipInputs);
                 LoadingClip = [clipLoaderNode, 0];
             }
-            if (info.BaseModel == "auraflow-v1" || info.BaseModel == "chroma" || info.BaseModel == "chroma-radiance")
+            if (info.BaseModel is "auraflow-v1" or "chroma" or "chroma-radiance")
             {
                 string t5Patch = CreateNode("T5TokenizerOptions", new JObject()
                 {
@@ -1144,7 +1144,7 @@ public class WorkflowGenerator
         {
             defscheduler ??= "simple";
         }
-        else if (CurrentCompatClass() == "chroma" || CurrentCompatClass() == "chroma-radiance")
+        else if (CurrentCompatClass() is "chroma" or "chroma-radiance")
         {
             defscheduler ??= "beta";
         }
@@ -1779,7 +1779,7 @@ public class WorkflowGenerator
             g.FinalLoadedModel = VideoModel;
             (VideoModel, Model, JArray clip, Vae) = g.CreateStandardModelLoader(VideoModel, "image2video", null, true);
             string promptText = Prompt;
-            if (VideoModel.ModelClass?.ID == "hunyuan-video-i2v" || VideoModel.ModelClass?.ID == "hunyuan-video-i2v-v2")
+            if (VideoModel.ModelClass?.ID is "hunyuan-video-i2v" or "hunyuan-video-i2v-v2")
             {
                 promptText = $"<image:{g.FinalImageOut[0]},{g.FinalImageOut[1]}>{Prompt}";
             }
@@ -1862,7 +1862,7 @@ public class WorkflowGenerator
                 DefaultSampler = "res_multistep";
                 DefaultScheduler = "karras";
             }
-            else if (VideoModel.ModelClass?.ID == "hunyuan-video-i2v" || VideoModel.ModelClass?.ID == "hunyuan-video-i2v-v2")
+            else if (VideoModel.ModelClass?.ID is "hunyuan-video-i2v" or "hunyuan-video-i2v-v2")
             {
                 VideoFPS ??= 24;
                 Frames ??= 53;
