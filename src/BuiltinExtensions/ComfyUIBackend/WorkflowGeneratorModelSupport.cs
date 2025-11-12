@@ -89,7 +89,7 @@ public partial class WorkflowGenerator
             string vaeFile = defaultVal;
             string nodeId = null;
             CommonModels.ModelInfo knownFile = knownName is null ? null : CommonModels.Known[knownName];
-            if (!g.NoVAEOverride && g.UserInput.TryGet(T2IParamTypes.VAE, out T2IModel vaeModel))
+            if (g.UserInput.TryGet(T2IParamTypes.VAE, out T2IModel vaeModel))
             {
                 vaeFile = vaeModel.Name;
                 nodeId = "11";
@@ -124,7 +124,7 @@ public partial class WorkflowGenerator
             g.LoadingVAE = g.CreateVAELoader(vaeFile, nodeId);
         }
 
-        string RequireClipModel(string name, string url, string hash, T2IRegisteredParam<T2IModel> param)
+        public string RequireClipModel(string id, T2IRegisteredParam<T2IModel> param)
         {
             if (param is not null && g.UserInput.TryGet(param, out T2IModel model))
             {
@@ -145,95 +145,10 @@ public partial class WorkflowGenerator
                 return name;
             }
             string filePath = Utilities.CombinePathWithAbsolute(Program.ServerSettings.Paths.ActualModelRoot, Program.ServerSettings.Paths.SDClipFolder.Split(';')[0], name);
-            g.DownloadModel(name, filePath, url, hash);
+            g.DownloadModel(name, filePath, info.URL, info.Hash);
+            Program.RefreshAllModelSets();
             ClipModelsValid.TryAdd(name, name);
             return name;
-        }
-
-        public string GetT5XXLModel()
-        {
-            return RequireClipModel("t5xxl_enconly.safetensors", "https://huggingface.co/mcmonkey/google_t5-v1_1-xxl_encoderonly/resolve/main/t5xxl_fp8_e4m3fn.safetensors", "7d330da4816157540d6bb7838bf63a0f02f573fc48ca4d8de34bb0cbfd514f09", T2IParamTypes.T5XXLModel);
-        }
-
-        public string GetOldT5XXLModel()
-        {
-            return RequireClipModel("old_t5xxl_cosmos.safetensors", "https://huggingface.co/comfyanonymous/cosmos_1.0_text_encoder_and_VAE_ComfyUI/resolve/main/text_encoders/oldt5_xxl_fp8_e4m3fn_scaled.safetensors", "1d0dd711ec9866173d4b39e86db3f45e1614a4e3f84919556f854f773352ea81", T2IParamTypes.T5XXLModel);
-        }
-
-        public string GetUniMaxT5XXLModel()
-        {
-            return RequireClipModel("umt5_xxl_fp8_e4m3fn_scaled.safetensors", "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors", "c3355d30191f1f066b26d93fba017ae9809dce6c627dda5f6a66eaa651204f68", T2IParamTypes.T5XXLModel);
-        }
-
-        public string GetByT5SmallGlyphxl_tenc()
-        {
-            return RequireClipModel("byt5_small_glyphxl_fp16.safetensors", "https://huggingface.co/Comfy-Org/HunyuanImage_2.1_ComfyUI/resolve/main/split_files/text_encoders/byt5_small_glyphxl_fp16.safetensors", "516910bb4c9b225370290e40585d1b0e6c8cd3583690f7eec2f7fb593990fb48", T2IParamTypes.T5XXLModel);
-        }
-
-        public string GetPileT5XLAuraFlow()
-        {
-            return RequireClipModel("pile_t5xl_auraflow.safetensors", "https://huggingface.co/fal/AuraFlow-v0.2/resolve/main/text_encoder/model.safetensors", "0a07449cf1141c0ec86e653c00465f6f0d79c6e58a2c60c8bcf4203d0e4ec4f6", T2IParamTypes.T5XXLModel);
-        }
-        public string GetOmniQwenModel()
-        {
-            return RequireClipModel("qwen_2.5_vl_fp16.safetensors", "https://huggingface.co/Comfy-Org/Omnigen2_ComfyUI_repackaged/resolve/main/split_files/text_encoders/qwen_2.5_vl_fp16.safetensors", "ba05dd266ad6a6aa90f7b2936e4e775d801fb233540585b43933647f8bc4fbc3", T2IParamTypes.QwenModel);
-        }
-
-        public string GetQwenImage25_7b_tenc()
-        {
-            return RequireClipModel("qwen_2.5_vl_7b_fp8_scaled.safetensors", "https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors", "cb5636d852a0ea6a9075ab1bef496c0db7aef13c02350571e388aea959c5c0b4", T2IParamTypes.QwenModel);
-        }
-
-        public string GetClipLModel()
-        {
-            if (g.UserInput.TryGet(T2IParamTypes.ClipLModel, out T2IModel model))
-            {
-                return model.Name;
-            }
-            if (Program.T2IModelSets["Clip"].Models.ContainsKey("clip_l_sdxl_base.safetensors"))
-            {
-                return "clip_l_sdxl_base.safetensors";
-            }
-            return RequireClipModel("clip_l.safetensors", "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/text_encoder/model.fp16.safetensors", "660c6f5b1abae9dc498ac2d21e1347d2abdb0cf6c0c0c8576cd796491d9a6cdd", T2IParamTypes.ClipLModel);
-        }
-
-        public string GetClipGModel()
-        {
-            if (g.UserInput.TryGet(T2IParamTypes.ClipGModel, out T2IModel model))
-            {
-                return model.Name;
-            }
-            if (Program.T2IModelSets["Clip"].Models.ContainsKey("clip_g_sdxl_base.safetensors"))
-            {
-                return "clip_g_sdxl_base.safetensors";
-            }
-            return RequireClipModel("clip_g.safetensors", "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/text_encoder_2/model.fp16.safetensors", "ec310df2af79c318e24d20511b601a591ca8cd4f1fce1d8dff822a356bcdb1f4", T2IParamTypes.ClipGModel);
-        }
-
-        public string GetHiDreamClipLModel()
-        {
-            return RequireClipModel("long_clip_l_hi_dream.safetensors", "https://huggingface.co/Comfy-Org/HiDream-I1_ComfyUI/resolve/main/split_files/text_encoders/clip_l_hidream.safetensors", "706fdb88e22e18177b207837c02f4b86a652abca0302821f2bfa24ac6aea4f71", T2IParamTypes.ClipLModel);
-        }
-
-        public string GetHiDreamClipGModel()
-        {
-            return RequireClipModel("long_clip_g_hi_dream.safetensors", "https://huggingface.co/Comfy-Org/HiDream-I1_ComfyUI/resolve/main/split_files/text_encoders/clip_g_hidream.safetensors", "3771e70e36450e5199f30bad61a53faae85a2e02606974bcda0a6a573c0519d5", T2IParamTypes.ClipGModel);
-        }
-
-        public string GetLlava3Model()
-        {
-            return RequireClipModel("llava_llama3_fp8_scaled.safetensors", "https://huggingface.co/Comfy-Org/HunyuanVideo_repackaged/resolve/main/split_files/text_encoders/llava_llama3_fp8_scaled.safetensors", "2f0c3ad255c282cead3f078753af37d19099cafcfc8265bbbd511f133e7af250", T2IParamTypes.LLaVAModel);
-        }
-
-        public string GetLlama31_8b_Model()
-        {
-            return RequireClipModel("llama_3.1_8b_instruct_fp8_scaled.safetensors", "https://huggingface.co/Comfy-Org/HiDream-I1_ComfyUI/resolve/main/split_files/text_encoders/llama_3.1_8b_instruct_fp8_scaled.safetensors", "9f86897bbeb933ef4fd06297740edb8dd962c94efcd92b373a11460c33765ea6", T2IParamTypes.LLaMAModel);
-        }
-
-        public string GetGemma2Model()
-        {
-            // TODO: Selector param?
-            return RequireClipModel("gemma_2_2b_fp16.safetensors", "https://huggingface.co/Comfy-Org/Lumina_Image_2.0_Repackaged/resolve/main/split_files/text_encoders/gemma_2_2b_fp16.safetensors", "29761442862f8d064d3f854bb6fabf4379dcff511a7f6ba9405a00bd0f7e2dbd", null);
         }
     }
 
@@ -242,6 +157,7 @@ public partial class WorkflowGenerator
     {
         ModelLoadHelpers helpers = new(this);
         string helper = $"modelloader_{model.Name}_{type}";
+        ModelInfo info = ModelDictionary.GetModel(CurrentCompatClass());
         if (NodeHelpers.TryGetValue(helper, out string alreadyLoaded))
         {
             string[] parts = alreadyLoaded.SplitFast(':');
@@ -304,11 +220,11 @@ public partial class WorkflowGenerator
             LoadingModel = [pixartNode, 0];
             string singleClipLoader = CreateNode("CLIPLoader", new JObject()
             {
-                ["clip_name"] = helpers.GetT5XXLModel(),
+                ["clip_name"] = helpers.RequireClipModel("t5xxl", T2IParamTypes.T5XXLModel),
                 ["type"] = "sd3"
             });
             LoadingClip = [singleClipLoader, 0];
-            helpers.DoVaeLoader(UserInput.SourceSession?.User?.Settings?.VAEs?.DefaultSDXLVAE, "stable-diffusion-xl-v1", "sdxl-vae");
+            helpers.DoVaeLoader(null, "stable-diffusion-xl-v1", "sdxl-vae");
         }
         else if (model.IsDiffusionModelsFormat)
         {
@@ -448,11 +364,11 @@ public partial class WorkflowGenerator
             LoadingModel = [pixartNode, 0];
             string singleClipLoader = CreateNode("CLIPLoader", new JObject()
             {
-                ["clip_name"] = requireClipModel("t5xxl", T2IParamTypes.T5XXLModel),
+                ["clip_name"] = helpers.RequireClipModel("t5xxl", T2IParamTypes.T5XXLModel),
                 ["type"] = "sd3"
             });
             LoadingClip = [singleClipLoader, 0];
-            doVaeLoader(null, "stable-diffusion-xl-v1", "sdxl-vae");
+            helpers.DoVaeLoader(null, "stable-diffusion-xl-v1", "sdxl-vae");
         }
         else
         {
@@ -481,7 +397,7 @@ public partial class WorkflowGenerator
                     ["qwen-2.5-vl-fp16"] = T2IParamTypes.QwenModel
                 };
                 List<string> encoders = info.TextEncoders ?? [];
-                string[] encoderFiles = encoders.Select(e => requireClipModel(e, encoderParams.GetValueOrDefault(e))).ToArray();
+                string[] encoderFiles = encoders.Select(e => helpers.RequireClipModel(e, encoderParams.GetValueOrDefault(e))).ToArray();
                 bool anyGguf = encoderFiles.Any(f => f.EndsWith(".gguf"));
                 string loaderType = (encoders.Count, anyGguf) switch
                 {
@@ -520,7 +436,7 @@ public partial class WorkflowGenerator
                 {
                     LoadingVAE = CreateVAELoader("pixel_space");
                 }
-                else doVaeLoader(null, CurrentCompatClass(), info.VAE);
+                else helpers.DoVaeLoader(null, CurrentCompatClass(), info.VAE);
             }
         }
         string predType = model.Metadata?.PredictionType == null ? info.PredType.ToString() : model.Metadata?.PredictionType;
