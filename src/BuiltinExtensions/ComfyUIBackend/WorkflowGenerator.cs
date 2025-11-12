@@ -131,9 +131,15 @@ public partial class WorkflowGenerator
     }
 
     /// <summary>Gets the current loaded model compat class.</summary>
-    public string CurrentCompatClass()
+    public T2IModelCompatClass CurrentCompat()
     {
         return CurrentModelClass()?.CompatClass;
+    }
+
+    /// <summary>Gets the current loaded model compat class ID.</summary>
+    public string CurrentCompatClass()
+    {
+        return CurrentModelClass()?.CompatClass?.ID;
     }
 
     /// <summary>Gets a dynamic ID within a semi-stable registration set.</summary>
@@ -332,6 +338,16 @@ public partial class WorkflowGenerator
                     ["model"] = model,
                     ["lora_name"] = lora.ToString(ModelFolderFormat),
                     ["lora_strength"] = weight
+                }, id, false);
+                model = [newId, 0];
+            }
+            else if (CurrentCompat()?.LorasTargetTextEnc == false || tencWeight == 0)
+            {
+                string newId = CreateNode("LoraLoaderModelOnly", new JObject()
+                {
+                    ["model"] = model,
+                    ["lora_name"] = lora.ToString(ModelFolderFormat),
+                    ["strength_model"] = weight,
                 }, id, false);
                 model = [newId, 0];
             }
@@ -1334,7 +1350,7 @@ public partial class WorkflowGenerator
 
         public void PrepFullCond(WorkflowGenerator g)
         {
-            if (VideoModel.ModelClass?.CompatClass == "lightricks-ltx-video")
+            if (VideoModel.ModelClass?.CompatClass?.ID == "lightricks-ltx-video")
             {
                 VideoFPS ??= 24;
                 Frames ??= 97;
@@ -1374,7 +1390,7 @@ public partial class WorkflowGenerator
                 DefaultSampler = "euler";
                 DefaultScheduler = "ltxv-image";
             }
-            else if (VideoModel.ModelClass?.CompatClass == "nvidia-cosmos-1")
+            else if (VideoModel.ModelClass?.CompatClass?.ID == "nvidia-cosmos-1")
             {
                 VideoFPS ??= 24;
                 Frames ??= 121;
@@ -1428,7 +1444,7 @@ public partial class WorkflowGenerator
                 DefaultSampler = "euler";
                 DefaultScheduler = "simple";
             }
-            else if (VideoModel.ModelClass?.CompatClass == "hunyuan-video") // skyreels
+            else if (VideoModel.ModelClass?.CompatClass?.ID == "hunyuan-video") // skyreels
             {
                 VideoFPS ??= 24;
                 Frames ??= 73;
@@ -1520,7 +1536,7 @@ public partial class WorkflowGenerator
                 DefaultSampler = "euler";
                 DefaultScheduler = "simple";
             }
-            else if (VideoModel.ModelClass.CompatClass.StartsWith("wan-21-14b") || VideoModel.ModelClass.CompatClass.StartsWith("wan-21-1_3b"))
+            else if (VideoModel.ModelClass.CompatClass?.ID.StartsWith("wan-21-14b") || VideoModel.ModelClass.CompatClass?.ID.StartsWith("wan-21-1_3b"))
             {
                 VideoFPS ??= 24;
                 Frames ??= 81;
@@ -1618,7 +1634,7 @@ public partial class WorkflowGenerator
                 DefaultSampler = "euler";
                 DefaultScheduler = "simple";
             }
-            else if (VideoModel.ModelClass?.CompatClass == "wan-22-5b")
+            else if (VideoModel.ModelClass?.CompatClass?.ID == "wan-22-5b")
             {
                 VideoFPS ??= 22;
                 Frames ??= 49;

@@ -10,6 +10,12 @@ namespace SwarmUI.Builtin_ComfyUIBackend;
 
 public partial class WorkflowGenerator
 {
+    /// <summary>
+    /// Map of model architecture IDs to Func(int width, int height, int batchSize, string id = null) => string NodeID.
+    /// Used for custom model classes to implement <see cref="CreateEmptyImage"/>
+    /// </summary>
+    public static Dictionary<string, Func<int, int, int, string, string>> EmptyImageCreators = [];
+
     public bool IsVideoModel()
     {
         return CurrentCompatClass() is "lightricks-ltx-video" or "genmo-mochi-1" or "hunyuan-video" or "nvidia-cosmos-1" || CurrentCompatClass().StartsWith("wan-21") || CurrentCompatClass().StartsWith("wan-22");
@@ -18,11 +24,15 @@ public partial class WorkflowGenerator
     /// <summary>Creates an Empty Latent Image node.</summary>
     public string CreateEmptyImage(int width, int height, int batchSize, string id = null)
     {
+        if (EmptyImageCreators.TryGetValue(CurrentModelClass()?.ID, out Func<int, int, int, string, string> creator))
+        {
+            return creator(width, height, batchSize, id);
+        }
         ModelInfo info = ModelDictionary.GetModel(CurrentCompatClass());
         if (info.Architecture.ToString() == "UNet" && UserInput.Get(ComfyUIBackendExtension.ShiftedLatentAverageInit, false))
         {
             double offA = 0, offB = 0, offC = 0, offD = 0;
-            switch (CurrentCompatClass())
+            switch (FinalLoadedModel.ModelClass?.CompatClass?.ID)
             {
                 case "stable-diffusion-v1": // https://github.com/Birch-san/sdxl-diffusion-decoder/blob/4ba89847c02db070b766969c0eca3686a1e7512e/script/inference_decoder.py#L112
                 case "stable-diffusion-v2-512":
@@ -72,22 +82,51 @@ public partial class WorkflowGenerator
         return CreateNode(latentNode, inputs, id);
     }
 
-    /// <summary>Creates a model loader and adapts it with any registered model adapters, and returns (Model, Clip, VAE).</summary>
-    public (T2IModel, JArray, JArray, JArray) CreateStandardModelLoader(T2IModel model, string type, string id = null, bool noCascadeFix = false)
+    public class ModelLoadHelpers(WorkflowGenerator g)
     {
-        string helper = $"modelloader_{model.Name}_{type}";
-        ModelInfo info = ModelDictionary.GetModel(CurrentCompatClass());
-        if (NodeHelpers.TryGetValue(helper, out string alreadyLoaded))
+        public void DoVaeLoader(string defaultVal, string compatClass, string knownName)
         {
-            string[] parts = alreadyLoaded.SplitFast(':');
-            LoadingModel = [parts[0], int.Parse(parts[1])];
-            LoadingClip = parts[2].Length == 0 ? null : [parts[2], int.Parse(parts[3])];
-            LoadingVAE = parts[4].Length == 0 ? null : [parts[4], int.Parse(parts[5])];
-            return (model, LoadingModel, LoadingClip, LoadingVAE);
+            string vaeFile = defaultVal;
+            string nodeId = null;
+            CommonModels.ModelInfo knownFile = knownName is null ? null : CommonModels.Known[knownName];
+            if (!g.NoVAEOverride && g.UserInput.TryGet(T2IParamTypes.VAE, out T2IModel vaeModel))
+            {
+                vaeFile = vaeModel.Name;
+                nodeId = "11";
+            }
+            if (vaeFile == "None")
+            {
+                vaeFile = null;
+            }
+            if (string.IsNullOrWhiteSpace(vaeFile) && knownFile is not null && Program.T2IModelSets["VAE"].Models.ContainsKey(knownFile.FileName))
+            {
+                vaeFile = knownFile.FileName;
+            }
+            if (string.IsNullOrWhiteSpace(vaeFile))
+            {
+                vaeModel = Program.T2IModelSets["VAE"].Models.Values.FirstOrDefault(m => m.ModelClass?.CompatClass?.ID == compatClass);
+                if (vaeModel is not null)
+                {
+                    Logs.Debug($"Auto-selected first available VAE of compat class '{compatClass}', VAE '{vaeModel.Name}' will be applied");
+                    vaeFile = vaeModel.Name;
+                }
+            }
+            if (string.IsNullOrWhiteSpace(vaeFile))
+            {
+                if (knownFile is null)
+                {
+                    throw new SwarmUserErrorException("No default VAE for this model found, please download its VAE and set it as default in User Settings");
+                }
+                vaeFile = knownFile.FileName;
+                knownFile.DownloadNow().Wait();
+                Program.RefreshAllModelSets();
+            }
+            g.LoadingVAE = g.CreateVAELoader(vaeFile, nodeId);
         }
-        string requireClipModel(string id, T2IRegisteredParam<T2IModel> param)
+
+        string RequireClipModel(string name, string url, string hash, T2IRegisteredParam<T2IModel> param)
         {
-            if (param is not null && UserInput.TryGet(param, out T2IModel model))
+            if (param is not null && g.UserInput.TryGet(param, out T2IModel model))
             {
                 return model.Name;
             }
@@ -105,51 +144,111 @@ public partial class WorkflowGenerator
                 ClipModelsValid.TryAdd(name, name);
                 return name;
             }
-            string folder = Program.T2IModelSets[info.FolderType].FolderPaths[0];
-            string filePath = Utilities.CombinePathWithAbsolute(Program.ServerSettings.Paths.ActualModelRoot, folder, name);
-            DownloadModel(name, filePath, info.URL, info.Hash);
-            Program.RefreshAllModelSets();
+            string filePath = Utilities.CombinePathWithAbsolute(Program.ServerSettings.Paths.ActualModelRoot, Program.ServerSettings.Paths.SDClipFolder.Split(';')[0], name);
+            g.DownloadModel(name, filePath, url, hash);
             ClipModelsValid.TryAdd(name, name);
             return name;
         }
-        void doVaeLoader(string defaultVal, string compatClass, string knownName)
+
+        public string GetT5XXLModel()
         {
-            string vaeFile = defaultVal;
-            string nodeId = null;
-            CommonModels.ModelInfo knownFile = knownName is null ? null : CommonModels.Known[knownName];
-            if (UserInput.TryGet(T2IParamTypes.VAE, out T2IModel vaeModel))
+            return RequireClipModel("t5xxl_enconly.safetensors", "https://huggingface.co/mcmonkey/google_t5-v1_1-xxl_encoderonly/resolve/main/t5xxl_fp8_e4m3fn.safetensors", "7d330da4816157540d6bb7838bf63a0f02f573fc48ca4d8de34bb0cbfd514f09", T2IParamTypes.T5XXLModel);
+        }
+
+        public string GetOldT5XXLModel()
+        {
+            return RequireClipModel("old_t5xxl_cosmos.safetensors", "https://huggingface.co/comfyanonymous/cosmos_1.0_text_encoder_and_VAE_ComfyUI/resolve/main/text_encoders/oldt5_xxl_fp8_e4m3fn_scaled.safetensors", "1d0dd711ec9866173d4b39e86db3f45e1614a4e3f84919556f854f773352ea81", T2IParamTypes.T5XXLModel);
+        }
+
+        public string GetUniMaxT5XXLModel()
+        {
+            return RequireClipModel("umt5_xxl_fp8_e4m3fn_scaled.safetensors", "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors", "c3355d30191f1f066b26d93fba017ae9809dce6c627dda5f6a66eaa651204f68", T2IParamTypes.T5XXLModel);
+        }
+
+        public string GetByT5SmallGlyphxl_tenc()
+        {
+            return RequireClipModel("byt5_small_glyphxl_fp16.safetensors", "https://huggingface.co/Comfy-Org/HunyuanImage_2.1_ComfyUI/resolve/main/split_files/text_encoders/byt5_small_glyphxl_fp16.safetensors", "516910bb4c9b225370290e40585d1b0e6c8cd3583690f7eec2f7fb593990fb48", T2IParamTypes.T5XXLModel);
+        }
+
+        public string GetPileT5XLAuraFlow()
+        {
+            return RequireClipModel("pile_t5xl_auraflow.safetensors", "https://huggingface.co/fal/AuraFlow-v0.2/resolve/main/text_encoder/model.safetensors", "0a07449cf1141c0ec86e653c00465f6f0d79c6e58a2c60c8bcf4203d0e4ec4f6", T2IParamTypes.T5XXLModel);
+        }
+        public string GetOmniQwenModel()
+        {
+            return RequireClipModel("qwen_2.5_vl_fp16.safetensors", "https://huggingface.co/Comfy-Org/Omnigen2_ComfyUI_repackaged/resolve/main/split_files/text_encoders/qwen_2.5_vl_fp16.safetensors", "ba05dd266ad6a6aa90f7b2936e4e775d801fb233540585b43933647f8bc4fbc3", T2IParamTypes.QwenModel);
+        }
+
+        public string GetQwenImage25_7b_tenc()
+        {
+            return RequireClipModel("qwen_2.5_vl_7b_fp8_scaled.safetensors", "https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors", "cb5636d852a0ea6a9075ab1bef496c0db7aef13c02350571e388aea959c5c0b4", T2IParamTypes.QwenModel);
+        }
+
+        public string GetClipLModel()
+        {
+            if (g.UserInput.TryGet(T2IParamTypes.ClipLModel, out T2IModel model))
             {
-                vaeFile = vaeModel.Name;
-                nodeId = "11";
+                return model.Name;
             }
-            if (vaeFile == "None")
+            if (Program.T2IModelSets["Clip"].Models.ContainsKey("clip_l_sdxl_base.safetensors"))
             {
-                vaeFile = null;
+                return "clip_l_sdxl_base.safetensors";
             }
-            if (string.IsNullOrWhiteSpace(vaeFile) && knownFile is not null && Program.T2IModelSets["VAE"].Models.ContainsKey(knownFile.FileName))
+            return RequireClipModel("clip_l.safetensors", "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/text_encoder/model.fp16.safetensors", "660c6f5b1abae9dc498ac2d21e1347d2abdb0cf6c0c0c8576cd796491d9a6cdd", T2IParamTypes.ClipLModel);
+        }
+
+        public string GetClipGModel()
+        {
+            if (g.UserInput.TryGet(T2IParamTypes.ClipGModel, out T2IModel model))
             {
-                vaeFile = knownFile.FileName;
+                return model.Name;
             }
-            if (string.IsNullOrWhiteSpace(vaeFile))
+            if (Program.T2IModelSets["Clip"].Models.ContainsKey("clip_g_sdxl_base.safetensors"))
             {
-                vaeModel = Program.T2IModelSets["VAE"].Models.Values.FirstOrDefault(m => m.ModelClass?.CompatClass == compatClass);
-                if (vaeModel is not null)
-                {
-                    Logs.Debug($"Auto-selected first available VAE of compat class '{compatClass}', VAE '{vaeModel.Name}' will be applied");
-                    vaeFile = vaeModel.Name;
-                }
+                return "clip_g_sdxl_base.safetensors";
             }
-            if (string.IsNullOrWhiteSpace(vaeFile))
-            {
-                if (knownFile is null)
-                {
-                    throw new SwarmUserErrorException("No default VAE for this model found, please download its VAE and set it as default in User Settings");
-                }
-                vaeFile = knownFile.FileName;
-                knownFile.DownloadNow().Wait();
-                Program.RefreshAllModelSets();
-            }
-            LoadingVAE = CreateVAELoader(vaeFile, nodeId);
+            return RequireClipModel("clip_g.safetensors", "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/text_encoder_2/model.fp16.safetensors", "ec310df2af79c318e24d20511b601a591ca8cd4f1fce1d8dff822a356bcdb1f4", T2IParamTypes.ClipGModel);
+        }
+
+        public string GetHiDreamClipLModel()
+        {
+            return RequireClipModel("long_clip_l_hi_dream.safetensors", "https://huggingface.co/Comfy-Org/HiDream-I1_ComfyUI/resolve/main/split_files/text_encoders/clip_l_hidream.safetensors", "706fdb88e22e18177b207837c02f4b86a652abca0302821f2bfa24ac6aea4f71", T2IParamTypes.ClipLModel);
+        }
+
+        public string GetHiDreamClipGModel()
+        {
+            return RequireClipModel("long_clip_g_hi_dream.safetensors", "https://huggingface.co/Comfy-Org/HiDream-I1_ComfyUI/resolve/main/split_files/text_encoders/clip_g_hidream.safetensors", "3771e70e36450e5199f30bad61a53faae85a2e02606974bcda0a6a573c0519d5", T2IParamTypes.ClipGModel);
+        }
+
+        public string GetLlava3Model()
+        {
+            return RequireClipModel("llava_llama3_fp8_scaled.safetensors", "https://huggingface.co/Comfy-Org/HunyuanVideo_repackaged/resolve/main/split_files/text_encoders/llava_llama3_fp8_scaled.safetensors", "2f0c3ad255c282cead3f078753af37d19099cafcfc8265bbbd511f133e7af250", T2IParamTypes.LLaVAModel);
+        }
+
+        public string GetLlama31_8b_Model()
+        {
+            return RequireClipModel("llama_3.1_8b_instruct_fp8_scaled.safetensors", "https://huggingface.co/Comfy-Org/HiDream-I1_ComfyUI/resolve/main/split_files/text_encoders/llama_3.1_8b_instruct_fp8_scaled.safetensors", "9f86897bbeb933ef4fd06297740edb8dd962c94efcd92b373a11460c33765ea6", T2IParamTypes.LLaMAModel);
+        }
+
+        public string GetGemma2Model()
+        {
+            // TODO: Selector param?
+            return RequireClipModel("gemma_2_2b_fp16.safetensors", "https://huggingface.co/Comfy-Org/Lumina_Image_2.0_Repackaged/resolve/main/split_files/text_encoders/gemma_2_2b_fp16.safetensors", "29761442862f8d064d3f854bb6fabf4379dcff511a7f6ba9405a00bd0f7e2dbd", null);
+        }
+    }
+
+    /// <summary>Creates a model loader and adapts it with any registered model adapters, and returns (Model, Clip, VAE).</summary>
+    public (T2IModel, JArray, JArray, JArray) CreateStandardModelLoader(T2IModel model, string type, string id = null, bool noCascadeFix = false)
+    {
+        ModelLoadHelpers helpers = new(this);
+        string helper = $"modelloader_{model.Name}_{type}";
+        if (NodeHelpers.TryGetValue(helper, out string alreadyLoaded))
+        {
+            string[] parts = alreadyLoaded.SplitFast(':');
+            LoadingModel = [parts[0], int.Parse(parts[1])];
+            LoadingClip = parts[2].Length == 0 ? null : [parts[2], int.Parse(parts[3])];
+            LoadingVAE = parts[4].Length == 0 ? null : [parts[4], int.Parse(parts[5])];
+            return (model, LoadingModel, LoadingClip, LoadingVAE);
         }
         IsDifferentialDiffusion = false;
         LoadingModelType = type;
@@ -194,6 +293,22 @@ public partial class WorkflowGenerator
         else if (model.Name.EndsWith(".engine"))
         {
             throw new SwarmUserErrorException($"Model {model.Name} appears to be TensorRT lacks metadata to identify its architecture, cannot load");
+        }
+        else if (model.ModelClass?.CompatClass?.ID == "pixart-ms-sigma-xl-2")
+        {
+            string pixartNode = CreateNode("PixArtCheckpointLoader", new JObject()
+            {
+                ["ckpt_name"] = model.ToString(ModelFolderFormat),
+                ["model"] = model.ModelClass.ID == "pixart-ms-sigma-xl-2-2k" ? "PixArtMS_Sigma_XL_2_2K" : "PixArtMS_Sigma_XL_2"
+            }, id);
+            LoadingModel = [pixartNode, 0];
+            string singleClipLoader = CreateNode("CLIPLoader", new JObject()
+            {
+                ["clip_name"] = helpers.GetT5XXLModel(),
+                ["type"] = "sd3"
+            });
+            LoadingClip = [singleClipLoader, 0];
+            helpers.DoVaeLoader(UserInput.SourceSession?.User?.Settings?.VAEs?.DefaultSDXLVAE, "stable-diffusion-xl-v1", "sdxl-vae");
         }
         else if (model.IsDiffusionModelsFormat)
         {
@@ -321,7 +436,7 @@ public partial class WorkflowGenerator
                 ["dtype"] = "default"
             });
             LoadingClip = [clipLoader, 0];
-            doVaeLoader(null, "nvidia-sana-1600", "sana-dcae");
+            helpers.DoVaeLoader(null, "nvidia-sana-1600", "sana-dcae");
         }
         else if (CurrentCompatClass() is "pixart-ms-sigma-xl-2")
         {
