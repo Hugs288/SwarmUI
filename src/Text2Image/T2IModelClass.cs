@@ -111,8 +111,8 @@ public record class T2IModelCompatClass
             ["text_encoders"] = new JArray(TextEncoders),
             ["clip_type"] = ClipType,
             ["vae"] = VAE,
-            ["default_parameters"] = new JArray(DefaultParameters)
-            ["loras_target_text_enc"] = LorasTargetTextEnc,
+            ["default_parameters"] = new JArray(DefaultParameters),
+            ["loras_target_text_enc"] = LorasTargetTextEnc
         };
     }
 }
