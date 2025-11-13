@@ -28,7 +28,7 @@ public partial class WorkflowGenerator
         {
             return creator(width, height, batchSize, id);
         }
-        ModelInfo info = ModelDictionary.GetModel(CurrentCompatClass());
+        T2IModelCompatClass info = T2IModelClassSorter.CompatClasses.GetValueOrDefault(CurrentCompatClass());
         if (info.Architecture.ToString() == "UNet" && UserInput.Get(ComfyUIBackendExtension.ShiftedLatentAverageInit, false))
         {
             double offA = 0, offB = 0, offC = 0, offD = 0;
@@ -67,7 +67,7 @@ public partial class WorkflowGenerator
             ["height"] = height,
             ["width"] = width
         };
-        if (info.Type is ModelType.TextToVideo or ModelType.ImageToVideo or ModelType.TextAndImageToVideo)
+        if (info.ModelType is ModelType.TextToVideo or ModelType.ImageToVideo or ModelType.TextAndImageToVideo)
         {
             inputs["length"] = UserInput.Get(T2IParamTypes.Text2VideoFrames, 25);
         }
@@ -157,7 +157,7 @@ public partial class WorkflowGenerator
     {
         ModelLoadHelpers helpers = new(this);
         string helper = $"modelloader_{model.Name}_{type}";
-        ModelInfo info = ModelDictionary.GetModel(CurrentCompatClass());
+        T2IModelCompatClass info = T2IModelClassSorter.CompatClasses.GetValueOrDefault(CurrentCompatClass());
         if (NodeHelpers.TryGetValue(helper, out string alreadyLoaded))
         {
             string[] parts = alreadyLoaded.SplitFast(':');
@@ -419,13 +419,13 @@ public partial class WorkflowGenerator
                 string clipLoaderNode = CreateNode(loaderType, clipInputs);
                 LoadingClip = [clipLoaderNode, 0];
             }
-            if (info.BaseModel is "auraflow-v1" or "chroma" or "chroma-radiance")
+            if (CurrentCompatClass() is "auraflow-v1" or "chroma" or "chroma-radiance")
             {
                 string t5Patch = CreateNode("T5TokenizerOptions", new JObject()
                 {
                     ["clip"] = LoadingClip,
-                    ["min_padding"] = info.BaseModel == "auraflow-v1" ? 768 : 0,
-                    ["min_length"] = info.BaseModel == "auraflow-v1" ? 768 : 0
+                    ["min_padding"] = CurrentCompatClass() == "auraflow-v1" ? 768 : 0,
+                    ["min_length"] = CurrentCompatClass() == "auraflow-v1" ? 768 : 0
                 });
                 LoadingClip = [t5Patch, 0];
             }

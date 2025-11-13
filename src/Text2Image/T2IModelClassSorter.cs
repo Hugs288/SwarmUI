@@ -31,49 +31,214 @@ public class T2IModelClassSorter
         return clazz;
     }
 
-    /// <summary>Core Compatibility classes.</summary>
-    public static T2IModelCompatClass CompatSdv1 = RegisterCompat(new() { ID = "stable-diffusion-v1", ShortCode = "SDv1" }),
-        CompatSdv2_512 = RegisterCompat(new() { ID = "stable-diffusion-v2-512", ShortCode = "SDv2" }),
-        CompatSdv2_768_v = RegisterCompat(new() { ID = "stable-diffusion-v2-768-v", ShortCode = "SDv2" }),
-        CompatSdv2Turbo = RegisterCompat(new() { ID = "stable-diffusion-v2-turbo", ShortCode = "SDv2" }),
-        CompatSdxl = RegisterCompat(new() { ID = "stable-diffusion-xl-v1", ShortCode = "SDXL" }),
-        CompatSdxlRefiner = RegisterCompat(new() { ID = "stable-diffusion-xl-v1-refiner", ShortCode = "SDXL" }),
-        CompatSvd = RegisterCompat(new() { ID = "stable-video-diffusion-img2vid-v1", ShortCode = "SVD", IsImage2Video = true }),
-        CompatGenmoMochi = RegisterCompat(new() { ID = "genmo-mochi-1", IsText2Video = true, ShortCode = "Mochi" }),
-        CompatCascade = RegisterCompat(new() { ID = "stable-cascade-v1", ShortCode = "Casc" }),
-        CompatSd3Medium = RegisterCompat(new() { ID = "stable-diffusion-v3-medium", ShortCode = "SD3m" }),
-        CompatSd35Large = RegisterCompat(new() { ID = "stable-diffusion-v3.5-large", ShortCode = "SD35L" }),
-        CompatSd35Medium = RegisterCompat(new() { ID = "stable-diffusion-v3.5-medium", ShortCode = "SD35m" }),
-        CompatSd3 = RegisterCompat(new() { ID = "stable-diffusion-v3", ShortCode = "SD3" }),
-        CompatFlux = RegisterCompat(new() { ID = "flux-1", ShortCode = "Flux-1" }),
-        CompatFluxSchnell = RegisterCompat(new() { ID = "flux-1-schnell", ShortCode = "Flux-1S" }),
-        CompatFluxDev = RegisterCompat(new() { ID = "flux-1-dev", ShortCode = "Flux-1D" }),
-        CompatWan21 = RegisterCompat(new() { ID = "wan-21", ShortCode = "Wan14B", LorasTargetTextEnc = false, IsText2Video = true, IsImage2Video = true }),
-        CompatWan21_1_3b_t2v = RegisterCompat(new() { ID = "wan-21-1_3b_t2v", ShortCode = "Wan1B-T2V", LorasTargetTextEnc = false, IsText2Video = true }),
-        CompatWan21_1_3b_i2v = RegisterCompat(new() { ID = "wan-21-1_3b_i2v", ShortCode = "Wan1B-I2V", LorasTargetTextEnc = false, IsImage2Video = true }),
-        CompatWan21_14b_t2v = RegisterCompat(new() { ID = "wan-21-14b-t2v", ShortCode = "Wan14B-T2V", LorasTargetTextEnc = false, IsText2Video = true }),
-        CompatWan21_14b_i2v = RegisterCompat(new() { ID = "wan-21-14b-i2v", ShortCode = "Wan14B-I2V", LorasTargetTextEnc = false, IsImage2Video = true }),
-
-        CompatWan22_5b = RegisterCompat(new() { ID = "wan-22-5b", ShortCode = "Wan5B", LorasTargetTextEnc = false, IsText2Video = true, IsImage2Video = true }),
-        CompatHunyuanVideo = RegisterCompat(new() { ID = "hunyuan-video", ShortCode = "HyVid", IsText2Video = true, IsImage2Video = true }),
-        CompatCosmos = RegisterCompat(new() { ID = "nvidia-cosmos-1", ShortCode = "Cosmos", IsText2Video = true, IsImage2Video = true }),
-        CompatCosmosPredict = RegisterCompat(new() { ID = "nvidia-cosmos-predict2-t2i", ShortCode = "Pred2", IsText2Video = true }),
-        CompatChroma = RegisterCompat(new() { ID = "chroma", ShortCode = "Chroma" }),
-        CompatChromaRadiance = RegisterCompat(new() { ID = "chroma-radiance", ShortCode = "ChrRad" }),
-        CompatAltDiffusion = RegisterCompat(new() { ID = "alt_diffusion_v1", ShortCode = "AltD" }),
-        CompatLtxv = RegisterCompat(new() { ID = "lightricks-ltx-video", ShortCode = "LTXV" }),
-        CompatSana = RegisterCompat(new() { ID = "nvidia-sana-1600", ShortCode = "Sana" }),
-        CompatLumina2 = RegisterCompat(new() { ID = "lumina-2", ShortCode = "Lumi2" }),
-        CompatHiDreamI1 = RegisterCompat(new() { ID = "hidream-i1", ShortCode = "HiDrm" }),
-        CompatHiDreamI1Edit = RegisterCompat(new() { ID = "hidream-i1-edit", ShortCode = "HiDrm-E" }),
-        CompatOmniGen2 = RegisterCompat(new() { ID = "omnigen-2", ShortCode = "Omni2" }),
-        CompatQwenImage = RegisterCompat(new() { ID = "qwen-image", ShortCode = "Qwen" }),
-        CompatQwenImageEdit = RegisterCompat(new() { ID = "qwen-imag-edite", ShortCode = "Qwen-E" }),
-        CompatAuraFlow = RegisterCompat(new() { ID = "auraflow-v1", ShortCode = "Aura" }),
-        CompatHunyuanImage2_1 = RegisterCompat(new() { ID = "hunyuan-image-2_1", ShortCode = "HyImg" }),
-        CompatHunyuanImage2_1Refiner = RegisterCompat(new() { ID = "hunyuan-image-2_1-refiner", ShortCode = "HyImg" }),
-        CompatSegmindStableDiffusion1b = RegisterCompat(new() { ID = "segmind-stable-diffusion-1b", ShortCode = "SSD1B" }),
-        CompatPixartMsSigmaXl2 = RegisterCompat(new() { ID = "pixart-ms-sigma-xl-2", ShortCode = "Pix" });
+    public static T2IModelCompatClass CompatSdv1 = RegisterCompat(new() {
+            ID = "stable-diffusion-v1", ShortCode = "SDv1",
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.UNet, PredType = PredictionType.eps,
+            TextEncoders = ["clip-l"], ClipType = "stable-diffusion", VAE = "sd1-vae",
+        }),
+        CompatSdv2_512 = RegisterCompat(new() {
+            ID = "stable-diffusion-v2-512", ShortCode = "SDv2",
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.UNet, PredType = PredictionType.eps,
+            TextEncoders = ["clip-g"], ClipType = "stable-diffusion", VAE = "sd1-vae",
+        }),
+        CompatSdv2_768_v = RegisterCompat(new() {
+            ID = "stable-diffusion-v2-768-v", ShortCode = "SDv2",
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.UNet, PredType = PredictionType.v_prediction,
+            TextEncoders = ["clip-g"], ClipType = "stable-diffusion", VAE = "sd1-vae",
+        }),
+        CompatSdxl = RegisterCompat(new() {
+            ID = "stable-diffusion-xl-v1", ShortCode = "SDXL",
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.UNet, PredType = PredictionType.eps,
+            TextEncoders = ["clip-l", "clip-g"], ClipType = "stable-diffusion", VAE = "sdxl-vae",
+        }),
+        CompatSdxlRefiner = RegisterCompat(new() {
+            ID = "stable-diffusion-xl-v1-refiner", ShortCode = "SDXL",
+            ModelType = ModelType.Refiner, Architecture = ModelArchitecture.UNet, PredType = PredictionType.eps,
+            TextEncoders = ["clip-l", "clip-g"], ClipType = "stable-diffusion", VAE = "sdxl-vae"
+        }),
+        CompatSvd = RegisterCompat(new() {
+            ID = "stable-video-diffusion-img2vid-v1", ShortCode = "SVD",
+            ModelType = ModelType.ImageToVideo, Architecture = ModelArchitecture.UNet, PredType = PredictionType.eps,
+            ClipType = null, VAE = "stable-diffusion",
+            DefaultParameters = ["cfgscale:2.5", "steps:25", "text2videoframes:14", "scheduler:karras"]
+        }),
+        CompatGenmoMochi = RegisterCompat(new() {
+            ID = "genmo-mochi-1", ShortCode = "Mochi",
+            ModelType = ModelType.TextToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.eps,
+            TextEncoders = ["t5xxl"], ClipType = "mochi", VAE = "mochi-vae", LatentNode = "EmptyMochiLatentVideo",
+            DefaultParameters = ["cfgscale:7", "steps:20", "text2videoframes:25"]
+        }),
+        CompatCascade = RegisterCompat(new() {
+            ID = "stable-cascade-v1", ShortCode = "Casc",
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Cascade, PredType = PredictionType.sd3,
+            ClipType = "stable-cascade", VAE = null, LatentNode = "StableCascade_EmptyLatentImage",
+            DefaultParameters = ["cfgscale:4", "steps:20", "sampler:euler_ancestral", "cascadelatentcompression:32"]
+        }),
+        CompatSd3 = RegisterCompat(new() {
+            ID = "stable-diffusion-v3-medium", ShortCode = "SD3m",
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["clip-l", "clip-g", "t5xxl"], ClipType = "sd3", VAE = "sd35-vae", LatentNode = "EmptySD3LatentImage",
+            DefaultParameters = ["cfgscale:4", "steps:20", "scheduler:sgm_uniform", "sigmashift:3.0"]
+        }),
+        CompatSd35 = RegisterCompat(new() {
+            ID = "stable-diffusion-v3.5-medium", ShortCode = "SD35",
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["clip-l", "clip-g", "t5xxl"], ClipType = "sd3", VAE = "sd35-vae", LatentNode = "EmptySD3LatentImage",
+            DefaultParameters = ["cfgscale:4", "steps:20", "scheduler:sgm_uniform", "sigmashift:3.0"]
+        }),
+        CompatFlux = RegisterCompat(new() {
+            ID = "flux-1", ShortCode = "Flux-1", ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["clip-l", "t5xxl"], ClipType = "flux", VAE = "flux-ae", LatentNode = "EmptySD3LatentImage"
+        }),
+        CompatFluxSchnell = RegisterCompat(new() {
+            ID = "flux-1-schnell", ShortCode = "Flux-1S",
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["clip-l", "t5xxl"], ClipType = "flux", VAE = "flux-ae", LatentNode = "EmptySD3LatentImage",
+            DefaultParameters = ["cfgscale:1", "steps:4"]
+        }),
+        CompatFluxDev = RegisterCompat(new() {
+            ID = "flux-1-dev", ShortCode = "Flux-1D",
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["clip-l", "t5xxl"], ClipType = "flux", VAE = "flux-ae", LatentNode = "EmptySD3LatentImage",
+            DefaultParameters = ["cfgscale:1", "steps:20"]
+        }),
+        CompatWan21 = RegisterCompat(new() {
+            ID = "wan-21", ShortCode = "Wan14B", LorasTargetTextEnc = false,
+            ModelType = ModelType.TextAndImageToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["umt5xxl"], ClipType = "wan", VAE = "wan21-vae", LatentNode = "EmptyHunyuanLatentVideo" }),
+        CompatWan21_1_3b_t2v = RegisterCompat(new() {
+            ID = "wan-21-1_3b_t2v", ShortCode = "Wan1B-T2V", LorasTargetTextEnc = false,
+            ModelType = ModelType.TextToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["umt5xxl"], ClipType = "wan", VAE = "wan21-vae", LatentNode = "EmptyHunyuanLatentVideo",
+            DefaultParameters = ["cfgscale:6", "steps:30", "text2videoframes:81", "sampler:uni_pc", "sigmashift:8"]
+        }),
+        CompatWan21_1_3b_i2v = RegisterCompat(new() {
+            ID = "wan-21-1_3b_i2v", ShortCode = "Wan1B-I2V", LorasTargetTextEnc = false,
+            ModelType = ModelType.ImageToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["umt5xxl"], ClipType = "wan", VAE = "wan21-vae", LatentNode = "EmptyHunyuanLatentVideo",
+            DefaultParameters = ["cfgscale:6", "steps:30", "text2videoframes:81", "sampler:uni_pc", "sigmashift:8"]
+        }),
+        CompatWan21_14b_t2v = RegisterCompat(new() {
+            ID = "wan-21-14b-t2v", ShortCode = "Wan14B-T2V", LorasTargetTextEnc = false,
+            ModelType = ModelType.TextToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["umt5xxl"], ClipType = "wan", VAE = "wan21-vae", LatentNode = "EmptyHunyuanLatentVideo",
+            DefaultParameters = ["cfgscale:6", "steps:30", "text2videoframes:81", "sampler:uni_pc", "sigmashift:8"]
+        }),
+        CompatWan21_14b_i2v = RegisterCompat(new() {
+            ID = "wan-21-14b-i2v", ShortCode = "Wan14B-I2V", LorasTargetTextEnc = false,
+            ModelType = ModelType.ImageToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["umt5xxl"], ClipType = "wan", VAE = "wan21-vae", LatentNode = "EmptyHunyuanLatentVideo",
+            DefaultParameters = ["cfgscale:6", "steps:30", "text2videoframes:81", "sampler:uni_pc", "sigmashift:8"]
+        }),
+        CompatWan22_5b = RegisterCompat(new() {
+            ID = "wan-22-5b", ShortCode = "Wan5B", LorasTargetTextEnc = false,
+            ModelType = ModelType.TextAndImageToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["umt5xxl"], ClipType = "wan", VAE = "wan22-vae", LatentNode = "Wan22ImageToVideoLatent",
+            DefaultParameters = ["cfgscale:5", "steps:20", "text2videoframes:81", "sigmashift:3.0"]
+        }),
+        CompatHunyuanVideo = RegisterCompat(new() {
+            ID = "hunyuan-video", ShortCode = "HyVid",
+            ModelType = ModelType.TextToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["clip-l", "llava-llama3"], ClipType = "hunyuan_video", VAE = "hunyuan-video-vae", LatentNode = "EmptyHunyuanLatentVideo",
+            DefaultParameters = ["cfgscale:6", "steps:20", "text2videoframes:73", "sigmashift:7.0"]
+        }),
+        CompatCosmos = RegisterCompat(new() {
+            ID = "nvidia-cosmos-1", ShortCode = "Cosmos",
+            ModelType = ModelType.TextAndImageToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.eps,
+            TextEncoders = ["old-t5xxl"], ClipType = "cosmos", VAE = "cosmos-vae", LatentNode = "EmptyCosmosLatentVideo",
+            DefaultParameters = ["cfgscale:6.5", "steps:20", "sampler:res_multistep", "scheduler:karras", "text2videoframes:121"]
+        }),
+        CompatCosmosPredict = RegisterCompat(new() {
+            ID = "nvidia-cosmos-predict2-t2i", ShortCode = "Pred2",
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.eps,
+            TextEncoders = ["old-t5xxl"], ClipType = "cosmos", VAE = "wan21-vae",
+            DefaultParameters = ["cfgscale:4", "steps:30"]
+        }),
+        CompatChroma = RegisterCompat(new() {
+            ID = "chroma", ShortCode = "Chroma",
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["t5xxl"], ClipType = "chroma", VAE = "flux-ae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingAuraFlow",
+            DefaultParameters = ["cfgscale:3.5", "steps:26", "scheduler:beta", "sigmashift:3.0"]
+        }),
+        CompatChromaRadiance = RegisterCompat(new() {
+            ID = "chroma-radiance", ShortCode = "ChrRad",
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["t5xxl"], ClipType = "chroma", VAE = "pixel_space", LatentNode = "EmptyChromaRadianceLatentImage", SigmaShiftNode = "ModelSamplingAuraFlow",
+            DefaultParameters = ["cfgscale:3.5", "steps:30", "scheduler:beta", "sigmashift:1.0"]
+        }),
+        CompatAltDiffusion = RegisterCompat(new() { ID = "alt_diffusion_v1", ShortCode = "AltD", ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.UNet, PredType = PredictionType.eps }),
+        CompatLtxv = RegisterCompat(new() {
+            ID = "lightricks-ltx-video", ShortCode = "LTXV",
+            ModelType = ModelType.TextAndImageToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.eps,
+            TextEncoders = ["t5xxl"], ClipType = "ltxv", VAE = "ltxv-vae", LatentNode = "EmptyLTXVLatentVideo",
+            DefaultParameters = ["cfgscale:3", "steps:30", "scheduler:ltxv", "text2videoframes:97"]
+        }),
+        CompatSana = RegisterCompat(new() {
+            ID = "nvidia-sana-1600", ShortCode = "Sana",
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.eps,
+            ClipType = null, VAE = "sana-dcae", LatentNode = "EmptySanaLatentImage",
+        }),
+        CompatLumina2 = RegisterCompat(new() {
+            ID = "lumina-2", ShortCode = "Lumi2",
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["gemma2-2b"], ClipType = "lumina", VAE = "flux-ae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingAuraFlow",
+            DefaultParameters = ["cfgscale:4", "steps:25", "sampler:res_multistep", "sigmashift:6.0"]
+        }),
+        CompatHiDreamI1 = RegisterCompat(new() {
+            ID = "hidream-i1", ShortCode = "HiDrm",
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["clip-l-hidream", "clip-g-hidream", "t5xxl", "llama3.1-8b"], ClipType = "hidream", VAE = "flux-ae", LatentNode = "EmptySD3LatentImage",
+            DefaultParameters = ["cfgscale:5", "steps:50", "sampler:uni_pc", "sigmashift:3.0"]
+        }),
+        CompatHiDreamI1Edit = RegisterCompat(new() {
+            ID = "hidream-i1-edit", ShortCode = "HiDrm-E",
+            ModelType = ModelType.ImageEdit, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["clip-l-hidream", "clip-g-hidream", "t5xxl", "llama3.1-8b"], ClipType = "hidream", VAE = "flux-ae", LatentNode = "EmptySD3LatentImage",
+            DefaultParameters = ["cfgscale:5", "steps:28", "scheduler:normal", "sigmashift:3.0"]
+        }),
+        CompatOmniGen2 = RegisterCompat(new() {
+            ID = "omnigen-2", ShortCode = "Omni2",
+            ModelType = ModelType.ImageEdit, Architecture = ModelArchitecture.MLLM, PredType = PredictionType.sd3,
+            TextEncoders = ["qwen-2.5-vl-fp16"], ClipType = "omnigen2", VAE = "flux-ae", LatentNode = "EmptySD3LatentImage",
+        }),
+        CompatQwenImage = RegisterCompat(new() {
+            ID = "qwen-image", ShortCode = "Qwen",
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["qwen-2.5-vl-7b"], ClipType = "qwen_image", VAE = "qwen-image-vae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingAuraFlow",
+            DefaultParameters = ["cfgscale:2.5", "steps:20", "sigmashift:3.1"]
+        }),
+        CompatQwenImageEdit = RegisterCompat(new() {
+            ID = "qwen-imag-edite", ShortCode = "Qwen-E",
+            ModelType = ModelType.ImageEdit, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["qwen-2.5-vl-7b"], ClipType = "qwen_image", VAE = "qwen-image-vae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingAuraFlow",
+            DefaultParameters = ["cfgscale:2.5", "steps:20", "sigmashift:3.0", "resizeimageprompts:1024"]
+        }),
+        CompatAuraFlow = RegisterCompat(new() {
+            ID = "auraflow-v1", ShortCode = "Aura",
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["pile-t5xxl"], ClipType = "chroma", VAE = "sdxl-vae", SigmaShiftNode = "ModelSamplingAuraFlow",
+            DefaultParameters = ["cfgscale:3.5", "steps:20", "sigmashift:1.73"]
+        }),
+        CompatHunyuanImage2_1 = RegisterCompat(new() {
+            ID = "hunyuan-image-2_1", ShortCode = "HyImg",
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["qwen-2.5-vl-7b", "byt5-small-glyphxl"], ClipType = "hunyuan_image", VAE = "hunyuan-image-2_1-vae", LatentNode = "EmptyHunyuanImageLatent",
+            DefaultParameters = ["cfgscale:3.5", "steps:20", "sigmashift:3.0"]
+        }),
+        CompatHunyuanImage2_1Refiner = RegisterCompat(new() {
+            ID = "hunyuan-image-2_1-refiner", ShortCode = "HyImg", ModelType = ModelType.Refiner, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["qwen-2.5-vl-7b", "byt5-small-glyphxl"], ClipType = "hunyuan_image", VAE = "hunyuan-image-2_1-vae", LatentNode = "EmptyHunyuanImageLatent" }),
+        CompatSegmindStableDiffusion1b = RegisterCompat(new() {
+            ID = "segmind-stable-diffusion-1b", ShortCode = "SSD1B",
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.UNet, PredType = PredictionType.eps,
+            TextEncoders = ["clip-l", "clip-g"], ClipType = "stable-diffusion", VAE = "sdxl-vae",
+        }),
+        CompatPixartMsSigmaXl2 = RegisterCompat(new() {
+            ID = "pixart-ms-sigma-xl-2", ShortCode = "Pix",
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.eps,
+            TextEncoders = ["t5xxl"], ClipType = "sd3", VAE = "sdxl-vae",
+            DefaultParameters = ["cfgscale:4", "steps:14"]
+        });
 
     /// <summary>Initialize the class sorter.</summary>
     public static void Init()
@@ -248,7 +413,7 @@ public class T2IModelClassSorter
             return shape.ToArray()[^1].Value<long>() == 1024;
         }
         });
-        Register(new() { ID = "stable-diffusion-v2-turbo", CompatClass = CompatSdv2Turbo, Name = "Stable Diffusion v2 Turbo", StandardWidth = 512, StandardHeight = 512, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "stable-diffusion-v2-turbo", CompatClass = CompatSdv2_512, Name = "Stable Diffusion v2 Turbo", StandardWidth = 512, StandardHeight = 512, IsThisModelOfClass = (m, h) =>
         {
             return isTurbo21(h);
         }});
@@ -306,39 +471,39 @@ public class T2IModelClassSorter
             return isCascadeC(h);
         }});
         // ====================== Stable Diffusion v3 ======================
-        Register(new() { ID = "stable-diffusion-v3-medium", CompatClass = CompatSd3Medium, Name = "Stable Diffusion 3 Medium", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "stable-diffusion-v3-medium", CompatClass = CompatSd3, Name = "Stable Diffusion 3 Medium", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
             return isSD3Med(h);
         }});
-        Register(new() { ID = "stable-diffusion-v3.5-large", CompatClass = CompatSd35Large, Name = "Stable Diffusion 3.5 Large", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "stable-diffusion-v3.5-large", CompatClass = CompatSd35, Name = "Stable Diffusion 3.5 Large", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
             return isSD3Large(h);
         }});
-        Register(new() { ID = "stable-diffusion-v3.5-medium", CompatClass = CompatSd35Medium, Name = "Stable Diffusion 3.5 Medium", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "stable-diffusion-v3.5-medium", CompatClass = CompatSd35, Name = "Stable Diffusion 3.5 Medium", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
             return false;
         }});
-        Register(new() { ID = "stable-diffusion-v3-medium/lora", CompatClass = CompatSd3Medium, Name = "Stable Diffusion 3 Medium LoRA", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "stable-diffusion-v3-medium/lora", CompatClass = CompatSd3, Name = "Stable Diffusion 3 Medium LoRA", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
             return false; // TODO: ?
         }});
-        Register(new() { ID = "stable-diffusion-v3.5-large/lora", CompatClass = CompatSd35Large, Name = "Stable Diffusion 3.5 Large LoRA", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "stable-diffusion-v3.5-large/lora", CompatClass = CompatSd35, Name = "Stable Diffusion 3.5 Large LoRA", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
             return isSD35Lora(h);
         }});
-        Register(new() { ID = "stable-diffusion-v3.5-medium/lora", CompatClass = CompatSd35Medium, Name = "Stable Diffusion 3.5 Medium LoRA", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "stable-diffusion-v3.5-medium/lora", CompatClass = CompatSd35, Name = "Stable Diffusion 3.5 Medium LoRA", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
             return false;
         }});
-        Register(new() { ID = "stable-diffusion-v3-medium/controlnet", CompatClass = CompatSd3Medium, Name = "Stable Diffusion 3 Medium ControlNet", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "stable-diffusion-v3-medium/controlnet", CompatClass = CompatSd3, Name = "Stable Diffusion 3 Medium ControlNet", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
             return isSD3Controlnet(h);
         }});
-        Register(new() { ID = "stable-diffusion-v3.5-large/controlnet", CompatClass = CompatSd35Large, Name = "Stable Diffusion 3.5 Large ControlNet", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "stable-diffusion-v3.5-large/controlnet", CompatClass = CompatSd35, Name = "Stable Diffusion 3.5 Large ControlNet", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
             return isSd35LargeControlnet(h);
         }});
-        Register(new() { ID = "stable-diffusion-v3.5-medium/controlnet", CompatClass = CompatSd35Medium, Name = "Stable Diffusion 3.5 Medium ControlNet", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "stable-diffusion-v3.5-medium/controlnet", CompatClass = CompatSd35, Name = "Stable Diffusion 3.5 Medium ControlNet", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
             return false;
         }});
@@ -623,7 +788,7 @@ public class T2IModelClassSorter
         Register(new() { ID = "stable-diffusion-v2-768-v/tensorrt", CompatClass = CompatSdv2_768_v, Name = "Stable Diffusion v2 (TensorRT Engine)", StandardWidth = 768, StandardHeight = 768, IsThisModelOfClass = (m, h) => { return false; } });
         Register(new() { ID = "stable-diffusion-xl-v0_9-base/tensorrt", CompatClass = CompatSdxl, Name = "Stable Diffusion XL 0.9-Base (TensorRT Engine)", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) => { return false; } });
         Register(new() { ID = "stable-diffusion-xl-v1-base/tensorrt", CompatClass = CompatSdxl, Name = "Stable Diffusion XL 1.0-Base (TensorRT Engine)", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) => { return false; } });
-        Register(new() { ID = "stable-diffusion-v3-medium/tensorrt", CompatClass = CompatSd3Medium, Name = "Stable Diffusion 3 Medium (TensorRT Engine)", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) => { return false; } });
+        Register(new() { ID = "stable-diffusion-v3-medium/tensorrt", CompatClass = CompatSd3, Name = "Stable Diffusion 3 Medium (TensorRT Engine)", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) => { return false; } });
         Register(new() { ID = "stable-diffusion-xl-turbo-v1/tensorrt", CompatClass = CompatSdxl, Name = "Stable Diffusion XL Turbo (TensorRT Engine)", StandardWidth = 512, StandardHeight = 512, IsThisModelOfClass = (m, h) => { return false; } });
         Register(new() { ID = "stable-diffusion-xl-v1-refiner/tensorrt", CompatClass = CompatSdxlRefiner, Name = "Stable Diffusion XL 1.0-Refiner (TensorRT Engine)", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) => { return false; } });
         Register(new() { ID = "stable-video-diffusion-img2vid-v1/tensorrt", CompatClass = CompatSvd, Name = "Stable Video Diffusion Img2Vid v1 (TensorRT Engine)", StandardWidth = 1024, StandardHeight = 576, IsThisModelOfClass = (m, h) => { return false; } });

@@ -4,8 +4,13 @@ class ModelCompatClass {
     constructor(data) {
         this.id = data.id;
         this.shortCode = data.short_code;
-        this.isText2Video = data.is_text2video;
-        this.isImage2Video = data.is_image2video;
+        this.modelType = data.model_type;
+        this.Architecture = data.architecture;
+        this.PredType = data.prediction_type;
+        this.TextEncoders = data.text_encoders;
+        this.vae = data.vae;
+        this.ClipType = data.clip_type;
+        this.defaultParameters = data.default_parameters;
         this.lorasTargetTextEnc = data.loras_target_text_enc;
     }
 }
