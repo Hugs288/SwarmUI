@@ -5,11 +5,11 @@ class ModelCompatClass {
         this.id = data.id;
         this.shortCode = data.short_code;
         this.modelType = data.model_type;
-        this.Architecture = data.architecture;
-        this.PredType = data.prediction_type;
-        this.TextEncoders = data.text_encoders;
+        this.architecture = data.architecture;
+        this.predType = data.prediction_type;
+        this.textEncoders = data.text_encoders;
         this.vae = data.vae;
-        this.ClipType = data.clip_type;
+        this.clipType = data.clip_type;
         this.defaultParameters = data.default_parameters;
         this.lorasTargetTextEnc = data.loras_target_text_enc;
     }

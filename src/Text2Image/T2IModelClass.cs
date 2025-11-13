@@ -105,7 +105,6 @@ public record class T2IModelCompatClass
         {
             ["id"] = ID,
             ["short_code"] = ShortCode,
-            ["loras_target_text_enc"] = LorasTargetTextEnc,
             ["model_type"] = ModelType.ToString(),
             ["architecture"] = Architecture.ToString(),
             ["prediction_type"] = PredType.ToString(),
@@ -113,6 +112,7 @@ public record class T2IModelCompatClass
             ["clip_type"] = ClipType,
             ["vae"] = VAE,
             ["default_parameters"] = new JArray(DefaultParameters)
+            ["loras_target_text_enc"] = LorasTargetTextEnc,
         };
     }
 }
