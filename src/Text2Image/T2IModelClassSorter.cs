@@ -47,7 +47,7 @@ public class T2IModelClassSorter
             TextEncoders = ["clip-g"], ClipType = "stable-diffusion", VAE = "sd1-vae",
         }),
         CompatSdxl = RegisterCompat(new() {
-            ID = "stable-diffusion-xl-v1", ShortCode = "SDXL",
+            ID = "stable-diffusion-xl-v1-base", ShortCode = "SDXL",
             ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.UNet, PredType = PredictionType.eps,
             TextEncoders = ["clip-l", "clip-g"], ClipType = "stable-diffusion", VAE = "sdxl-vae",
         }),
