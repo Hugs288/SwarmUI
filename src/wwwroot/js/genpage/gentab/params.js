@@ -410,19 +410,18 @@ function genInputs(delay_final = false) {
             let inputAspectRatioParentStyles = window.getComputedStyle(inputAspectRatioParent);
             let swapAspectRatioButton = document.createElement("button");
             inputAspectRatioParent.style.position = 'relative';
-            swapAspectRatioButton.style.display = inputAspectRatio.value == "Custom" ? 'block' : 'none';
+            swapAspectRatioButton.style.display = 'block';
             swapAspectRatioButton.style.right = inputAspectRatioParentStyles.paddingRight;
             swapAspectRatioButton.style.top = inputAspectRatioParentStyles.paddingTop;
             swapAspectRatioButton.className = 'basic-button swap_aspectratio_button';
-            swapAspectRatioButton.title = 'Swap the width and the height';
+            swapAspectRatioButton.title = 'Swap the width and the height or aspect ratio';
             swapAspectRatioButton.innerHTML = '&#x21C6;';
             inputAspectRatioParent.appendChild(swapAspectRatioButton);
             let resTrick = () => {
                 let aspect;
-                if (inputAspectRatio.value == "Custom") {
+                if (inputAspectRatio.value == "Resolution") {
                     inputWidthParent.style.display = 'block';
                     inputHeightParent.style.display = 'block';
-                    swapAspectRatioButton.style.display = 'block';
                     delete inputWidthParent.dataset.visible_controlled;
                     delete inputHeightParent.dataset.visible_controlled;
                     inputSideLengthParent.style.display = 'none';
@@ -432,7 +431,6 @@ function genInputs(delay_final = false) {
                 else {
                     inputWidthParent.style.display = 'none';
                     inputHeightParent.style.display = 'none';
-                    swapAspectRatioButton.style.display = 'none';
                     inputWidthParent.dataset.visible_controlled = 'true';
                     inputHeightParent.dataset.visible_controlled = 'true';
                     inputSideLengthParent.style.display = 'block';
@@ -445,7 +443,7 @@ function genInputs(delay_final = false) {
                 target.addEventListener('input', resTrick);
             }
             inputAspectRatio.addEventListener('change', () => {
-                if (inputAspectRatio.value != "Custom") {
+                if (inputAspectRatio.value != "Resolution") {
                     let aspectRatio = inputAspectRatio.value;
                     let sideLen;
                     if (inputSideLength.value && inputSideLengthToggle.checked) {
@@ -481,12 +479,20 @@ function genInputs(delay_final = false) {
                 });
             }
             swapAspectRatioButton.addEventListener('click', (event) => {
-                event.preventDefault();
-                let tmpWidth = inputWidth.value;
-                inputWidth.value = inputHeight.value;
-                inputHeight.value = tmpWidth;
-                triggerChangeFor(inputWidth);
-                triggerChangeFor(inputHeight);
+                if (inputAspectRatio.value == "Resolution") {
+                    event.preventDefault();
+                    let tmpWidth = inputWidth.value;
+                    inputWidth.value = inputHeight.value;
+                    inputHeight.value = tmpWidth;
+                    triggerChangeFor(inputWidth);
+                    triggerChangeFor(inputHeight);
+                } else {
+                    let parts = inputAspectRatio.value.split(':');
+                    if (parts.length == 2) {
+                        inputAspectRatio.value = parts.reverse().join(':');
+                        triggerChangeFor(inputAspectRatio);
+                    }
+                }
             });
             inputWidth.addEventListener('change', () => {
                 if (imageEditor.active) {
@@ -599,7 +605,7 @@ function genInputs(delay_final = false) {
                                 let closestDiff = 999999;
                                 let imageRatio = imageWidth / imageHeight;
                                 for (let option of inputAspectRatio.options) {
-                                    if (option.value == "Custom" || !option.value.includes(':')) {
+                                    if (option.value == "Resolution" || !option.value.includes(':')) {
                                         continue;
                                     }
                                     let parts = option.value.split(':');
@@ -618,7 +624,7 @@ function genInputs(delay_final = false) {
                             key: 'Use Exact Aspect Ratio',
                             title: "Sets the Aspect Ratio to Custom, and resolution to a perfectly matched aspect ratio for this image (rounded to x32 pixels)",
                             action: () => {
-                                inputAspectRatio.value = "Custom";
+                                inputAspectRatio.value = "Resolution";
                                 triggerChangeFor(inputAspectRatio);
                                 let ratio = imageWidth / imageHeight;
                                 let width = Math.round(Math.sqrt(512 * 512 * ratio));
@@ -631,9 +637,9 @@ function genInputs(delay_final = false) {
                         },
                         {
                             key: 'Use Resolution',
-                            title: "Sets the Aspect Ratio to Custom, and resolution to exactly this image's resolution, with rounding to x32 pixels to avoid errors",
+                            title: "Sets the Aspect Ratio to Custom, and resolution to exactly this image's resolution, with rounding to x16 pixels to avoid errors",
                             action: () => {
-                                inputAspectRatio.value = "Custom";
+                                inputAspectRatio.value = "Resolution";
                                 inputWidth.value = roundTo(imageWidth, 32);
                                 inputHeight.value = roundTo(imageHeight, 32);
                                 triggerChangeFor(inputAspectRatio);
@@ -645,7 +651,7 @@ function genInputs(delay_final = false) {
                             key: 'Use Exact Aspect Resolution',
                             title: "Sets the Aspect Ratio to Custom, and resolution to exactly this image's resolution, without any rounding",
                             action: () => {
-                                inputAspectRatio.value = "Custom";
+                                inputAspectRatio.value = "Resolution";
                                 inputWidth.value = imageWidth;
                                 inputHeight.value = imageHeight;
                                 triggerChangeFor(inputAspectRatio);
