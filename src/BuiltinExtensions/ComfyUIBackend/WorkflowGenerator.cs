@@ -1956,8 +1956,7 @@ public partial class WorkflowGenerator
         }
         string node;
         double mult = isPositive ? 1.5 : 0.8;
-        int width = UserInput.GetImageResolution().Width;
-        int height = UserInput.GetImageResolution().Height;
+        (int width, int height) = UserInput.GetImageResolution();
         bool enhance = UserInput.Get(T2IParamTypes.ModelSpecificEnhancements, true);
         bool needsAdvancedEncode = (prompt.Contains('[') && prompt.Contains(']')) || prompt.Contains("<break>");
         double defaultGuidance = -1;
@@ -2194,8 +2193,7 @@ public partial class WorkflowGenerator
                     ["gligen_name"] = gligenModel
                 });
             });
-            int width = UserInput.GetImageResolution().Width;
-            int height = UserInput.GetImageResolution().Height;
+            (int width, int height) = UserInput.GetImageResolution();
             JArray lastCond = globalCond;
             foreach (PromptRegion.Part part in parts)
             {

@@ -444,7 +444,7 @@ public class WorkflowGeneratorSteps
                 }
                 if (g.UserInput.TryGet(T2IParamTypes.InitImageResetToNorm, out double resetFactor))
                 {
-                    string emptyImg = g.CreateEmptyImage(g.UserInput.GetImageResolution().Width, g.UserInput.GetImageResolution().Width, g.UserInput.Get(T2IParamTypes.BatchSize, 1));
+                    string emptyImg = g.CreateEmptyImage(g.UserInput.GetImageResolution().Width, g.UserInput.GetImageResolution().Height, g.UserInput.Get(T2IParamTypes.BatchSize, 1));
                     if (g.Features.Contains("comfy_latent_blend_masked") && currentMask is not null)
                     {
                         string blended = g.CreateNode("SwarmLatentBlendMasked", new JObject()
@@ -1586,13 +1586,7 @@ public class WorkflowGeneratorSteps
                 }
                 int width = vidModel.StandardWidth <= 0 ? 1024 : vidModel.StandardWidth;
                 int height = vidModel.StandardHeight <= 0 ? 576 : vidModel.StandardHeight;
-                int imageWidth = g.UserInput.GetImageResolution().Width;
-                int imageHeight = g.UserInput.GetImageResolution().Height;
-                int resPrecision = 64;
-                if (vidModel.ModelClass?.CompatClass?.ID == "hunyuan-video")
-                {
-                    resPrecision = 16; // wants 720x720, which is wonky x16 and not x32 or x64
-                }
+                (int imageWidth, int imageHeight) = g.UserInput.GetImageResolution();
                 if (resFormat == "Image Aspect, Model Res")
                 {
                     if (width == 1024 && height == 576 && imageWidth == 1344 && imageHeight == 768)
@@ -1602,7 +1596,7 @@ public class WorkflowGeneratorSteps
                     }
                     else
                     {
-                        (width, height) = Utilities.ResToModelFit(imageWidth, imageHeight, width * height, resPrecision);
+                        (width, height) = Utilities.ResToModelFit(imageWidth, imageHeight, width * height);
                     }
                 }
                 else if (resFormat == "Image")
