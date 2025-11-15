@@ -394,6 +394,7 @@ function genInputs(delay_final = false) {
             }
         }
         let inputAspectRatio = document.getElementById('input_aspectratio');
+        let inputCustomAspectRatio = document.getElementById('input_customaspectratio');
         let inputWidth = document.getElementById('input_width');
         let inputHeight = document.getElementById('input_height');
         let inputSideLength = document.getElementById('input_sidelength');
@@ -406,6 +407,7 @@ function genInputs(delay_final = false) {
             let inputSideLengthSlider = getRequiredElementById('input_sidelength_rangeslider');
             let inputSideLengthToggle = getRequiredElementById('input_sidelength_toggle');
             let resGroupLabel = findParentOfClass(inputWidth, 'input-group').querySelector('.header-label');
+            let inputCustomAspectRatioParent = findParentOfClass(inputCustomAspectRatio, 'auto-input');
             let inputAspectRatioParent = findParentOfClass(inputAspectRatio, 'auto-dropdown-box');
             let inputAspectRatioParentStyles = window.getComputedStyle(inputAspectRatioParent);
             let swapAspectRatioButton = document.createElement("button");
@@ -419,6 +421,9 @@ function genInputs(delay_final = false) {
             inputAspectRatioParent.appendChild(swapAspectRatioButton);
             let resTrick = () => {
                 let aspect;
+                let showCustom = inputAspectRatio.value == "Custom";
+                inputCustomAspectRatioParent.style.display = showCustom ? 'block' : 'none';
+                inputCustomAspectRatioParent.dataset.visible_controlled = showCustom ? 'false' : 'true';
                 if (inputAspectRatio.value == "Resolution") {
                     inputWidthParent.style.display = 'block';
                     inputHeightParent.style.display = 'block';
@@ -427,6 +432,15 @@ function genInputs(delay_final = false) {
                     inputSideLengthParent.style.display = 'none';
                     inputSideLengthParent.dataset.visible_controlled = 'true';
                     aspect = describeAspectRatio(inputWidth.value, inputHeight.value);
+                }
+                else if (inputAspectRatio.value == "Custom") {
+                    inputWidthParent.style.display = 'none';
+                    inputHeightParent.style.display = 'none';
+                    inputWidthParent.dataset.visible_controlled = 'true';
+                    inputHeightParent.dataset.visible_controlled = 'true';
+                    inputSideLengthParent.style.display = 'block';
+                    delete inputSideLengthParent.dataset.visible_controlled;
+                    aspect = inputCustomAspectRatio.value || '1:1';
                 }
                 else {
                     inputWidthParent.style.display = 'none';
@@ -444,7 +458,13 @@ function genInputs(delay_final = false) {
             }
             inputAspectRatio.addEventListener('change', () => {
                 if (inputAspectRatio.value != "Resolution") {
-                    let aspectRatio = inputAspectRatio.value;
+                    let aspectRatio;
+                    if (inputAspectRatio.value == "Custom") {
+                        aspectRatio = inputCustomAspectRatio.value || "1:1";
+                    }
+                    else {
+                        aspectRatio = inputAspectRatio.value;
+                    }
                     let sideLen;
                     if (inputSideLength.value && inputSideLengthToggle.checked) {
                         sideLen = parseInt(inputSideLength.value);
@@ -473,7 +493,7 @@ function genInputs(delay_final = false) {
                 }
                 resTrick();
             });
-            for (let target of [inputSideLength, inputSideLengthSlider, inputSideLengthToggle]) {
+            for (let target of [inputSideLength, inputSideLengthSlider, inputSideLengthToggle, inputCustomAspectRatio]) {
                 target.addEventListener('change', () => {
                     triggerChangeFor(inputAspectRatio);
                 });
@@ -486,7 +506,15 @@ function genInputs(delay_final = false) {
                     inputHeight.value = tmpWidth;
                     triggerChangeFor(inputWidth);
                     triggerChangeFor(inputHeight);
-                } else {
+                }
+                else if (inputAspectRatio.value == "Custom") {
+                    let parts = inputCustomAspectRatio.value.split(':');
+                    if (parts.length == 2) {
+                        inputCustomAspectRatio.value = parts.reverse().join(':');
+                        triggerChangeFor(inputCustomAspectRatio);
+                    }
+                }
+                else {
                     let parts = inputAspectRatio.value.split(':');
                     if (parts.length == 2) {
                         inputAspectRatio.value = parts.reverse().join(':');
@@ -875,7 +903,10 @@ function getGenInput(input_overrides = {}, input_preoverrides = {}) {
             }
         }
     }
-    if (input['aspectratio'] == 'Custom') {
+    if (input['aspectratio'] != 'Custom') {
+        delete input['customaspectratio'];
+    }
+    if (input['aspectratio'] == 'Resolution') {
         delete input['sidelength'];
     }
     let revisionImageArea = getRequiredElementById('alt_prompt_image_area');

@@ -312,7 +312,7 @@ public class T2IParamTypes
         return update;
     }
 
-    public static T2IRegisteredParam<string> Prompt, NegativePrompt, AspectRatio, BackendType, RefinerMethod, PersonalNote, VideoFormat, VideoResolution, UnsamplerPrompt, MaskBehavior, ColorCorrectionBehavior, SeamlessTileable, BitDepth, Webhooks, Text2VideoFormat, WildcardSeedBehavior, SegmentSortOrder, SegmentTargetResolution, TorchCompile, VideoExtendFormat, ExactBackendID;
+    public static T2IRegisteredParam<string> Prompt, NegativePrompt, AspectRatio, CustomAspectRatio, BackendType, RefinerMethod, PersonalNote, VideoFormat, VideoResolution, UnsamplerPrompt, MaskBehavior, ColorCorrectionBehavior, SeamlessTileable, BitDepth, Webhooks, Text2VideoFormat, WildcardSeedBehavior, SegmentSortOrder, SegmentTargetResolution, TorchCompile, VideoExtendFormat, ExactBackendID;
     public static T2IRegisteredParam<int> Images, Steps, Width, Height, SideLength, BatchSize, VAETileSize, VAETileOverlap, VAETemporalTileSize, VAETemporalTileOverlap, VideoFrames, VideoMotionBucket, VideoFPS, VideoSteps, RefinerSteps, CascadeLatentCompression, MaskShrinkGrow, MaskBlur, MaskGrow, SegmentMaskBlur, SegmentMaskGrow, SegmentMaskOversize, SegmentSteps, Text2VideoFrames, Text2VideoFPS, TrimVideoStartFrames, TrimVideoEndFrames, VideoExtendFrameOverlap, ResizeImagePrompts;
     public static T2IRegisteredParam<long> Seed, VariationSeed, WildcardSeed;
     public static T2IRegisteredParam<double> CFGScale, VariationSeedStrength, InitImageCreativity, InitImageResetToNorm, InitImageNoise, RefinerControl, RefinerUpscale, RefinerCFGScale, ReVisionStrength, GlobalRegionFactor, SamplerSigmaMin, SamplerSigmaMax, SamplerRho, VideoAugmentationLevel, VideoCFG, VideoMinCFG, Video2VideoCreativity, VideoSwapPercent, VideoExtendSwapPercent, IP2PCFG2, RegionalObjectCleanupFactor, SigmaShift, SegmentThresholdMax, SegmentCFGScale, FluxGuidanceScale;
@@ -423,6 +423,9 @@ public class T2IParamTypes
         GroupResolution = new("Resolution", Toggles: false, Open: false, OrderPriority: -11);
         AspectRatio = Register<string>(new("Aspect Ratio", "Image aspect ratio - that is, the shape of the image (wide vs square vs tall).\nSet to 'Resolution' to define a manual width/height instead or 'Custom' to define one yourself.\nSome models can stretch better than others.",
             "1:1", GetValues: (_) => ["1:1", "3:2", "2:3", "4:3", "3:4", "16:9", "9:16", "Custom", "Resolution"], OrderPriority: -11, Group: GroupResolution
+            ));
+        CustomAspectRatio = Register<string>(new("Custom Aspect Ratio", "yes you can really put in whatever you want.",
+            "1:1", IgnoreIf: "1:1", OrderPriority: -11, Group: GroupResolution
             ));
         Width = Register<int>(new("Width", "Image width, in pixels.\nSDv1 uses 512, SDv2 uses 768, SDXL prefers 1024.\nSome models allow variation within a range (eg 512 to 768) but almost always want a multiple of 64.\nFlux is very open to differing values.",
             "512", Min: 64, ViewMin: 256, Max: 16384, ViewMax: 2048, Step: 32, Examples: ["512", "768", "1024"], OrderPriority: -10, ViewType: ParamViewType.POT_SLIDER, Group: GroupResolution
