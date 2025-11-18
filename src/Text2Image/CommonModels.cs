@@ -103,5 +103,10 @@ public static class CommonModels
         Register(new("llava-llama3", "LLaVA-LLaMA-3", "https://huggingface.co/Comfy-Org/HunyuanVideo_repackaged/resolve/main/split_files/text_encoders/llava_llama3_fp8_scaled.safetensors", "2f0c3ad255c282cead3f078753af37d19099cafcfc8265bbbd511f133e7af250", "Clip", "llava_llama3_fp8_scaled.safetensors"));
         Register(new("llama3.1-8b", "LLaMA-3.1-8B", "https://huggingface.co/Comfy-Org/HiDream-I1_ComfyUI/resolve/main/split_files/text_encoders/llama_3.1_8b_instruct_fp8_scaled.safetensors", "9f86897bbeb933ef4fd06297740edb8dd962c94efcd92b373a11460c33765ea6", "Clip", "llama_3.1_8b_instruct_fp8_scaled.safetensors"));
         Register(new("gemma2-2b", "Gemma-2-2B", "https://huggingface.co/Comfy-Org/Lumina_Image_2.0_Repackaged/resolve/main/split_files/text_encoders/gemma_2_2b_fp16.safetensors", "29761442862f8d064d3f854bb6fabf4379dcff511a7f6ba9405a00bd0f7e2dbd", "Clip", "gemma_2_2b_fp16.safetensors"));
+
+        // Clip Vision
+        Register(new("wan21-clipvision-h", "Wan 2.1 ClipVision-H", "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors", "64a7ef761bfccbadbaa3da77366aac4185a6c58fa5de5f589b42a65bcc21f161", "ClipVision", "clip_vision_h.safetensors"));
+        Register(new("svd-clipvision-h", "SVD ClipVision-H", "https://huggingface.co/h94/IP-Adapter/resolve/main/models/image_encoder/model.safetensors", "6ca9667da1ca9e0b0f75e46bb030f7e011f44f86cbfb8d5a36590fcd7507b030", "ClipVision", "CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors"));
+        Register(new("llava-llama3-vision", "LLaVA-LLaMA-3 Vision", "https://huggingface.co/Comfy-Org/HunyuanVideo_repackaged/resolve/main/split_files/clip_vision/llava_llama3_vision.safetensors", "7d0f89bf7860815f3a994b9bdae8ebe3a29c161825d03ca9262cb13b0c973aa6", "ClipVision", "llava_llama3_vision.safetensors"));
     }
 }

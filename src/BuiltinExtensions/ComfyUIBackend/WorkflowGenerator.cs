@@ -1245,20 +1245,24 @@ public partial class WorkflowGenerator
         });
         FinalModel = [diffNode, 0];
     }
-    public string RequireVisionModel(string name, string url, string hash, T2IRegisteredParam<T2IModel> param = null)
+    public string RequireVisionModel(string modelId, T2IRegisteredParam<T2IModel> param = null)
     {
         if (param is not null && UserInput.TryGet(param, out T2IModel visModel))
         {
             return visModel.Name;
         }
-        if (VisionModelsValid.ContainsKey(name))
+        if (!CommonModels.Known.TryGetValue(modelId, out CommonModels.ModelInfo model))
         {
-            return name;
+            throw new SwarmUserErrorException($"Unknown common model ID '{modelId}'.");
         }
-        string filePath = Utilities.CombinePathWithAbsolute(Program.ServerSettings.Paths.ActualModelRoot, Program.ServerSettings.Paths.SDClipVisionFolder.Split(';')[0], name);
-        DownloadModel(name, filePath, url, hash);
-        VisionModelsValid.TryAdd(name, name);
-        return name;
+        if (VisionModelsValid.ContainsKey(model.FileName))
+        {
+            return model.FileName;
+        }
+        string filePath = Utilities.CombinePathWithAbsolute(Program.ServerSettings.Paths.ActualModelRoot, Program.T2IModelSets[model.FolderType].FolderPaths[0], model.FileName);
+        DownloadModel(model.FileName, filePath, model.URL, model.Hash);
+        VisionModelsValid.TryAdd(model.FileName, model.FileName);
+        return model.FileName;
     }
 
     /// <summary>Do a video frame interpolation.</summary>
@@ -1540,8 +1544,7 @@ public partial class WorkflowGenerator
             {
                 VideoFPS ??= 24;
                 Frames ??= 81;
-                string targetName = "clip_vision_h.safetensors";
-                targetName = g.RequireVisionModel(targetName, "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors", "64a7ef761bfccbadbaa3da77366aac4185a6c58fa5de5f589b42a65bcc21f161", T2IParamTypes.ClipVisionModel);
+                string targetName = g.RequireVisionModel("wan21-clipvision-h", T2IParamTypes.ClipVisionModel);
                 string clipLoader = g.CreateNode("CLIPVisionLoader", new JObject()
                 {
                     ["clip_name"] = targetName
@@ -1679,8 +1682,7 @@ public partial class WorkflowGenerator
                         ["model_type"] = "svd"
                     });
                     Model = [trtloader, 0];
-                    string fname = "CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors";
-                    fname = g.RequireVisionModel(fname, "https://huggingface.co/h94/IP-Adapter/resolve/main/models/image_encoder/model.safetensors", "6ca9667da1ca9e0b0f75e46bb030f7e011f44f86cbfb8d5a36590fcd7507b030", T2IParamTypes.ClipVisionModel);
+                    string fname = g.RequireVisionModel("svd-clipvision-h", T2IParamTypes.ClipVisionModel);
                     string cliploader = g.CreateNode("CLIPVisionLoader", new JObject()
                     {
                         ["clip_name"] = fname
@@ -2039,8 +2041,7 @@ public partial class WorkflowGenerator
         {
             (string prefix, string content) = prompt.BeforeAndAfter('>');
             (string imgNodeId, string imgNodePart) = prefix.After(':').BeforeAndAfter(',');
-            string targetName = "llava_llama3_vision.safetensors";
-            targetName = RequireVisionModel(targetName, "https://huggingface.co/Comfy-Org/HunyuanVideo_repackaged/resolve/main/split_files/clip_vision/llava_llama3_vision.safetensors", "7d0f89bf7860815f3a994b9bdae8ebe3a29c161825d03ca9262cb13b0c973aa6", T2IParamTypes.ClipVisionModel);
+            string targetName = RequireVisionModel("llava-llama3-vision", T2IParamTypes.ClipVisionModel);
             string clipLoader = CreateNode("CLIPVisionLoader", new JObject()
             {
                 ["clip_name"] = targetName
