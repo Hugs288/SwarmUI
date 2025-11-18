@@ -208,7 +208,7 @@ public class T2IModelClassSorter
             DefaultParameters = ["cfgscale:2.5", "steps:20", "sigmashift:3.1"]
         }),
         CompatQwenImageEdit = RegisterCompat(new() {
-            ID = "qwen-imag-edite", ShortCode = "Qwen-E",
+            ID = "qwen-imag-edit", ShortCode = "Qwen-E",
             ModelType = ModelType.ImageEdit, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["qwen-2.5-vl-7b"], ClipType = "qwen_image", VAE = "qwen-image-vae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingAuraFlow",
             DefaultParameters = ["cfgscale:2.5", "steps:20", "sigmashift:3.0", "resizeimageprompts:1024"]
