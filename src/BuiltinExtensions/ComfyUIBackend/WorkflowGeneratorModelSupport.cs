@@ -84,46 +84,53 @@ public partial class WorkflowGenerator
 
     public class ModelLoadHelpers(WorkflowGenerator g)
     {
-        public void DoVaeLoader(string defaultVal, string compatClass, string knownName)
+        public void DoVaeLoader(string compatClass, string knownName)
         {
+            string vaeNameToLoad = null;
             string nodeId = null;
-            CommonModels.ModelInfo knownFile = knownName is null ? null : CommonModels.Known[knownName];
+            // 1. Check for a user-specified VAE first.
             if (g.UserInput.TryGet(T2IParamTypes.VAE, out T2IModel vaeModel))
             {
-                defaultVal = vaeModel.Name;
+                vaeNameToLoad = vaeModel.Name;
                 nodeId = "11";
             }
-            if (defaultVal == "None")
+            else
             {
-                defaultVal = null;
-            }
-            if (string.IsNullOrWhiteSpace(defaultVal) && knownFile is not null && Program.T2IModelSets["VAE"].Models.ContainsKey(knownFile.FileName))
-            {
-                defaultVal = knownFile.FileName;
-            }
-            if (string.IsNullOrWhiteSpace(defaultVal))
-            {
-                vaeModel = Program.T2IModelSets["VAE"].Models.Values.FirstOrDefault(m => m.ModelClass?.CompatClass?.ID == compatClass);
-                if (vaeModel is not null)
+                // 2. If no user VAE is provided, attempt to find a suitable one automatically.
+                CommonModels.ModelInfo knownFile = knownName is null ? null : CommonModels.Known.GetValueOrDefault(knownName);
+                // 2a. Check if the recommended 'knownFile' is already installed.
+                if (knownFile is not null && Program.T2IModelSets["VAE"].Models.ContainsKey(knownFile.FileName))
                 {
-                    Logs.Debug($"Auto-selected first available VAE of compat class '{compatClass}', VAE '{vaeModel.Name}' will be applied");
-                    defaultVal = vaeModel.Name;
+                    vaeNameToLoad = knownFile.FileName;
+                }
+                else
+                {
+                    // 2b. If not, find any other installed VAE with a matching compatibility class.
+                    T2IModel matchingVae = Program.T2IModelSets["VAE"].Models.Values.FirstOrDefault(m => m.ModelClass?.CompatClass?.ID == compatClass);
+                    if (matchingVae is not null)
+                    {
+                        Logs.Debug($"Auto-selected first available VAE of compat class '{compatClass}', VAE '{matchingVae.Name}' will be applied");
+                        vaeNameToLoad = matchingVae.Name;
+                    }
+                    // 2c. If no compatible VAE is found locally and a downloadable 'knownFile' exists, download it.
+                    else if (knownFile is not null)
+                    {
+                        vaeNameToLoad = knownFile.FileName;
+                        knownFile.DownloadNow().Wait();
+                        Program.RefreshAllModelSets();
+                    }
                 }
             }
-            if (string.IsNullOrWhiteSpace(defaultVal))
+            // 3. If no VAE could be determined, throw an error.
+            if (string.IsNullOrWhiteSpace(vaeNameToLoad))
             {
-                if (knownFile is null)
-                {
-                    throw new SwarmUserErrorException("No default VAE for this model found, please download its VAE and set it as default in User Settings");
-                }
-                defaultVal = knownFile.FileName;
-                g.EnsureCommonModel(knownFile);
-                Program.RefreshAllModelSets();
+                throw new SwarmUserErrorException("No default VAE for this model found, this normally should not happen, but you can select one to use.");
             }
-            g.LoadingVAE = g.CreateVAELoader(defaultVal, nodeId);
+            // 4. Create the VAE loader node in the workflow.
+            g.LoadingVAE = g.CreateVAELoader(vaeNameToLoad, nodeId);
         }
 
-        public string RequireClipModel(string id, T2IRegisteredParam<T2IModel> param)
+        public string DoClipLoader(string id, T2IRegisteredParam<T2IModel> param)
         {
             if (param is not null && g.UserInput.TryGet(param, out T2IModel model))
             {
@@ -218,11 +225,11 @@ public partial class WorkflowGenerator
             LoadingModel = [pixartNode, 0];
             string singleClipLoader = CreateNode("CLIPLoader", new JObject()
             {
-                ["clip_name"] = helpers.RequireClipModel("t5xxl", T2IParamTypes.T5XXLModel),
+                ["clip_name"] = helpers.DoClipLoader("t5xxl", T2IParamTypes.T5XXLModel),
                 ["type"] = "sd3"
             });
             LoadingClip = [singleClipLoader, 0];
-            helpers.DoVaeLoader(null, "stable-diffusion-xl-v1", "sdxl-vae");
+            helpers.DoVaeLoader("stable-diffusion-xl-v1", "sdxl-vae");
         }
         else if (model.IsDiffusionModelsFormat)
         {
@@ -350,7 +357,7 @@ public partial class WorkflowGenerator
                 ["dtype"] = "default"
             });
             LoadingClip = [clipLoader, 0];
-            helpers.DoVaeLoader(null, "nvidia-sana-1600", "sana-dcae");
+            helpers.DoVaeLoader("nvidia-sana-1600", "sana-dcae");
         }
         else if (CurrentCompatClass() is "pixart-ms-sigma-xl-2")
         {
@@ -362,11 +369,11 @@ public partial class WorkflowGenerator
             LoadingModel = [pixartNode, 0];
             string singleClipLoader = CreateNode("CLIPLoader", new JObject()
             {
-                ["clip_name"] = helpers.RequireClipModel("t5xxl", T2IParamTypes.T5XXLModel),
+                ["clip_name"] = helpers.DoClipLoader("t5xxl", T2IParamTypes.T5XXLModel),
                 ["type"] = "sd3"
             });
             LoadingClip = [singleClipLoader, 0];
-            helpers.DoVaeLoader(null, "stable-diffusion-xl-v1", "sdxl-vae");
+            helpers.DoVaeLoader("stable-diffusion-xl-v1", "sdxl-vae");
         }
         else
         {
@@ -395,7 +402,7 @@ public partial class WorkflowGenerator
                     ["qwen-2.5-vl-fp16"] = T2IParamTypes.QwenModel
                 };
                 List<string> encoders = info.TextEncoders ?? [];
-                string[] encoderFiles = encoders.Select(e => helpers.RequireClipModel(e, encoderParams.GetValueOrDefault(e))).ToArray();
+                string[] encoderFiles = encoders.Select(e => helpers.DoClipLoader(e, encoderParams.GetValueOrDefault(e))).ToArray();
                 bool anyGguf = encoderFiles.Any(f => f.EndsWith(".gguf"));
                 string loaderType = (encoders.Count, anyGguf) switch
                 {
@@ -434,7 +441,7 @@ public partial class WorkflowGenerator
                 {
                     LoadingVAE = CreateVAELoader("pixel_space");
                 }
-                else helpers.DoVaeLoader(null, CurrentCompatClass(), info.VAE);
+                else helpers.DoVaeLoader(CurrentCompatClass(), info.VAE);
             }
         }
         string predType = model.Metadata?.PredictionType == null ? info.PredType.ToString() : model.Metadata?.PredictionType;
