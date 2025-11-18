@@ -86,42 +86,41 @@ public partial class WorkflowGenerator
     {
         public void DoVaeLoader(string defaultVal, string compatClass, string knownName)
         {
-            string vaeFile = defaultVal;
             string nodeId = null;
             CommonModels.ModelInfo knownFile = knownName is null ? null : CommonModels.Known[knownName];
             if (g.UserInput.TryGet(T2IParamTypes.VAE, out T2IModel vaeModel))
             {
-                vaeFile = vaeModel.Name;
+                defaultVal = vaeModel.Name;
                 nodeId = "11";
             }
-            if (vaeFile == "None")
+            if (defaultVal == "None")
             {
-                vaeFile = null;
+                defaultVal = null;
             }
-            if (string.IsNullOrWhiteSpace(vaeFile) && knownFile is not null && Program.T2IModelSets["VAE"].Models.ContainsKey(knownFile.FileName))
+            if (string.IsNullOrWhiteSpace(defaultVal) && knownFile is not null && Program.T2IModelSets["VAE"].Models.ContainsKey(knownFile.FileName))
             {
-                vaeFile = knownFile.FileName;
+                defaultVal = knownFile.FileName;
             }
-            if (string.IsNullOrWhiteSpace(vaeFile))
+            if (string.IsNullOrWhiteSpace(defaultVal))
             {
                 vaeModel = Program.T2IModelSets["VAE"].Models.Values.FirstOrDefault(m => m.ModelClass?.CompatClass?.ID == compatClass);
                 if (vaeModel is not null)
                 {
                     Logs.Debug($"Auto-selected first available VAE of compat class '{compatClass}', VAE '{vaeModel.Name}' will be applied");
-                    vaeFile = vaeModel.Name;
+                    defaultVal = vaeModel.Name;
                 }
             }
-            if (string.IsNullOrWhiteSpace(vaeFile))
+            if (string.IsNullOrWhiteSpace(defaultVal))
             {
                 if (knownFile is null)
                 {
                     throw new SwarmUserErrorException("No default VAE for this model found, please download its VAE and set it as default in User Settings");
                 }
-                vaeFile = knownFile.FileName;
-                knownFile.DownloadNow().Wait();
+                defaultVal = knownFile.FileName;
+                g.EnsureCommonModel(knownFile);
                 Program.RefreshAllModelSets();
             }
-            g.LoadingVAE = g.CreateVAELoader(vaeFile, nodeId);
+            g.LoadingVAE = g.CreateVAELoader(defaultVal, nodeId);
         }
 
         public string RequireClipModel(string id, T2IRegisteredParam<T2IModel> param)
@@ -144,8 +143,7 @@ public partial class WorkflowGenerator
                 ClipModelsValid.TryAdd(name, name);
                 return name;
             }
-            string filePath = Utilities.CombinePathWithAbsolute(Program.ServerSettings.Paths.ActualModelRoot, Program.ServerSettings.Paths.SDClipFolder.Split(';')[0], name);
-            g.DownloadModel(name, filePath, info.URL, info.Hash);
+            g.EnsureCommonModel(info);
             Program.RefreshAllModelSets();
             ClipModelsValid.TryAdd(name, name);
             return name;

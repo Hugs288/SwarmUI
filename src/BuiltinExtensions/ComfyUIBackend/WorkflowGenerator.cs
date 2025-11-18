@@ -224,6 +224,14 @@ public partial class WorkflowGenerator
         }
     }
 
+    /// <summary>Helper to download a common model file required by the workflow, if it doesn't already exist.</summary>
+    public void EnsureCommonModel(CommonModels.ModelInfo model)
+    {
+        string folder = Program.T2IModelSets[model.FolderType].FolderPaths[0];
+        string path = Utilities.CombinePathWithAbsolute(Program.ServerSettings.Paths.ActualModelRoot, folder, model.FileName);
+        DownloadModel(model.FileName, path, model.URL, model.Hash);
+    }
+
     /// <summary>Loads and applies LoRAs in the user parameters for the given LoRA confinement ID, as a Set CLIP Hooks node.</summary>
     public JArray CreateHookLorasForConfinement(int confinement, JArray clip)
     {
@@ -1259,8 +1267,7 @@ public partial class WorkflowGenerator
         {
             return model.FileName;
         }
-        string filePath = Utilities.CombinePathWithAbsolute(Program.ServerSettings.Paths.ActualModelRoot, Program.T2IModelSets[model.FolderType].FolderPaths[0], model.FileName);
-        DownloadModel(model.FileName, filePath, model.URL, model.Hash);
+        EnsureCommonModel(model);
         VisionModelsValid.TryAdd(model.FileName, model.FileName);
         return model.FileName;
     }
