@@ -496,7 +496,7 @@ public class WorkflowGeneratorSteps
             {
                 if (g.UserInput.TryGet(ComfyUIBackendExtension.UseStyleModel, out string styleModelName))
                 {
-                    string clipVis = g.RequireVisionModel("sigclip_vision_patch14_384.safetensors", "https://huggingface.co/Comfy-Org/sigclip_vision_384/resolve/main/sigclip_vision_patch14_384.safetensors", "1fee501deabac72f0ed17610307d7131e3e9d1e838d0363aa3c2b97a6e03fb33", T2IParamTypes.ClipVisionModel);
+                    string clipVis = g.RequireVisionModel("sigclip_vision", T2IParamTypes.ClipVisionModel);
                     string styleModelClipLoader = g.CreateNode("CLIPVisionLoader", new JObject()
                     {
                         ["clip_name"] = clipVis
@@ -565,8 +565,7 @@ public class WorkflowGeneratorSteps
                     {
                         return visionLoaderId;
                     }
-                    string visModelName = "clip_vision_g.safetensors";
-                    visModelName = g.RequireVisionModel(visModelName, "https://huggingface.co/stabilityai/control-lora/resolve/main/revision/clip_vision_g.safetensors", "9908329b3ead722a693ea400fab1d7c9ec91d6736fd194a94d20d793457f9c2e", T2IParamTypes.ClipVisionModel);
+                    string visModelName = g.RequireVisionModel("clip_vision_g", T2IParamTypes.ClipVisionModel);
                     visionLoaderId = g.CreateNode("CLIPVisionLoader", new JObject()
                     {
                         ["clip_name"] = visModelName
@@ -650,8 +649,7 @@ public class WorkflowGeneratorSteps
                         {
                             if ((ipAdapter.Contains("sd15") && !ipAdapter.Contains("vit-G")) || ipAdapter.Contains("vit-h"))
                             {
-                                string targetName = "clip_vision_h.safetensors";
-                                targetName = g.RequireVisionModel(targetName, "https://huggingface.co/h94/IP-Adapter/resolve/main/models/image_encoder/model.safetensors", "6ca9667da1ca9e0b0f75e46bb030f7e011f44f86cbfb8d5a36590fcd7507b030", T2IParamTypes.ClipVisionModel);
+                                string targetName = g.RequireVisionModel("clip_vision_h", T2IParamTypes.ClipVisionModel);
                                 ipAdapterVisionLoader = g.CreateNode("CLIPVisionLoader", new JObject()
                                 {
                                     ["clip_name"] = targetName
@@ -662,8 +660,8 @@ public class WorkflowGeneratorSteps
                     }
                     if (g.Features.Contains("cubiqipadapterunified"))
                     {
-                        g.RequireVisionModel("CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors", "https://huggingface.co/h94/IP-Adapter/resolve/main/models/image_encoder/model.safetensors", "6ca9667da1ca9e0b0f75e46bb030f7e011f44f86cbfb8d5a36590fcd7507b030");
-                        g.RequireVisionModel("CLIP-ViT-bigG-14-laion2B-39B-b160k.safetensors", "https://huggingface.co/h94/IP-Adapter/resolve/main/sdxl_models/image_encoder/model.safetensors", "657723e09f46a7c3957df651601029f66b1748afb12b419816330f16ed45d64d");
+                        g.RequireVisionModel("CLIP-ViT-H");
+                        g.RequireVisionModel("CLIP-ViT-G");
                     }
                     string lastImage = g.CreateLoadImageNode(images[0], "${promptimages.0}", false);
                     for (int i = 1; i < images.Count; i++)
