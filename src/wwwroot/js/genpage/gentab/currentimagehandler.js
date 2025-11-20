@@ -214,7 +214,7 @@ class ImageFullViewHelper {
                 }
             }
             else {
-                quickAppendButton(subDiv, added.label, (e, button) => added.onclick(button), '', added.title);
+                quickAppendButton(subDiv, added.label, (e, button) => added.onclick(button), added.className || '', added.title);
             }
         }
         this.modalJq.modal('show');
@@ -642,7 +642,9 @@ function toggleStar(path, rawSrc) {
         if (imageFullView.isOpen() && imageFullView.currentSrc == rawSrc) {
             let oldMetadata = JSON.parse(imageFullView.currentMetadata);
             let newMetadata = { ...oldMetadata, is_starred: data.new_state };
+            let state = imageFullView.copyState();
             imageFullView.showImage(rawSrc, JSON.stringify(newMetadata), imageFullView.currentBatchId);
+            imageFullView.pasteState(state);
         }
     });
 }
@@ -1095,9 +1097,9 @@ function gotImageResult(image, metadata, batchId) {
     batch_div.addEventListener('contextmenu', (e) => rightClickImageInBatch(e, batch_div));
     if (!document.getElementById('current_image_img') || autoLoadImagesElem.checked) {
         setCurrentImage(src, metadata, batchId, false, true);
-        if (getUserSetting('AutoSwapImagesIncludesFullView') && imageFullView.isOpen()) {
-            imageFullView.showImage(src, metadata, batchId);
-        }
+    }
+    if ((getUserSetting('AutoSwapImagesIncludesFullView') || imageFullView.currentBatchId == batchId) && imageFullView.isOpen()) {
+        imageFullView.showImage(src, metadata, batchId);
     }
     return batch_div;
 }
