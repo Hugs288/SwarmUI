@@ -228,7 +228,13 @@ public class T2IModelClassSorter
         CompatHunyuanImage2_1Refiner = RegisterCompat(new() {
             ID = "hunyuan-image-2_1-refiner", ShortCode = "HyImg", ModelType = ModelType.Refiner, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["qwen-2.5-vl-7b", "byt5-small-glyphxl"], ClipType = "hunyuan_image", VAE = "hunyuan-image-2_1-vae", LatentNode = "EmptyHunyuanImageLatent" }),
-        CompatHunyuanVideo1_5 = RegisterCompat(new() { ID = "hunyuan-video-1_5", ShortCode = "HyVid" }),
+
+        CompatHunyuanVideo1_5 = RegisterCompat(new() {
+            ID = "hunyuan-video-1_5", ShortCode = "HyVid",
+            ModelType = ModelType.TextToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["qwen-2.5-vl-7b", "byt5-small-glyphxl"], ClipType = "hunyuan_video_15", VAE = "hunyuan-video-1_5-vae",
+            DefaultParameters = ["cfgscale:6", "steps:20", "text2videoframes:73", "sigmashift:7.0"]
+        }),
         CompatSegmindStableDiffusion1b = RegisterCompat(new() {
             ID = "segmind-stable-diffusion-1b", ShortCode = "SSD1B",
             ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.UNet, PredType = PredictionType.eps,

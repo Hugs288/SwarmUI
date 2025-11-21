@@ -697,7 +697,7 @@ public partial class WorkflowGenerator
                 ["samples"] = latent,
                 ["tile_size"] = 256,
                 ["overlap"] = 64,
-                ["temporal_size"] = IsHunyuanVideo15() ? 9999 : 32, // HyVid 1.5 dies on temporal tiling
+                ["temporal_size"] = CurrentCompatClass() == "hunyuan-video-1_5" ? 9999 : 32, // HyVid 1.5 dies on temporal tiling
                 ["temporal_overlap"] = 4
             }, id);
         }
@@ -1465,8 +1465,7 @@ public partial class WorkflowGenerator
             {
                 VideoFPS ??= 24;
                 Frames ??= 73;
-                string targetName = "sigclip_vision_patch14_384.safetensors";
-                targetName = g.RequireVisionModel(targetName, "https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/clip_vision/sigclip_vision_patch14_384.safetensors", "1fee501deabac72f0ed17610307d7131e3e9d1e838d0363aa3c2b97a6e03fb33", T2IParamTypes.ClipVisionModel);
+                string targetName = g.RequireVisionModel("sigclip_vision", T2IParamTypes.ClipVisionModel);
                 string clipLoader = g.CreateNode("CLIPVisionLoader", new JObject()
                 {
                     ["clip_name"] = targetName

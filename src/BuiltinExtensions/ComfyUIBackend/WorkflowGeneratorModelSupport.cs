@@ -18,7 +18,7 @@ public partial class WorkflowGenerator
 
     public bool IsVideoModel()
     {
-        return CurrentCompatClass() is "lightricks-ltx-video" or "genmo-mochi-1" or "hunyuan-video" or "nvidia-cosmos-1" || CurrentCompatClass().StartsWith("wan-21") || CurrentCompatClass().StartsWith("wan-22");
+        return CurrentCompatClass() is "lightricks-ltx-video" or "genmo-mochi-1" or "hunyuan-video" or "hunyuan-video-1_5" or "nvidia-cosmos-1" || CurrentCompatClass().StartsWith("wan-21") || CurrentCompatClass().StartsWith("wan-22");
     }
 
     /// <summary>Creates an Empty Latent Image node.</summary>
