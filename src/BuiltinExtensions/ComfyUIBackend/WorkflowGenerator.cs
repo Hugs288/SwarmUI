@@ -142,6 +142,11 @@ public partial class WorkflowGenerator
         return CurrentModelClass()?.CompatClass?.ID;
     }
 
+    public T2IModelCompatClass CurrentModelInfo()
+    {
+        return T2IModelClassSorter.CompatClasses.GetValueOrDefault(CurrentCompatClass());
+    }
+
     /// <summary>Gets a dynamic ID within a semi-stable registration set.</summary>
     public string GetStableDynamicID(int index, int offset)
     {

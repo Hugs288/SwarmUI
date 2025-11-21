@@ -28,8 +28,7 @@ public partial class WorkflowGenerator
         {
             return creator(width, height, batchSize, id);
         }
-        T2IModelCompatClass info = T2IModelClassSorter.CompatClasses.GetValueOrDefault(CurrentCompatClass());
-        if (info.Architecture.ToString() == "UNet" && UserInput.Get(ComfyUIBackendExtension.ShiftedLatentAverageInit, false))
+        if (CurrentModelInfo().Architecture.ToString() == "UNet" && UserInput.Get(ComfyUIBackendExtension.ShiftedLatentAverageInit, false))
         {
             double offA = 0, offB = 0, offC = 0, offD = 0;
             switch (FinalLoadedModel.ModelClass?.CompatClass?.ID)
@@ -60,18 +59,18 @@ public partial class WorkflowGenerator
                 ["off_d"] = offD
             }, id);
         }
-        string latentNode = info.LatentNode;
+        string latentNode = CurrentModelInfo().LatentNode;
         JObject inputs = new()
         {
             ["batch_size"] = batchSize,
             ["height"] = height,
             ["width"] = width
         };
-        if (info.ModelType is ModelType.TextToVideo or ModelType.ImageToVideo or ModelType.TextAndImageToVideo)
+        if (CurrentModelInfo().ModelType is ModelType.TextToVideo or ModelType.ImageToVideo or ModelType.TextAndImageToVideo)
         {
             inputs["length"] = UserInput.Get(T2IParamTypes.Text2VideoFrames, 25);
         }
-        if (info.Architecture == ModelArchitecture.Cascade)
+        if (CurrentModelInfo().Architecture == ModelArchitecture.Cascade)
         {
             inputs["compression"] = UserInput.Get(T2IParamTypes.CascadeLatentCompression, 32);
         }
