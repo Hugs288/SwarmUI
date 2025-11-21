@@ -87,6 +87,7 @@ public static class CommonModels
         Register(new("qwen-image-vae", "Qwen Image VAE", "https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/vae/qwen_image_vae.safetensors", "a70580f0213e67967ee9c95f05bb400e8fb08307e017a924bf3441223e023d1f", "VAE", "qwen_image_vae.safetensors"));
         Register(new("hunyuan-image-2_1-vae", "Hunyuan Image 2.1 VAE", "https://huggingface.co/Comfy-Org/HunyuanImage_2.1_ComfyUI/resolve/main/split_files/vae/hunyuan_image_2.1_vae_fp16.safetensors", "f2ae19863609206196b5e3a86bfd94f67bd3866f5042004e3994f07e3c93b2f9", "VAE", "hunyuan_image_2.1_vae_fp16.safetensors"));
         Register(new("hunyuan-image-2_1-refiner-vae", "Hunyuan Image 2.1 Refiner VAE", "https://huggingface.co/Comfy-Org/HunyuanImage_2.1_ComfyUI/resolve/main/split_files/vae/hunyuan_image_refiner_vae_fp16.safetensors", "e1b74e85d61b65e18cc05ca390e387d93cfadf161e737de229ebb800ea3db769", "VAE", "hunyuan_image_2.1_refiner_vae_fp16.safetensors"));
+        Register(new("hunyuan-video-1_5-vae", "Hunyuan Video 1.5 VAE", "https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/vae/hunyuanvideo15_vae_fp16.safetensors", "e7c3091949c27e2d55ae6d5df917b99dadfebbf308e5a50d0ade0d16c90297ae", "VAE", "HunyuanVideo/hunyuanvideo15_vae_fp16.safetensors"));
 
         /// text encoders
         Register(new("clip-l", "CLIP-L", "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/text_encoder/model.fp16.safetensors", "660c6f5b1abae9dc498ac2d21e1347d2abdb0cf6c0c0c8576cd796491d9a6cdd", "Clip", "clip_l.safetensors"));
@@ -113,5 +114,6 @@ public static class CommonModels
         Register(new("clip_vision_h", "Clip Vision H", "https://huggingface.co/h94/IP-Adapter/resolve/main/models/image_encoder/model.safetensors", "6ca9667da1ca9e0b0f75e46bb030f7e011f44f86cbfb8d5a36590fcd7507b030", "ClipVision", "clip_vision_h.safetensors"));
         Register(new("CLIP-ViT-G", "Clip ViT G", "https://huggingface.co/h94/IP-Adapter/resolve/main/sdxl_models/image_encoder/model.safetensors", "657723e09f46a7c3957df651601029f66b1748afb12b419816330f16ed45d64d", "ClipVision", "CLIP-ViT-bigG-14-laion2B-39B-b160k.safetensors"));
         Register(new("CLIP-ViT-H", "Clip Vision H", "https://huggingface.co/h94/IP-Adapter/resolve/main/models/image_encoder/model.safetensors", "6ca9667da1ca9e0b0f75e46bb030f7e011f44f86cbfb8d5a36590fcd7507b030", "ClipVision", "CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors"));
+        Register(new("hunyuan-video-1_5-vae", "Hunyuan Video 1.5 VAE", "The VAE for Hunyuan Video 1.5", "https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/vae/hunyuanvideo15_vae_fp16.safetensors", "e7c3091949c27e2d55ae6d5df917b99dadfebbf308e5a50d0ade0d16c90297ae", "VAE", "HunyuanVideo/hunyuanvideo15_vae_fp16.safetensors"));
     }
 }

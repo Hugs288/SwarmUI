@@ -288,10 +288,11 @@ function editModel(model, browser) {
     getRequiredElementById('edit_model_lora_default_confinement').value = model.lora_default_confinement || '';
     getRequiredElementById('edit_model_lora_default_confinement_div').style.display = model.architecture && model.architecture.endsWith('/lora') ? 'block' : 'none';
     let run = () => {
+		modelPresetLinkManager.buildPresetLinkSelectorForModel(curModelMenuBrowser.subType, model.name, 'edit_model_preset_id');
         triggerChangeFor(modelsHelpers.enableImageElem);
         $('#edit_model_modal').modal('show');
     };
-    let curImg = document.getElementById('current_image_img');
+    let curImg = currentImageHelper.getCurrentImage();
     if (curImg && curImg.tagName == 'IMG') {
         setMediaFileDirect(modelsHelpers.imageElem, curImg.src, 'image', 'cur', 'cur', () => {
             modelsHelpers.enableImageElem.checked = false;
@@ -381,6 +382,9 @@ function save_edit_model() {
         genericRequest('EditModelMetadata', data, data => {
             curModelMenuBrowser.browser.lightRefresh();
         });
+        let presetSelect = document.getElementById('edit_model_preset_id');
+        let presetTitle = presetSelect?.value || '';
+        modelPresetLinkManager.setLink(curModelMenuBrowser.subType, model.name, presetTitle);
         $('#edit_model_modal').modal('hide');
     }
     if (modelsHelpers.enableImageElem.checked) {
@@ -745,7 +749,11 @@ class ModelBrowserWrapper {
                 interject += `${getOptLine("Default LoRA Weight", model.data.lora_default_weight)}${getOptLine("Default LoRA Confinement", confinementName)}`;
                 searchableAdded += `, Default LoRA Weight: ${model.data.lora_default_weight}, Default LoRA Confinement: ${confinementName}`;
             }
-            description = `<span class="model_filename">${isStarred ? 'Starred: ' : ''}${escapeHtml(display)}</span><br>${getLine("Title", model.data.title)}${getOptLine("Author", model.data.author)}${getLine("Type", model.data.class)}${interject}${getOptLine('Trigger Phrase', model.data.trigger_phrase)}${getOptLine('Usage Hint', model.data.usage_hint)}${getLine("Description", model.data.description)}<br>`;
+            let linkedPresets = modelPresetLinkManager.getLinks(this.subType, model.data.name);
+            if (linkedPresets.length > 0) {
+                searchableAdded += `, Linked Presets: ${linkedPresets.join(', ')}`;
+            }
+            description = `<span class="model_filename">${isStarred ? 'Starred: ' : ''}${escapeHtml(display)}</span><br>${getLine("Title", model.data.title)}${getOptLine("Author", model.data.author)}${getLine("Type", model.data.class)}${interject}${getOptLine('Trigger Phrase', model.data.trigger_phrase)}${getOptLine("Linked Presets", linkedPresets.join(', '))}${getOptLine('Usage Hint', model.data.usage_hint)}${getLine("Description", model.data.description)}<br>`;
             let cleanForDetails = (val) => val == null ? '(Unset)' : safeHtmlOnly(val).replaceAll('<br>', '&emsp;');
             detail_list.push(cleanForDetails(model.data.title), cleanForDetails(model.data.class), cleanForDetails(model.data.usage_hint ?? model.data.trigger_phrase), cleanForDetails(model.data.description));
             if (model.data.local && permissions.hasPermission('edit_model_metadata')) {
@@ -973,7 +981,13 @@ function directSetModel(model) {
     if (!model) {
         return;
     }
+    let priorModel = getRequiredElementById('current_model').value;
+    if (priorModel) {
+        modelPresetLinkManager.removePresetsFrom('Stable-Diffusion', priorModel);
+    }
+    let modelName = null;
     if (model.name) {
+		modelName = model.name;
         let clean = cleanModelName(model.name);
         forceSetDropdownValue('input_model', clean);
         forceSetDropdownValue('current_model', clean);
@@ -994,8 +1008,10 @@ function directSetModel(model) {
         curModelArch = arch;
         curModelCompatClass = compatClass;
         curModelSpecialFormat = specialFormat;
+        modelName = name;
     }
     reviseBackendFeatureSet();
+    modelPresetLinkManager.addPresetsFrom('Stable-Diffusion', modelName);
     getRequiredElementById('input_model').dispatchEvent(new Event('change'));
     let aspect = document.getElementById('input_aspectratio');
     if (aspect) {
