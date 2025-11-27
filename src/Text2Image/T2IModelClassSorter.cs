@@ -88,18 +88,24 @@ public class T2IModelClassSorter
         }),
         CompatFlux = RegisterCompat(new() {
             ID = "flux-1", ShortCode = "Flux-1", ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
-            TextEncoders = ["clip-l", "t5xxl"], ClipType = "flux", VAE = "flux-ae", LatentNode = "EmptySD3LatentImage"
+            TextEncoders = ["clip-l", "t5xxl"], ClipType = "flux", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage"
         }),
         CompatFluxSchnell = RegisterCompat(new() {
             ID = "flux-1-schnell", ShortCode = "Flux-1S",
             ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
-            TextEncoders = ["clip-l", "t5xxl"], ClipType = "flux", VAE = "flux-ae", LatentNode = "EmptySD3LatentImage",
+            TextEncoders = ["clip-l", "t5xxl"], ClipType = "flux", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage",
             DefaultParameters = ["cfgscale:1", "steps:4"]
         }),
         CompatFluxDev = RegisterCompat(new() {
             ID = "flux-1-dev", ShortCode = "Flux-1D",
             ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
-            TextEncoders = ["clip-l", "t5xxl"], ClipType = "flux", VAE = "flux-ae", LatentNode = "EmptySD3LatentImage",
+            TextEncoders = ["clip-l", "t5xxl"], ClipType = "flux", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage",
+            DefaultParameters = ["cfgscale:1", "steps:20"]
+        }),
+        CompatFlux2 = RegisterCompat(new() {
+            ID = "flux-2", ShortCode = "Flux-2",
+            ModelType = ModelType.ImageEdit, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["clip-l", "t5xxl"], ClipType = "flux2", VAE = "flux2-vae", LatentNode = "EmptySD3LatentImage",
             DefaultParameters = ["cfgscale:1", "steps:20"]
         }),
         CompatWan21 = RegisterCompat(new() {
@@ -157,7 +163,7 @@ public class T2IModelClassSorter
         CompatChroma = RegisterCompat(new() {
             ID = "chroma", ShortCode = "Chroma",
             ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
-            TextEncoders = ["t5xxl"], ClipType = "chroma", VAE = "flux-ae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingAuraFlow",
+            TextEncoders = ["t5xxl"], ClipType = "chroma", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingAuraFlow",
             DefaultParameters = ["cfgscale:3.5", "steps:26", "scheduler:beta", "sigmashift:3.0"]
         }),
         CompatChromaRadiance = RegisterCompat(new() {
@@ -181,25 +187,25 @@ public class T2IModelClassSorter
         CompatLumina2 = RegisterCompat(new() {
             ID = "lumina-2", ShortCode = "Lumi2",
             ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
-            TextEncoders = ["gemma2-2b"], ClipType = "lumina", VAE = "flux-ae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingAuraFlow",
+            TextEncoders = ["gemma2-2b"], ClipType = "lumina", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingAuraFlow",
             DefaultParameters = ["cfgscale:4", "steps:25", "sampler:res_multistep", "sigmashift:6.0"]
         }),
         CompatHiDreamI1 = RegisterCompat(new() {
             ID = "hidream-i1", ShortCode = "HiDrm",
             ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
-            TextEncoders = ["clip-l-hidream", "clip-g-hidream", "t5xxl", "llama3.1-8b"], ClipType = "hidream", VAE = "flux-ae", LatentNode = "EmptySD3LatentImage",
+            TextEncoders = ["clip-l-hidream", "clip-g-hidream", "t5xxl", "llama3.1-8b"], ClipType = "hidream", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage",
             DefaultParameters = ["cfgscale:5", "steps:50", "sampler:uni_pc", "sigmashift:3.0"]
         }),
         CompatHiDreamI1Edit = RegisterCompat(new() {
             ID = "hidream-i1-edit", ShortCode = "HiDrm-E",
             ModelType = ModelType.ImageEdit, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
-            TextEncoders = ["clip-l-hidream", "clip-g-hidream", "t5xxl", "llama3.1-8b"], ClipType = "hidream", VAE = "flux-ae", LatentNode = "EmptySD3LatentImage",
+            TextEncoders = ["clip-l-hidream", "clip-g-hidream", "t5xxl", "llama3.1-8b"], ClipType = "hidream", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage",
             DefaultParameters = ["cfgscale:5", "steps:28", "scheduler:normal", "sigmashift:3.0"]
         }),
         CompatOmniGen2 = RegisterCompat(new() {
             ID = "omnigen-2", ShortCode = "Omni2",
             ModelType = ModelType.ImageEdit, Architecture = ModelArchitecture.MLLM, PredType = PredictionType.sd3,
-            TextEncoders = ["qwen-2.5-vl-fp16"], ClipType = "omnigen2", VAE = "flux-ae", LatentNode = "EmptySD3LatentImage",
+            TextEncoders = ["qwen-2.5-vl-fp16"], ClipType = "omnigen2", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage",
         }),
         CompatQwenImage = RegisterCompat(new() {
             ID = "qwen-image", ShortCode = "Qwen",
@@ -245,6 +251,12 @@ public class T2IModelClassSorter
             ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.eps,
             TextEncoders = ["t5xxl"], ClipType = "sd3", VAE = "sdxl-vae",
             DefaultParameters = ["cfgscale:4", "steps:14"]
+        }),
+        CompatZImage = RegisterCompat(new() {
+            ID = "z-image", ShortCode = "ZImg",
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["qwen_3_4b"], ClipType = "stable_diffusion", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingAuraFlow",
+            DefaultParameters = ["cfgscale:4", "steps:14"]
         });
 
     /// <summary>Initialize the class sorter.</summary>
@@ -277,6 +289,7 @@ public class T2IModelClassSorter
         bool isCascadeC(JObject h) => (h.ContainsKey("model.diffusion_model.clf.1.weight") && h.ContainsKey("model.diffusion_model.clip_txt_mapper.weight")) || (h.ContainsKey("clf.1.weight") && h.ContainsKey("clip_txt_mapper.weight"));
         bool isFluxSchnell(JObject h) => (h.ContainsKey("double_blocks.0.img_attn.norm.key_norm.scale") && !h.ContainsKey("guidance_in.in_layer.bias")) // 'diffusion_models'
                 || (h.ContainsKey("model.diffusion_model.double_blocks.0.img_attn.norm.key_norm.scale") && !h.ContainsKey("model.diffusion_model.guidance_in.in_layer.bias")); // 'checkpoints'
+        bool isFlux2Dev(JObject h) => h.ContainsKey("double_stream_modulation_img.lin.weight") || h.ContainsKey("model.diffusion_model.double_stream_modulation_img.lin.weight");
         bool isFluxDev(JObject h) => (h.ContainsKey("double_blocks.0.img_attn.norm.key_norm.scale") && h.ContainsKey("guidance_in.in_layer.bias")) // 'diffusion_models'
                 || (h.ContainsKey("time_text_embed.guidance_embedder.linear_1.weight") && h.ContainsKey("single_transformer_blocks.0.attn.norm_k.weight") && h.ContainsKey("transformer_blocks.0.attn.add_k_proj.weight") && h.ContainsKey("single_transformer_blocks.0.proj_mlp.weight")) // tencent funky models
                 || (h.ContainsKey("single_transformer_blocks.0.norm.linear.qweight") && h.ContainsKey("transformer_blocks.0.mlp_context_fc1.bias") && (h.ContainsKey("transformer_blocks.0.mlp_context_fc1.wscales") || h.ContainsKey("transformer_blocks.0.mlp_context_fc1.wtscale")) // Nunchaku
@@ -317,6 +330,7 @@ public class T2IModelClassSorter
         bool isCosmosPredict2_2B(JObject h) => h.ContainsKey("norm_out.linear_1.weight") && h.ContainsKey("time_embed.t_embedder.linear_1.weight");
         bool isCosmosPredict2_14B(JObject h) => h.ContainsKey("net.blocks.0.adaln_modulation_cross_attn.1.weight");
         bool isLumina2(JObject h) => h.ContainsKey("model.diffusion_model.cap_embedder.0.weight") || h.ContainsKey("cap_embedder.0.weight");
+        bool isZImage(JObject h) => h.ContainsKey("context_refiner.0.attention.k_norm.weight");
         bool tryGetWanTok(JObject h, out JToken tok) => h.TryGetValue("model.diffusion_model.blocks.0.cross_attn.k.bias", out tok) || h.TryGetValue("blocks.0.cross_attn.k.bias", out tok) || h.TryGetValue("lora_unet_blocks_0_cross_attn_k.lora_down.weight", out tok);
         bool tryGetPatchEmbedTok(JObject h, out JToken tok) => h.TryGetValue("patch_embedding.weight", out tok) || h.TryGetValue("model.diffusion_model.patch_embedding.weight", out tok);
         bool isWan21_1_3b(JObject h) => tryGetWanTok(h, out JToken tok) && tok["shape"].ToArray()[0].Value<long>() == 1536;
@@ -345,6 +359,7 @@ public class T2IModelClassSorter
         bool isControlnetX(JObject h) => h.ContainsKey("controlnet_x_embedder.weight");
         bool isHyImg(JObject h) => h.ContainsKey("byt5_in.fc1.bias") && h.ContainsKey("double_blocks.0.img_attn_k_norm.weight");
         bool isHyVid15(JObject h) => h.ContainsKey("vision_in.proj.0.bias");
+        bool isHyVid15Lora(JObject h) => h.ContainsKey("diffusion_model.cond_type_embedding.lora_down.weight") && h.ContainsKey("diffusion_model.byt5_in.fc1.lora_down.weight") && h.ContainsKey("diffusion_model.vision_in.proj.1.lora_down.weight");
         bool isHyImgRefiner(JObject h) => h.ContainsKey("double_blocks.0.img_attn_k_norm.weight") && h.TryGetValue("time_r_in.mlp.0.bias", out JToken timeTok) && timeTok["shape"].ToArray()[0].Value<long>() == 3328;
         bool isAuraFlow(JObject h) => h.ContainsKey("model.cond_seq_linear.weight") && h.ContainsKey("model.double_layers.0.attn.w1k.weight");
         // ====================== Stable Diffusion v1 ======================
@@ -523,15 +538,15 @@ public class T2IModelClassSorter
         Register(new() { ID = "flux.1/vae", CompatClass = CompatFlux, Name = "Flux.1 Autoencoder", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) => { return false; } });
         Register(new() { ID = "Flux.1-schnell", CompatClass = CompatFluxSchnell, Name = "Flux.1 Schnell", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
-            return isFluxSchnell(h) && !isChroma(h);
+            return isFluxSchnell(h) && !isChroma(h) && !isFlux2Dev(h);
         }});
         Register(new() { ID = "Flux.1-dev", CompatClass = CompatFluxDev, Name = "Flux.1 Dev", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
-            return isFluxDev(h);
+            return isFluxDev(h) && !isFlux2Dev(h);
         }});
         Register(new() { ID = "Flux.1-dev/lora", CompatClass = CompatFluxDev, Name = "Flux.1 LoRA", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
-            return isFluxLora(h);
+            return isFluxLora(h) && !isHyVid15Lora(h);
         }});
         Register(new() { ID = "Flux.1-dev/depth", CompatClass = CompatFluxDev, Name = "Flux.1 Depth", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
@@ -564,6 +579,15 @@ public class T2IModelClassSorter
         Register(new() { ID = "flux.1-dev/controlnet-alimamainpaint", CompatClass = CompatFluxDev, Name = "Flux.1 ControlNet - AliMama Inpaint", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
             return false;
+        }});
+        // ====================== BFL Flux.2 ======================
+        Register(new() { ID = "Flux.2-dev", CompatClass = CompatFlux2, Name = "Flux.2 Dev", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        {
+            return isFlux2Dev(h);
+        }});
+        Register(new() { ID = "Flux.2-dev/lora", CompatClass = CompatFlux2, Name = "Flux.2 Dev LoRA", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        {
+            return false; // TODO
         }});
         // ====================== Wan Video ======================
         Register(new() { ID = "wan-2_1-text2video/vae", CompatClass = CompatWan21, Name = "Wan 2.1 VAE", StandardWidth = 640, StandardHeight = 640, IsThisModelOfClass = (m, h) => { return false; }});
@@ -705,7 +729,11 @@ public class T2IModelClassSorter
         }});
         Register(new() { ID = "lumina-2", CompatClass = CompatLumina2, Name = "Lumina 2", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
-            return isLumina2(h);
+            return isLumina2(h) && !isZImage(h);
+        }});
+        Register(new() { ID = "z-image", CompatClass = CompatZImage, Name = "Z-Image", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        {
+            return isLumina2(h) && isZImage(h);
         }});
         Register(new() { ID = "hidream-i1", CompatClass = CompatHiDreamI1, Name = "HiDream i1", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
@@ -781,6 +809,14 @@ public class T2IModelClassSorter
         {
             return isHyImg(h) && isHyVid15(h);
         }});
+        Register(new() { ID = "hunyuan-video-1_5/lora", CompatClass = CompatHunyuanVideo1_5, Name = "Hunyuan Video 1.5 LoRA", StandardWidth = 960, StandardHeight = 960, IsThisModelOfClass = (m, h) =>
+        {
+            return isHyVid15Lora(h);
+        }});
+        Register(new() { ID = "hunyuan-video-1_5-sr", CompatClass = CompatHunyuanVideo1_5, Name = "Hunyuan Video 1.5 SuperResolution", StandardWidth = 960, StandardHeight = 960, IsThisModelOfClass = (m, h) =>
+        {
+            return false; // TODO: Possible to detect?
+        }});
         // ====================== Everything below this point does not autodetect, it must match through ModelSpec or be manually set ======================
         // General Stable Diffusion variants
         Register(new() { ID = "stable-diffusion-v1/vae", CompatClass = CompatSdv1, Name = "Stable Diffusion v1 VAE", StandardWidth = 512, StandardHeight = 512, IsThisModelOfClass = (m, h) => { return false; } });
@@ -840,10 +876,8 @@ public class T2IModelClassSorter
         Remaps["hunyuanvideo1.5_480p_i2v"] = "hunyuan-video-1_5";
         Remaps["hunyuanvideo1.5_720p_t2v"] = "hunyuan-video-1_5";
         Remaps["hunyuanvideo1.5_720p_i2v"] = "hunyuan-video-1_5";
-        // ====================== GGUF Remaps ======================
-        Remaps["flux"] = "Flux.1-dev";
-        Remaps["sd3"] = "stable-diffusion-v3-medium";
-        Remaps["hyvid"] = "hunyuan-video";
+        Remaps["hunyuanvideo1.5_1080p_sr_distilled"] = "hunyuan-video-1_5-sr";
+        Remaps["hunyuanvideo1.5_720p_sr_distilled"] = "hunyuan-video-1_5-sr";
     }
 
     /// <summary>Returns the model class that matches this model, or null if none.</summary>

@@ -168,17 +168,24 @@ There's a full step by step guide for video model usage here: <https://github.co
 
 ## Hunyuan Video 1.5
 
-- Hunyuan Video 1.5 support in SwarmUI is a Work-In-Progress.
+https://github.com/user-attachments/assets/b3605901-78ed-4f13-a065-adfbc0d63232
+
+*(Hunyuan Video 1.5 - T2V 720p non-distilled CFG=6 Steps=20 Frames=121)*
+
+- SwarmUI supports [Hunyuan Video 1.5 Models](https://huggingface.co/tencent/HunyuanVideo-1.5)
     - There appear to be quality issues not related to the Swarm impl, either in the model or in the upstream comfy impl.
 - Downloads here <https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/tree/main/split_files/diffusion_models>
     - save to `diffusion_models` folder
-    - There are variants for Text2Video vs Image2Video, and a dedicated superresolution v2v upscaler
+    - There are variants for Text2Video vs Image2Video
         - Despite the labeled difference, both variants can equally do both text2video and image2video.
+        - Also a dedicated superresolution v2v upscaler, see [below](#hunyuan-video-15-superresolution-model)
     - There are 480p and 720p variants
         - Swarm will assume all models are 720p (`960x960`). For the 480p models, you may want to edit the model metadata and set the resolution to `640x640`.
+        - They are actually pretty friendly to mixing the resolution, 720p can do 480 fine and 480p can mostly do 720.
     - There are CFG Distilled and non-distilled versions
-- Official documentation from tencent here <https://huggingface.co/tencent/HunyuanVideo-1.5>
+        - CFG distilled runs faster and with less vram, non-distilled is slower but MIGHT yield better quality
 - The VAE is a 16x16 downsample (as opposed to most prior models using 8x8)
+    - This allows HyVid1.5 to run faster than most, but with some quality reduction on small details
 - **Parameters**:
     - **CFG:** `1` for Distilled, otherwise normal high CFG values, eg `6`
     - **Steps:** Normal step counts (20+)
@@ -186,7 +193,22 @@ There's a full step by step guide for video model usage here: <https://github.co
         - You can do Frames=`1` for image generation.
     - **FPS:** The model is trained for `24` fps
     - **Resolution:** Aside from the trained resolution, the models seem happy with different smaller resolutions or different aspect ratios as well.
-    - **Sigma Shift:** defaults to `7`
+    - **Sigma Shift:** defaults to `7`. They recommend lowering to `5` for 480p and raising to `9` on specifically `720p T2V`.
+        - SuperResolution uses `2`
+
+### Hunyuan Video 1.5 SuperResolution Model
+
+- The SuperResolution models function equivalent to basic models, and are meant to be used as a Refiner model.
+    - Save in the same folder as the rest.
+    - You may need to manually edit the model metadata to architecture `Hunyuan Video 1.5 SuperResolution`
+    - Probably edit model metadata to set the resolution to `1920x1080` (or approx 1:1 of `1456x1456`)
+    - The SR models have "distilled" in the filename but seem to respond better to CFG=6 and make a mess at CFG=1.
+- There are dedicated latent upscale models here <https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/tree/main/split_files/latent_upscale_models>
+    - Save to `(SwarmUI)/Models/latent_upscale_models` (create the folder if it doesn't already exist)
+    - Select the model as the *Refiner Upscale Method*
+    - If you have a 720p gen, and you are using the 1080p upscale, set Refiner Upscale to `1.5`.
+
+- Not yet supported, WIP.
 
 ## Genmo Mochi 1 (Text2Video)
 

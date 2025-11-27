@@ -772,6 +772,23 @@ public partial class WorkflowGenerator
             }
             defscheduler ??= "simple";
         }
+        else if (CurrentModelClass().ID.StartsWith("hunyuan-video-1_5-sr"))
+        {
+            if (!hadSpecialCond)
+            {
+                string srCond = CreateNode("HunyuanVideo15SuperResolution", new JObject()
+                {
+                    ["positive"] = pos,
+                    ["negative"] = neg,
+                    ["vae"] = FinalVae,
+                    ["latent"] = latent,
+                    ["noise_augmentation"] = 0.7 // TODO: User input?
+                });
+                pos = [srCond, 0];
+                neg = [srCond, 1];
+                latent = [srCond, 2];
+            }
+        }
         else if (CurrentCompatClass().StartsWith("flux-1") || CurrentCompatClass().StartsWith("wan-21") || CurrentCompatClass().StartsWith("wan-22") || CurrentCompatClass().StartsWith("omnigen-") || CurrentCompatClass().StartsWith("qwen-image"))
         {
             defscheduler ??= "simple";
@@ -780,7 +797,7 @@ public partial class WorkflowGenerator
         {
             defscheduler ??= "beta";
         }
-            bool willCascadeFix = false;
+        bool willCascadeFix = false;
         JArray cascadeModel = null;
         if (!rawSampler && CurrentCompatClass() == "stable-cascade-v1" && FinalLoadedModel.Name.Contains("stage_c") && Program.MainSDModels.Models.TryGetValue(FinalLoadedModel.Name.Replace("stage_c", "stage_b"), out T2IModel bModel))
         {
@@ -865,12 +882,12 @@ public partial class WorkflowGenerator
             neg = [ip2p2condNode, 1];
             latent = [ip2p2condNode, 2];
         }
-        else if (CurrentCompatClass() == "flux-1-kontext" || CurrentCompatClass().StartsWith("omnigen-") || CurrentCompatClass().StartsWith("qwen-image"))
+        else if (CurrentCompatClass() == "flux-1-kontext" || CurrentCompatClass().StartsWith("omnigen-") || CurrentCompatClass().StartsWith("qwen-image") || CurrentCompatClass() == "flux-2")
         {
             JArray img = null;
             JArray imgNeg = null;
             bool doLatentChain = CurrentCompatClass() != "flux-1-kontext"; // Arguably even kontext should just do this?
-            bool onlyExplicit = CurrentCompatClass() == "qwen-image";
+            bool onlyExplicit = (CurrentCompatClass() == "qwen-image") || CurrentCompatClass() == "flux-2";
             if (CurrentCompatClass().StartsWith("omnigen-") || CurrentModelClass().ID.StartsWith("qwen-image-edit-plus"))
             {
                 imgNeg = neg;

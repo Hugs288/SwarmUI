@@ -218,7 +218,7 @@ public class WorkflowGeneratorSteps
                 {
                     Logs.Warning($"Ignore TeaCache Mode parameter because the current model is Nunchaku which does not support TeaCache. Use 'Nunchaku Cache Threshold' for a similar effect to TeaCache.");
                 }
-                else if (g.CurrentCompatClass().StartsWith("flux-1"))
+                else if (g.CurrentCompatClass().StartsWith("flux-1") || g.CurrentCompatClass() == "flux-2")
                 {
                     if (teaCacheMode != "video only")
                     {
@@ -1042,7 +1042,7 @@ public class WorkflowGeneratorSteps
                             ["end_percent"] = g.UserInput.Get(controlnetParams.End, 1)
                         });
                     }
-                    else if (g.CurrentCompatClass().StartsWith("stable-diffusion-v3") || g.CurrentCompatClass().StartsWith("flux-1") || g.CurrentCompatClass() == "chroma" || g.CurrentCompatClass().StartsWith("qwen-image"))
+                    else if (g.CurrentCompatClass().StartsWith("stable-diffusion-v3") || g.CurrentCompatClass().StartsWith("qwen-image") || g.CurrentCompatClass().StartsWith("flux-1") || g.CurrentCompatClass() is "chroma" or "Flux.2-dev")
                     {
                         applyNode = g.CreateNode("ControlNetApplyAdvanced", new JObject()
                         {
@@ -1207,6 +1207,10 @@ public class WorkflowGeneratorSteps
                 string upscaleMethod = g.UserInput.Get(ComfyUIBackendExtension.RefinerUpscaleMethod, "None");
                 // TODO: Better same-VAE check
                 bool doPixelUpscale = doUspcale && (upscaleMethod.StartsWith("pixel-") || upscaleMethod.StartsWith("model-"));
+                int width = (int)Math.Round(g.UserInput.GetImageResolution().Width * refineUpscale);
+                int height = (int)Math.Round(g.UserInput.GetImageResolution().Height * refineUpscale);
+                width = (width / 16) * 16; // avoid unworkable output sizes
+                height = (height / 16) * 16;
                 if (modelMustReencode || doPixelUpscale || doSave || g.MaskShrunkInfo.BoundsNode is not null)
                 {
                     g.CreateVAEDecode(origVae, g.FinalSamples, "24");
@@ -1218,10 +1222,6 @@ public class WorkflowGeneratorSteps
                     }
                     if (doPixelUpscale)
                     {
-                        int width = (int)Math.Round(g.UserInput.GetImageResolution().Width * refineUpscale);
-                        int height = (int)Math.Round(g.UserInput.GetImageResolution().Height * refineUpscale);
-                        width = (width / 16) * 16; // avoid unworkable output sizes
-                        height = (height / 16) * 16;
                         if (upscaleMethod.StartsWith("pixel-"))
                         {
                             g.CreateNode("ImageScale", new JObject()
@@ -1273,6 +1273,23 @@ public class WorkflowGeneratorSteps
                         ["samples"] = g.FinalSamples,
                         ["upscale_method"] = upscaleMethod.After("latent-"),
                         ["scale_by"] = refineUpscale
+                    }, "26");
+                    g.FinalSamples = ["26", 0];
+                }
+                else if (doUspcale && upscaleMethod.StartsWith("latentmodel-"))
+                {
+                    g.CreateNode("LatentUpscaleModelLoader", new JObject()
+                    {
+                        ["model_name"] = upscaleMethod.After("latentmodel-")
+                    }, "27");
+                    g.CreateNode("HunyuanVideo15LatentUpscaleWithModel", new JObject()
+                    {
+                        ["model"] = new JArray() { "27", 0 },
+                        ["samples"] = g.FinalSamples,
+                        ["upscale_method"] = "bilinear",
+                        ["width"] = width,
+                        ["height"] = height,
+                        ["crop"] = "disabled"
                     }, "26");
                     g.FinalSamples = ["26", 0];
                 }

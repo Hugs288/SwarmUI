@@ -2,27 +2,34 @@
 
 | Model | Architecture | Year | Author | Scale | Censored? | Quality/Status |
 | ----  | ---- | ---- | ---- | ---- | ---- | ---- |
-[Stable Diffusion v1 and v2](#stable-diffusion-v1-and-v2) | unet | 2022 | Stability AI | 1B | No | Outdated |
-[Stable Diffusion v1 Inpainting Models](#stable-diffusion-v1-inpainting-models) | unet | 2022 | RunwayML | 1B | No | Outdated |
 [Stable Diffusion XL](#stable-diffusion-xl) | unet | 2023 | Stability AI | 2B | Partial | Older but some finetunes are worth using |
 [SD1 and SDXL Turbo Variants](#sd1-and-sdxl-turbo-variants) | unet | 2023 | Stability AI and others | 2B | Partial | Outdated |
 [Stable Diffusion 3](#stable-diffusion-3) | MMDiT | 2024 | Stability AI | 2B | Yes | Outdated, prefer 3.5 |
 [Stable Diffusion 3.5 Large](#stable-diffusion-35-large) | MMDiT | 2024 | Stability AI | 8B | Partial | Recent, Good Quality |
 [Stable Diffusion 3.5 Medium](#stable-diffusion-35-medium) | MMDiT | 2024 | Stability AI | 2B | Partial | Recent, Good Quality |
+[AuraFlow](#auraflow) | MMDiT | 2024 | Fal.AI | 6B | Yes | Outdated |
+[Flux.1](#black-forest-labs-flux1-models) | MMDiT | 2024 | Black Forest Labs | 12B | Partial | Recent, High Quality |
+[Flux.2](#flux-2) | MMDiT | 2025 | Black Forest Labs | 32B | Minimal | Recent, Incredible Quality, extremely memory intense |
+[Chroma](#chroma) | MMDiT | 2025 | Lodestone Rock | 8.9B  | No | Recent, Decent Quality |
+[Chroma Radiance](#chroma-radiance) | Pixel MMDiT | 2025 | Lodestone Rock | 8.9B  | No | Recent, Bad Quality (WIP) |
+[Lumina 2.0](#lumina-2) | NextDiT | 2025 | Alpha-VLLM | 2.6B | Partial | Modern, Passable Quality |
+[OmniGen 2](#omnigen-2) | MLLM | 2025 | VectorSpaceLab | 7B | No | Modern, Decent Quality |
+[Qwen Image](#qwen-image) | MMDiT | 2025 | Alibaba-Qwen | 20B | Minimal | Modern, Great Quality, very memory intense |
+[Hunyuan Image 2.1](#hunyuan-image-21) | MMDiT | 2025 | Tencent | 17B | No | Modern, Great Quality, very memory intense |
+[Z-Image](#z-image) | S3-DiT | 2025 | Tongyi MAI (Alibaba) | 6B | No | Modern, Great Quality, lightweight |
+
+Old or bad options also tracked listed:
+
+| Model | Architecture | Year | Author | Scale | Censored? | Quality/Status |
+| ----  | ---- | ---- | ---- | ---- | ---- | ---- |
+[Stable Diffusion v1 and v2](#stable-diffusion-v1-and-v2) | unet | 2022 | Stability AI | 1B | No | Outdated |
+[Stable Diffusion v1 Inpainting Models](#stable-diffusion-v1-inpainting-models) | unet | 2022 | RunwayML | 1B | No | Outdated |
 [Segmind SSD 1B](#segmind-ssd-1b) | unet | 2023 | Segmind | 1B | Partial | Outdated |
 [Stable Cascade](#stable-cascade) | unet cascade | 2024 | Stability AI | 5B | Partial | Outdated |
 [PixArt Sigma](#pixart-sigma) | DiT | 2024 | PixArt | 1B | ? | Outdated |
 [Nvidia Sana](#nvidia-sana) | DiT | 2024 | NVIDIA | 1.6B | No | Just Bad |
-[AuraFlow](#auraflow) | MMDiT | 2024 | Fal.AI | 6B | Yes | Outdated |
-[Flux.1](#black-forest-labs-flux1-models) | MMDiT | 2024 | Black Forest Labs | 12B | Partial | Recent, High Quality |
-[Chroma](#chroma) | MMDiT | 2025 | Lodestone Rock | 8.9B  | No | Recent, Decent Quality |
-[Chroma Radiance](#chroma-radiance) | Pixel MMDiT | 2025 | Lodestone Rock | 8.9B  | No | Recent, Bad Quality (WIP) |
-[Lumina 2.0](#lumina-2) | NextDiT | 2025 | Alpha-VLLM | 2.6B | Partial | Modern, Passable Quality |
-[HiDream i1](#hidream-i1) | MMDiT | 2025 | HiDream AI (Vivago) | 17B | Minimal | Modern, High Quality, very memory intense |
 [Nvidia Cosmos Predict2](#cosmos-predict2) | DiT | 2025 | NVIDIA | 2B/14B | Partial | Just Bad |
-[OmniGen 2](#omnigen-2) | MLLM | 2025 | VectorSpaceLab | 7B | No | Modern, Decent Quality |
-[Qwen Image](#qwen-image) | MMDiT | 2025 | Alibaba-Qwen | 20B | Minimal | Modern, Great Quality, very memory intense |
-[Hunyuan Image 2.1](#hunyuan-image-21) | MMDiT | 2025 | Tencent | 17B | No | Modern, Great Quality, very memory intense |
+[HiDream i1](#hidream-i1) | MMDiT | 2025 | HiDream AI (Vivago) | 17B | Minimal | Good Quality, lost community attention |
 
 - **Architecture** is the fundamental machine learning structure used for the model, UNet's were used in the past but DiT (Diffusion Transformers) are the modern choice
 - **Scale** is how big the model is - "B" for "Billion", so for example "2B" means "Two billion parameters".
@@ -311,6 +318,30 @@ These steps are not friendly to beginners (if Sana gains popularity, likely more
     - Add a Mask, draw a dot anywhere in the empty area (this is just a trick to tell the editor to automask all the empty area to the side, you don't need to mask it manually)
     - Type your prompt, hit generate
 
+# Flux 2
+
+![img](/docs/images/models/flux2.jpg)
+
+- Black Forest Labs' [Flux.2 Models](https://bfl.ai/blog/flux-2) are supported in SwarmUI
+- It is an extremely massive model (32B diffusion model, 24B text encoder) that will demand significant RAM availability on your PC.
+    - This can easily fill up 128 gigs of system RAM in usage, but does still work on 64 gig systems. Lower than 64 may not be possible, or may require heavily using swapfile.
+- Download the standard model here <https://huggingface.co/Comfy-Org/flux2-dev/blob/main/split_files/diffusion_models/flux2_dev_fp8mixed.safetensors>
+    - Or GGUF version here <https://huggingface.co/orabazes/FLUX.2-dev-GGUF/tree/main>
+    - Goes in `diffusion_models` folder
+- The VAE is a brand new 16x16 downsample VAE with 128 channels
+- **Parameters:**
+    - **Prompt:** Prompting guide from the model creators here <https://docs.bfl.ai/guides/prompting_guide_flux2>
+        - Notably, they trained heavily on complex JSON structured prompts to allow for very complex scene control, though this is not required
+        - They used a powerful LLM for inputs, allow for multiple languages and a variety of ways of phrasing/formatting text to work out
+    - **Resolution:** Flux2 supports just about any resolution you can think of, from 64x64 up to 4 megapixels (2048x2048)
+    - **CFG Scale:** `1`
+    - **Steps:** They recommend 50, 20 still works but may have some quality reduction
+    - **Sigma Shift:** Defaults to `2.02`
+    - **Flux Guidance Scale:** Defaults to `3.5`, fiddling this value up a bit (to eg `4`) may be better
+    - **Sampler:** Defaults to regular `Euler`
+    - **Scheduler:** Defaults to `Flux2`, a new specialty scheduler added for Flux.2 to use, but it makes very little difference
+    - **Prompt Images:** add up to a max of 6 images to the prompt box to be used as reference images. This uses significantly more memory.
+
 # Chroma
 
 - Chroma is a derivative of Flux, and is supported in SwarmUI
@@ -537,6 +568,24 @@ These steps are not friendly to beginners (if Sana gains popularity, likely more
         - 2048 on this model is the same latent size as 512 on other models.
     - **Sigma Shift:** Default is `5`. Refine defaults to `4`.
     - TBD: Info specific to Distilled variant usage (doesn't seem to work well with their documented settings, testing TBD or comfy fix), and dedicated Refiner model
+
+# Z-Image
+
+![img](/docs/images/models/zimage.jpg)
+
+*(Steps=9)*
+
+- [Z-Image](https://huggingface.co/Tongyi-MAI/Z-Image-Turbo) is supported in SwarmUI!
+    - It is a 6B scaled model designed to run extremely fast while competing at the top level of image models
+- Only the "Turbo" model is currently released, download here <https://huggingface.co/Comfy-Org/z_image_turbo/blob/main/split_files/diffusion_models/z_image_turbo_bf16.safetensors>
+    - Save in `diffusion_models`
+    - "Base" and "Edit" variants are expected to release in the future
+- **Parameters:**
+    - **Prompt:** ? Seems to support general prompts file
+    - **CFG Scale:** For Turbo, `1`
+    - **Steps:** For Turbo, small numbers are fine. `5` will work, `9` is better (they recommend 1 more than an otherwise normal count due to scheduler oddities, so eg `5` instead of `4`).
+    - **Resolution:** 1024x1024 is the standard, but it works at other scales. eg `1536` works well, `512` noticeably loses some quality.
+    - **Sigma Shift:** Default is `3`.
 
 # Video Models
 

@@ -126,6 +126,7 @@ public class ComfyUIBackendExtension : Extension
             FeaturesDiscardIfNotFound.UnionWith(["teacache"]);
         }
         T2IParamTypes.ConcatDropdownValsClean(ref UpscalerModels, InternalListModelsFor("upscale_models", true).Select(u => $"model-{u}///Model: {u}"));
+        T2IParamTypes.ConcatDropdownValsClean(ref UpscalerModels, InternalListModelsFor("latent_upscale_models", true).Select(u => $"latentmodel-{u}///Latent Model: {u}"));
         T2IParamTypes.ConcatDropdownValsClean(ref YoloModels, InternalListModelsFor("yolov8", false));
         T2IParamTypes.ConcatDropdownValsClean(ref GligenModels, InternalListModelsFor("gligen", false));
         T2IParamTypes.ConcatDropdownValsClean(ref StyleModels, InternalListModelsFor("style_models", true));
@@ -474,6 +475,10 @@ public class ComfyUIBackendExtension : Extension
             {
                 T2IParamTypes.ConcatDropdownValsClean(ref UpscalerModels, upscaleModels.Select(u => $"model-{u}///Model: {u}"));
             }
+            if (TryGetRequiredInputs(rawObjectInfo, "LatentUpscaleModelLoader", "model_name", out JToken latentUpscaleModels))
+            {
+                T2IParamTypes.ConcatDropdownValsClean(ref UpscalerModels, latentUpscaleModels.Select(u => $"latentmodel-{u}///Latent Model: {u}"));
+            }
             if (TryGetRequiredInputs(rawObjectInfo, "SwarmKSampler", "sampler_name", out JToken swarmksamplerNames))
             {
                 string[] dropped = [.. Samplers.Select(s => s.Before("///")).Except([.. swarmksamplerNames.Select(u => $"{u}")])];
@@ -632,7 +637,7 @@ public class ComfyUIBackendExtension : Extension
             // CFG++ variants
             "euler_cfg_pp///Euler CFG++ (Manifold-constrained CFG)", "euler_ancestral_cfg_pp///Euler Ancestral CFG++", "dpmpp_2m_cfg_pp///DPM++ 2M CFG++", "dpmpp_2s_ancestral_cfg_pp///DPM++ 2S Ancestral CFG++ (2x Slow)", "res_multistep_cfg_pp///Res MultiStep CFG++", "res_multistep_ancestral_cfg_pp///Res MultiStep Ancestral CFG++", "gradient_estimation_cfg_pp///Gradient Estimation CFG++"
         ],
-        Schedulers = ["normal///Normal", "karras///Karras", "exponential///Exponential", "simple///Simple", "ddim_uniform///DDIM Uniform", "sgm_uniform///SGM Uniform", "turbo///Turbo (for turbo models, max 10 steps)", "align_your_steps///Align Your Steps (NVIDIA, rec. 10 steps)", "beta///Beta", "linear_quadratic///Linear Quadratic (Mochi)", "ltxv///LTX-Video", "ltxv-image///LTXV-Image", "kl_optimal///KL Optimal (Nvidia AYS)"];
+        Schedulers = ["normal///Normal", "karras///Karras", "exponential///Exponential", "simple///Simple", "ddim_uniform///DDIM Uniform", "sgm_uniform///SGM Uniform", "turbo///Turbo (for turbo models, max 10 steps)", "align_your_steps///Align Your Steps (NVIDIA, rec. 10 steps)", "beta///Beta", "linear_quadratic///Linear Quadratic (Mochi)", "ltxv///LTX-Video", "ltxv-image///LTXV-Image", "kl_optimal///KL Optimal (Nvidia AYS)", "flux2///Flux.2"];
 
     public static List<string> IPAdapterModels = ["None"], IPAdapterWeightTypes = ["standard", "prompt is more important", "style transfer"];
 
