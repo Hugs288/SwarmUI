@@ -105,7 +105,7 @@ public class T2IModelClassSorter
         CompatFlux2 = RegisterCompat(new() {
             ID = "flux-2", ShortCode = "Flux-2",
             ModelType = ModelType.ImageEdit, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
-            TextEncoders = ["clip-l", "t5xxl"], ClipType = "flux2", VAE = "flux2-vae", LatentNode = "EmptySD3LatentImage",
+            TextEncoders = ["mistral_3_small_fp8"], ClipType = "flux2", VAE = "flux2-vae", LatentNode = "EmptySD3LatentImage",
             DefaultParameters = ["cfgscale:1", "steps:20"]
         }),
         CompatWan21 = RegisterCompat(new() {
