@@ -302,7 +302,7 @@ public partial class WorkflowGenerator
                 string dtype = UserInput.Get(ComfyUIBackendExtension.PreferredDType, "automatic");
                 if (dtype == "automatic")
                 {
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || model.Metadata?.SpecialFormat == "fp8_scaled" || CurrentCompatClass() is "nvidia-cosmos-predict2" or "chroma" or "chroma-radiance" || CurrentCompatClass().StartsWith("omnigen-")) // TODO: Or AMD?
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || model.Metadata?.SpecialFormat == "fp8_scaled" || CurrentCompatClass() is "nvidia-cosmos-predict2" or "chroma" or "chroma-radiance" or "z-image" || CurrentCompatClass().StartsWith("omnigen-")) // TODO: Or AMD?
                     {
                         dtype = "default";
                     }
