@@ -161,7 +161,6 @@ public partial class WorkflowGenerator
     {
         ModelLoadHelpers helpers = new(this);
         string helper = $"modelloader_{model.Name}_{type}";
-        T2IModelCompatClass info = T2IModelClassSorter.CompatClasses.GetValueOrDefault(CurrentCompatClass());
         if (NodeHelpers.TryGetValue(helper, out string alreadyLoaded))
         {
             string[] parts = alreadyLoaded.SplitFast(':');
@@ -388,7 +387,7 @@ public partial class WorkflowGenerator
             LoadingClip = [modelNode, 1];
             LoadingVAE = [modelNode, 2];
         }
-        if (info is not null)
+        if (CurrentModelInfo() is not null)
         {
             // text encoders
             if (LoadingClip is null) {
@@ -400,7 +399,7 @@ public partial class WorkflowGenerator
                     ["umt5xxl"] = T2IParamTypes.T5XXLModel, ["gemma2-2b"] = null, ["pile-t5xxl"] = T2IParamTypes.T5XXLModel, ["byt5-small-glyphxl"] = T2IParamTypes.T5XXLModel,
                     ["qwen-2.5-vl-fp16"] = T2IParamTypes.QwenModel
                 };
-                List<string> encoders = info.TextEncoders ?? [];
+                List<string> encoders = CurrentModelInfo().TextEncoders ?? [];
                 string[] encoderFiles = encoders.Select(e => helpers.DoClipLoader(e, encoderParams.GetValueOrDefault(e))).ToArray();
                 bool anyGguf = encoderFiles.Any(f => f.EndsWith(".gguf"));
                 string loaderType = (encoders.Count, anyGguf) switch
@@ -416,9 +415,9 @@ public partial class WorkflowGenerator
                 {
                     clipInputs[$"clip_name{(i == 0 ? "" : (i + 1))}"] = encoderFiles[i];
                 }
-                if (info.ClipType is not null)
+                if (CurrentModelInfo().ClipType is not null)
                 {
-                    clipInputs["type"] = info.ClipType;
+                    clipInputs["type"] = CurrentModelInfo().ClipType;
                 }
                 string clipLoaderNode = CreateNode(loaderType, clipInputs);
                 LoadingClip = [clipLoaderNode, 0];
@@ -440,15 +439,15 @@ public partial class WorkflowGenerator
                 {
                     LoadingVAE = CreateVAELoader("pixel_space");
                 }
-                else helpers.DoVaeLoader(CurrentCompatClass(), info.VAE);
+                else helpers.DoVaeLoader(CurrentCompatClass(), CurrentModelInfo().VAE);
             }
         }
-        string predType = model.Metadata?.PredictionType == null ? info.PredType.ToString() : model.Metadata?.PredictionType;
+        string predType = model.Metadata?.PredictionType == null ? CurrentModelInfo().PredType.ToString() : model.Metadata?.PredictionType;
         if (!string.IsNullOrWhiteSpace(predType) && LoadingModel is not null)
         {
             if (predType == "sd3")
             {
-                if (CurrentCompatClass().StartsWith("flux-1"))
+                if (CurrentModelInfo().SigmaShiftNode == "ModelSamplingFlux")
                 {
                     string samplingNode = CreateNode("ModelSamplingFlux", new JObject()
                     {
@@ -462,7 +461,7 @@ public partial class WorkflowGenerator
                 }
                 else
                 {
-                    string samplingNode = CreateNode(info.SigmaShiftNode, new JObject()
+                    string samplingNode = CreateNode(CurrentModelInfo().SigmaShiftNode, new JObject()
                     {
                         ["model"] = LoadingModel,
                         ["shift"] = UserInput.Get(T2IParamTypes.SigmaShift, 3)
@@ -470,7 +469,7 @@ public partial class WorkflowGenerator
                     LoadingModel = [samplingNode, 0];
                 }
             }
-            else if (model.Metadata?.PredictionType != null && model.Metadata?.PredictionType != info.PredType.ToString())
+            else if (model.Metadata?.PredictionType != null && model.Metadata?.PredictionType != CurrentModelInfo().PredType.ToString())
             {
                 string discreteNode = CreateNode("ModelSamplingDiscrete", new JObject()
                 {

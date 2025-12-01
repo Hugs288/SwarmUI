@@ -88,24 +88,24 @@ public class T2IModelClassSorter
         }),
         CompatFlux = RegisterCompat(new() {
             ID = "flux-1", ShortCode = "Flux-1", ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
-            TextEncoders = ["clip-l", "t5xxl"], ClipType = "flux", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage"
+            TextEncoders = ["clip-l", "t5xxl"], ClipType = "flux", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingFlux",
         }),
         CompatFluxSchnell = RegisterCompat(new() {
             ID = "flux-1-schnell", ShortCode = "Flux-1S",
             ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
-            TextEncoders = ["clip-l", "t5xxl"], ClipType = "flux", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage",
+            TextEncoders = ["clip-l", "t5xxl"], ClipType = "flux", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingFlux",
             DefaultParameters = ["cfgscale:1", "steps:4"]
         }),
         CompatFluxDev = RegisterCompat(new() {
             ID = "flux-1-dev", ShortCode = "Flux-1D",
             ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
-            TextEncoders = ["clip-l", "t5xxl"], ClipType = "flux", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage",
+            TextEncoders = ["clip-l", "t5xxl"], ClipType = "flux", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingFlux",
             DefaultParameters = ["cfgscale:1", "steps:20"]
         }),
         CompatFlux2 = RegisterCompat(new() {
             ID = "flux-2", ShortCode = "Flux-2",
             ModelType = ModelType.ImageEdit, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
-            TextEncoders = ["mistral_3_small_fp8"], ClipType = "flux2", VAE = "flux2-vae", LatentNode = "EmptySD3LatentImage",
+            TextEncoders = ["mistral_3_small_fp8"], ClipType = "flux2", VAE = "flux2-vae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingFlux",
             DefaultParameters = ["cfgscale:1", "steps:20"]
         }),
         CompatWan21 = RegisterCompat(new() {
