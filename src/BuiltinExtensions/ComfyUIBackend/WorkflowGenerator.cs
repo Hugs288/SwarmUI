@@ -789,13 +789,17 @@ public partial class WorkflowGenerator
                 latent = [srCond, 2];
             }
         }
-        else if (CurrentCompatClass().StartsWith("flux-1") || CurrentCompatClass().StartsWith("wan-21") || CurrentCompatClass().StartsWith("wan-22") || CurrentCompatClass().StartsWith("omnigen-") || CurrentCompatClass().StartsWith("qwen-image"))
+        else if (CurrentCompatClass().StartsWith("flux-1") || CurrentCompatClass().StartsWith("wan-21") || CurrentCompatClass().StartsWith("wan-22") || CurrentCompatClass().StartsWith("omnigen-") || CurrentCompatClass().StartsWith("qwen-image") || CurrentCompatClass() == "z-image")
         {
             defscheduler ??= "simple";
         }
         else if (CurrentCompatClass() is "chroma" or "chroma-radiance")
         {
             defscheduler ??= "beta";
+        }
+        else if (CurrentCompatClass() == "flux-2")
+        {
+            defscheduler ??= "flux2";
         }
         bool willCascadeFix = false;
         JArray cascadeModel = null;

@@ -328,7 +328,9 @@ These steps are not friendly to beginners (if Sana gains popularity, likely more
 - Download the standard model here <https://huggingface.co/Comfy-Org/flux2-dev/blob/main/split_files/diffusion_models/flux2_dev_fp8mixed.safetensors>
     - Or GGUF version here <https://huggingface.co/orabazes/FLUX.2-dev-GGUF/tree/main>
     - Goes in `diffusion_models` folder
-- The VAE is a brand new 16x16 downsample VAE with 128 channels
+- The VAE is a brand new 16x16 downsample VAE with 128 channels. It will be autodownloaded.
+- The Text Encoder is 24B Mistral Small 3.2 (2506). It will be autodownloaded.
+    - This would make sense to replace with a GGUF. (Pending gguf download link)
 - **Parameters:**
     - **Prompt:** Prompting guide from the model creators here <https://docs.bfl.ai/guides/prompting_guide_flux2>
         - Notably, they trained heavily on complex JSON structured prompts to allow for very complex scene control, though this is not required
@@ -578,16 +580,23 @@ These steps are not friendly to beginners (if Sana gains popularity, likely more
 - [Z-Image](https://huggingface.co/Tongyi-MAI/Z-Image-Turbo) is supported in SwarmUI!
     - It is a 6B scaled model designed to run extremely fast while competing at the top level of image models
 - Only the "Turbo" model is currently released, download here <https://huggingface.co/Comfy-Org/z_image_turbo/blob/main/split_files/diffusion_models/z_image_turbo_bf16.safetensors>
+    - Or FP8 version here (for lower VRAM) <https://huggingface.co/T5B/Z-Image-Turbo-FP8/blob/main/z-image-turbo-fp8-e4m3fn.safetensors>
+        - That's a direct fp8 with some quality loss, proper scaled/mixed fp8 version pending (?)
+    - Or GGUF version here <https://huggingface.co/jayn7/Z-Image-Turbo-GGUF/tree/main>
     - Save in `diffusion_models`
     - "Base" and "Edit" variants are expected to release in the future
 - Uses the Flux.1 VAE
 - **Parameters:**
-    - **Prompt:** ? Seems to support general prompts file
+    - **Prompt:** Supports general prompting in any format just fine. Speaks English and Chinese deeply, understands other languages decently well too.
+    - **Sampler:** Default is fine. Some users find `Euler Ancestral` can be better on photorealism detail. Comfy examples suggests `Res MultiStep`.
+    - **Scheduler:** Default is fine. Some users find `Beta` can be very slightly better.
     - **CFG Scale:** For Turbo, `1`
-    - **Steps:** For Turbo, small numbers are fine. `5` will work, `9` is better (they recommend 1 more than an otherwise normal count due to scheduler oddities, so eg `5` instead of `4`).
+    - **Steps:** For Turbo, small numbers are fine. `4` will work, `8` is better
+        - Original repo suggests 5/9, but this appears redundant in Swarm.
         - For particularly difficult prompts, raising Steps up to `20` may help get the full detail.
-    - **Resolution:** 1024x1024 is the standard, 1536x1536 works great too. `512` noticeably loses some quality.
-    - **Sigma Shift:** Default is `3`.
+    - **Resolution:** Side length `1024` is the standard, but anywhere up to `2048` is good. `512` noticeably loses some quality, above `2048` corrupts the image.
+    - **Sigma Shift:** Default is `3`, raising to `6` can yield stronger coherence.
+    - Here's a big ol' grid of Z-Image Turbo params: [Z-Image MegaGrid](<https://sd.mcmonkey.org/zimagegrid/#auto-loc,true,true,false,true,false,cfgscale,steps,none,none,extremecloseupt,4,1,3,1024x1024,1,euler,simple>)
 
 # Video Models
 

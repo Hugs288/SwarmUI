@@ -1093,7 +1093,7 @@ public class T2IParamTypes
         List<string> result = [.. mainList];
         foreach (string str in addIn)
         {
-            if (!existing.Contains(str.Before("///")))
+            if (existing.Add(str.Before("///")))
             {
                 result.Add(str);
             }
