@@ -257,6 +257,11 @@ public class T2IModelClassSorter
             ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3, LorasTargetTextEnc = false,
             TextEncoders = ["qwen_3_4b"], ClipType = "stable_diffusion", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingAuraFlow",
             DefaultParameters = ["cfgscale:4", "steps:14"]
+        }),
+        CompatOvis = RegisterCompat(new() { ID = "ovis", ShortCode = "Ovis", LorasTargetTextEnc = false,
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["ovis_2.5-5b"], ClipType = "ovis", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage",
+            DefaultParameters = ["cfgscale:4", "steps:14"]
         });
 
     /// <summary>Initialize the class sorter.</summary>
@@ -330,9 +335,10 @@ public class T2IModelClassSorter
         bool isCosmosPredict2_2B(JObject h) => h.ContainsKey("norm_out.linear_1.weight") && h.ContainsKey("time_embed.t_embedder.linear_1.weight");
         bool isCosmosPredict2_14B(JObject h) => h.ContainsKey("net.blocks.0.adaln_modulation_cross_attn.1.weight");
         bool isLumina2(JObject h) => hasKey(h, "cap_embedder.0.weight");
-        bool isZImage(JObject h) => hasKey(h, "context_refiner.0.attention.k_norm.weight");
+        bool isZImage(JObject h) => hasKey(h, "context_refiner.0.attention.k_norm.weight") && hasKey(h, "layers.0.adaLN_modulation.0.bias");
+        bool isOvis(JObject h) => hasKey(h, "double_blocks.0.img_mlp.down_proj.weight");
         bool isZImageLora(JObject h) => hasKey(h, "layers.0.adaLN_modulation.0.lora_A.weight") && hasKey(h, "layers.9.feed_forward.w3.lora_B.weight");
-        bool isZImageControlNet(JObject h) => h.ContainsKey("control_layers.0.adaLN_modulation.0.weight") && h.ContainsKey("control_noise_refiner.0.adaLN_modulation.0.weight") && h.ContainsKey("control_layers.0.feed_forward.w3.weight");
+        bool isZImageControlNetDiffPatch(JObject h) => h.ContainsKey("control_layers.0.adaLN_modulation.0.weight") && h.ContainsKey("control_noise_refiner.0.adaLN_modulation.0.weight") && h.ContainsKey("control_layers.0.feed_forward.w3.weight");
         bool tryGetWanTok(JObject h, out JToken tok) => h.TryGetValue("model.diffusion_model.blocks.0.cross_attn.k.bias", out tok) || h.TryGetValue("blocks.0.cross_attn.k.bias", out tok) || h.TryGetValue("lora_unet_blocks_0_cross_attn_k.lora_down.weight", out tok);
         bool tryGetPatchEmbedTok(JObject h, out JToken tok) => h.TryGetValue("patch_embedding.weight", out tok) || h.TryGetValue("model.diffusion_model.patch_embedding.weight", out tok);
         bool isWan21_1_3b(JObject h) => tryGetWanTok(h, out JToken tok) && tok["shape"].ToArray()[0].Value<long>() == 1536;
@@ -358,6 +364,7 @@ public class T2IModelClassSorter
                                             || (h.ContainsKey("transformer_blocks.0.attn.add_k_proj.lora_A.default.weight") && h.ContainsKey("transformer_blocks.0.img_mlp.net.2.lora_A.default.weight"))
                                             || (h.ContainsKey("diffusion_model.transformer_blocks.0.attn.add_k_proj.lora_A.weight") && h.ContainsKey("diffusion_model.transformer_blocks.0.img_mlp.net.2.lora_A.weight"))
                                             || (h.ContainsKey("lora_unet_transformer_blocks_0_attn_add_k_proj.lora_down.weight") && h.ContainsKey("lora_unet_transformer_blocks_0_img_mlp_net_0_proj.lora_down.weight"));
+        bool isQwenImageControlnet(JObject h) => h.ContainsKey("controlnet_blocks.0.input_proj.weight") && h.ContainsKey("controlnet_blocks.0.x_rms.weight") && h.ContainsKey("controlnet_blocks.59.input_proj.bias") && h.ContainsKey("img_in.weight");
         bool isControlnetX(JObject h) => h.ContainsKey("controlnet_x_embedder.weight");
         bool isHyImg(JObject h) => h.ContainsKey("byt5_in.fc1.bias") && h.ContainsKey("double_blocks.0.img_attn_k_norm.weight");
         bool isHyVid15(JObject h) => h.ContainsKey("vision_in.proj.0.bias");
@@ -495,6 +502,10 @@ public class T2IModelClassSorter
         {
             return isCascadeC(h);
         }});
+        Register(new() { ID = "stable-cascade-v1-stage-c/controlnet", CompatClass = CompatCascade, Name = "Stable Cascade v1 (Stage C ControlNet)", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        {
+            return false;
+        }});
         // ====================== Stable Diffusion v3 ======================
         Register(new() { ID = "stable-diffusion-v3-medium", CompatClass = CompatSd3, Name = "Stable Diffusion 3 Medium", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
@@ -540,11 +551,11 @@ public class T2IModelClassSorter
         Register(new() { ID = "flux.1/vae", CompatClass = CompatFlux, Name = "Flux.1 Autoencoder", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) => { return false; } });
         Register(new() { ID = "Flux.1-schnell", CompatClass = CompatFluxSchnell, Name = "Flux.1 Schnell", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
-            return isFluxSchnell(h) && !isChroma(h) && !isFlux2Dev(h);
+            return isFluxSchnell(h) && !isChroma(h) && !isFlux2Dev(h) && !isOvis(h);;
         }});
         Register(new() { ID = "Flux.1-dev", CompatClass = CompatFluxDev, Name = "Flux.1 Dev", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
-            return isFluxDev(h) && !isFlux2Dev(h);
+            return isFluxDev(h) && !isFlux2Dev(h) && !isOvis(h);
         }});
         Register(new() { ID = "Flux.1-dev/lora", CompatClass = CompatFluxDev, Name = "Flux.1 LoRA", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
@@ -709,9 +720,38 @@ public class T2IModelClassSorter
         {
             return isZImageLora(h);
         }});
-        Register(new() { ID = "z-image/controlnet", CompatClass = CompatZImage, Name = "Z-Image ControlNet", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "z-image/control-diffpatch", CompatClass = CompatZImage, Name = "Z-Image ControlNet (DiffPatch)", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
-            return isZImageControlNet(h);
+            return isZImageControlNetDiffPatch(h);
+        }});
+        // ====================== Qwen Image ======================
+        Register(new() { ID = "qwen-image", CompatClass = CompatQwenImage, Name = "Qwen Image", StandardWidth = 1328, StandardHeight = 1328, IsThisModelOfClass = (m, h) =>
+        {
+            return isQwenImage(h) && !isControlnetX(h) && !isSD3Controlnet(h);
+        }});
+        Register(new() { ID = "qwen-image-edit", CompatClass = CompatQwenImageEdit, Name = "Qwen Image Edit", StandardWidth = 1328, StandardHeight = 1328, IsThisModelOfClass = (m, h) =>
+        {
+            return false;
+        }});
+        Register(new() { ID = "qwen-image-edit-plus", CompatClass = CompatQwenImageEdit, Name = "Qwen Image Edit Plus", StandardWidth = 1328, StandardHeight = 1328, IsThisModelOfClass = (m, h) =>
+        {
+            return false;
+        }});
+        Register(new() { ID = "qwen-image/controlnet", CompatClass = CompatQwenImage, Name = "Qwen Image ControlNet", StandardWidth = 1328, StandardHeight = 1328, IsThisModelOfClass = (m, h) =>
+        {
+            return isQwenImage(h) && isControlnetX(h) &&!isFluxControlnet(h);
+        }});
+        Register(new() { ID = "qwen-image/control-diffpatch", CompatClass = CompatQwenImage, Name = "Qwen Image ControlNet (DiffPatch)", StandardWidth = 1328, StandardHeight = 1328, IsThisModelOfClass = (m, h) =>
+        {
+            return isQwenImageControlnet(h);
+        }});
+        Register(new() { ID = "qwen-image/vae", CompatClass = CompatQwenImage, Name = "Qwen Image VAE", StandardWidth = 1328, StandardHeight = 1328, IsThisModelOfClass = (m, h) =>
+        {
+            return false; // TODO?
+        }});
+        Register(new() { ID = "qwen-image/lora", CompatClass = CompatQwenImage, Name = "Qwen Image LoRA", StandardWidth = 1328, StandardHeight = 1328, IsThisModelOfClass = (m, h) =>
+        {
+            return isQwenImageLora(h);
         }});
         // ====================== Random Other Models ======================
         Register(new() { ID = "chroma", CompatClass = CompatChroma, Name = "Chroma", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
@@ -762,30 +802,6 @@ public class T2IModelClassSorter
         {
             return isOmniGen(h);
         }});
-        Register(new() { ID = "qwen-image", CompatClass = CompatQwenImage, Name = "Qwen Image", StandardWidth = 1328, StandardHeight = 1328, IsThisModelOfClass = (m, h) =>
-        {
-            return isQwenImage(h) && !isControlnetX(h) && !isSD3Controlnet(h);
-        }});
-        Register(new() { ID = "qwen-image-edit", CompatClass = CompatQwenImageEdit, Name = "Qwen Image Edit", StandardWidth = 1328, StandardHeight = 1328, IsThisModelOfClass = (m, h) =>
-        {
-            return false;
-        }});
-        Register(new() { ID = "qwen-image-edit-plus", CompatClass = CompatQwenImageEdit, Name = "Qwen Image Edit Plus", StandardWidth = 1328, StandardHeight = 1328, IsThisModelOfClass = (m, h) =>
-        {
-            return false;
-        }});
-        Register(new() { ID = "qwen-image/controlnet", CompatClass = CompatQwenImage, Name = "Qwen Image Controlnet", StandardWidth = 1328, StandardHeight = 1328, IsThisModelOfClass = (m, h) =>
-        {
-            return isQwenImage(h) && isControlnetX(h) &&!isFluxControlnet(h);
-        }});
-        Register(new() { ID = "qwen-image/vae", CompatClass = CompatQwenImage, Name = "Qwen Image VAE", StandardWidth = 1328, StandardHeight = 1328, IsThisModelOfClass = (m, h) =>
-        {
-            return false; // TODO?
-        }});
-        Register(new() { ID = "qwen-image/lora", CompatClass = CompatQwenImage, Name = "Qwen Image LoRA", StandardWidth = 1328, StandardHeight = 1328, IsThisModelOfClass = (m, h) =>
-        {
-            return isQwenImageLora(h);
-        }});
         Register(new() { ID = "auraflow-v1", CompatClass = CompatAuraFlow, Name = "AuraFlow", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
             return isAuraFlow(h);
@@ -827,6 +843,11 @@ public class T2IModelClassSorter
         Register(new() { ID = "hunyuan-video-1_5-sr", CompatClass = CompatHunyuanVideo1_5, Name = "Hunyuan Video 1.5 SuperResolution", StandardWidth = 960, StandardHeight = 960, IsThisModelOfClass = (m, h) =>
         {
             return false; // TODO: Possible to detect?
+        }});
+        // ====================== Ovis ======================
+        Register(new() { ID = "ovis", CompatClass = CompatOvis, Name = "Ovis", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        {
+            return isOvis(h);
         }});
         // ====================== Everything below this point does not autodetect, it must match through ModelSpec or be manually set ======================
         // General Stable Diffusion variants

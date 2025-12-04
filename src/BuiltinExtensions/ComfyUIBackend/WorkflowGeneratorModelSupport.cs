@@ -447,26 +447,29 @@ public partial class WorkflowGenerator
         {
             if (predType == "sd3")
             {
-                if (CurrentModelInfo().SigmaShiftNode == "ModelSamplingFlux")
+                if (UserInput.TryGet(T2IParamTypes.SigmaShift, out double sigmashift) != false)
                 {
-                    string samplingNode = CreateNode("ModelSamplingFlux", new JObject()
+                    if (CurrentModelInfo().SigmaShiftNode == "ModelSamplingFlux")
                     {
-                        ["model"] = LoadingModel,
-                        ["width"] = UserInput.GetImageResolution().Width,
-                        ["height"] = UserInput.GetImageResolution().Height,
-                        ["max_shift"] = UserInput.Get(T2IParamTypes.SigmaShift, 3),
-                        ["base_shift"] = 0.5 // TODO: Does this need an input?
-                    });
-                    LoadingModel = [samplingNode, 0];
-                }
-                else
-                {
-                    string samplingNode = CreateNode(CurrentModelInfo().SigmaShiftNode, new JObject()
+                        string samplingNode = CreateNode("ModelSamplingFlux", new JObject()
+                        {
+                            ["model"] = LoadingModel,
+                            ["width"] = UserInput.GetImageResolution().Width,
+                            ["height"] = UserInput.GetImageResolution().Height,
+                            ["max_shift"] = UserInput.Get(T2IParamTypes.SigmaShift, 3),
+                            ["base_shift"] = 0.5 // TODO: Does this need an input?
+                        });
+                        LoadingModel = [samplingNode, 0];
+                    }
+                    else
                     {
-                        ["model"] = LoadingModel,
-                        ["shift"] = UserInput.Get(T2IParamTypes.SigmaShift, 3)
-                    });
-                    LoadingModel = [samplingNode, 0];
+                        string samplingNode = CreateNode(CurrentModelInfo().SigmaShiftNode, new JObject()
+                        {
+                            ["model"] = LoadingModel,
+                            ["shift"] = UserInput.Get(T2IParamTypes.SigmaShift, 3)
+                        });
+                        LoadingModel = [samplingNode, 0];
+                    }
                 }
             }
             else if (model.Metadata?.PredictionType != null && model.Metadata?.PredictionType != CurrentModelInfo().PredType.ToString())

@@ -30,6 +30,7 @@ Old or bad options also tracked listed:
 [Nvidia Sana](#nvidia-sana) | DiT | 2024 | NVIDIA | 1.6B | No | Just Bad |
 [Nvidia Cosmos Predict2](#cosmos-predict2) | DiT | 2025 | NVIDIA | 2B/14B | Partial | Just Bad |
 [HiDream i1](#hidream-i1) | MMDiT | 2025 | HiDream AI (Vivago) | 17B | Minimal | Good Quality, lost community attention |
+[Ovis](#ovis) | MMDiT | 2025 | AIDC-AI (Alibaba) | 7B | No | Passable quality, but outclassed on launch |
 
 - **Architecture** is the fundamental machine learning structure used for the model, UNet's were used in the past but DiT (Diffusion Transformers) are the modern choice
 - **Scale** is how big the model is - "B" for "Billion", so for example "2B" means "Two billion parameters".
@@ -515,7 +516,9 @@ These steps are not friendly to beginners (if Sana gains popularity, likely more
         - Compatible with lightning loras.
         - If not using Lightning, probably raise your CFG a bit to ensure your prompt is stronger than the controlnet.
     - "Model Patch"
-        - Support pending
+        - Download here <https://huggingface.co/Comfy-Org/Qwen-Image-DiffSynth-ControlNets/tree/main/split_files/model_patches>
+        - Save to ControlNets folder
+        - Work the same as any other controlnets for basic usage, but advanced controls (eg start/stop steps) don't quite work
     - LoRA form
         - Download here <https://huggingface.co/Comfy-Org/Qwen-Image-DiffSynth-ControlNets/tree/main/split_files/loras>
         - Save to loras folder
@@ -523,6 +526,7 @@ These steps are not friendly to beginners (if Sana gains popularity, likely more
         - Upload a prompt image of controlnet input (depth or canny)
             - You can create this from an existing image by using the Controlnet Parameter group, select the preprocessor (Canny, or MiDAS Depth), and hit "Preview"
         - You cannot use the controlnet parameters directly for actual generation due to the weird lora-hack this uses
+- Note that Qwen Image controlnets do not work the best on the Qwen Image Edit model.
 
 ### Qwen Image Edit
 
@@ -597,6 +601,31 @@ These steps are not friendly to beginners (if Sana gains popularity, likely more
     - **Resolution:** Side length `1024` is the standard, but anywhere up to `2048` is good. `512` noticeably loses some quality, above `2048` corrupts the image.
     - **Sigma Shift:** Default is `3`, raising to `6` can yield stronger coherence.
     - Here's a big ol' grid of Z-Image Turbo params: [Z-Image MegaGrid](<https://sd.mcmonkey.org/zimagegrid/#auto-loc,true,true,false,true,false,cfgscale,steps,none,none,extremecloseupt,4,1,3,1024x1024,1,euler,simple>)
+
+### Z-Image Controlnets
+
+- There's a "DiffSynth Model Patch" controlnet-union available here <https://huggingface.co/alibaba-pai/Z-Image-Turbo-Fun-Controlnet-Union/blob/main/Z-Image-Turbo-Fun-Controlnet-Union.safetensors>
+    - This goes in your regular ControlNets folder
+        - Comfy treats this as separate "model_patches", to use Comfy folder format, add `;model_patches` to the end of Server Config->Paths->SDControlNetsFolder
+    - Proper Architecture ID is `Z-Image ControlNet (DiffPatch)`
+    - Works like any other controlnet. Select as controlnet model, give it an image, select a preprocessor. Fiddle the strength to taste.
+    - Despite being a Union controlnet, the Union Type parameter is not used.
+    - Because it is "Model Patch" based, the Start and End parameters also do not work.
+
+# Ovis
+
+- [Ovis](https://huggingface.co/AIDC-AI/Ovis-Image-7B) is supported in SwarmUI.
+    - It is a 7B-scale MMDiT image model from Alibaba's AIDC-AI, with image quality roughly a bit above base SDXL and a focus on strong text understanding.
+- Download the model from <https://huggingface.co/Comfy-Org/Ovis-Image/blob/main/split_files/diffusion_models/ovis_image_bf16.safetensors>
+    - Save in `diffusion_models`
+- Uses the Flux.1 VAE
+- **Parameters:**
+    - **Prompt:** Supports general prompting in any format just fine. Speaks English and Chinese.
+    - **Sampler:** Default is fine (`Euler`)
+    - **Scheduler:** Default works, but `Beta` may be better
+    - **CFG Scale:** Normal CFG ranges, `5` is the official recommendation
+    - **Steps:** Normal step counts (eg `20`), but they recommend `50`
+    - **Resolution:** Side length `1024`. Quickly breaks above that.
 
 # Video Models
 
