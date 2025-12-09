@@ -320,7 +320,7 @@ public class T2IParamTypes
     public static T2IRegisteredParam<T2IModel> Model, RefinerModel, VAE, RegionalObjectInpaintingModel, SegmentModel, VideoModel, VideoSwapModel, RefinerVAE, ClipLModel, ClipGModel, ClipVisionModel, T5XXLModel, LLaVAModel, LLaMAModel, QwenModel, MistralModel, VideoExtendModel, VideoExtendSwapModel;
     public static T2IRegisteredParam<List<string>> Loras, LoraWeights, LoraTencWeights, LoraSectionConfinement;
     public static T2IRegisteredParam<List<Image>> PromptImages;
-    public static T2IRegisteredParam<bool> OutputIntermediateImages, DoNotSave, DoNotSaveIntermediates, ControlNetPreviewOnly, RevisionZeroPrompt, RemoveBackground, NoSeedIncrement, NoPreviews, VideoBoomerang, ModelSpecificEnhancements, UseInpaintingEncode, MaskCompositeUnthresholded, SaveSegmentMask, InitImageRecompositeMask, UseReferenceOnly, RefinerDoTiling, ZeroNegative, Text2VideoBoomerang, FluxDisableGuidance,
+    public static T2IRegisteredParam<bool> OutputIntermediateImages, DoNotSave, DoNotSaveIntermediates, ControlNetPreviewOnly, RevisionZeroPrompt, NoSeedIncrement, NoPreviews, VideoBoomerang, ModelSpecificEnhancements, UseInpaintingEncode, MaskCompositeUnthresholded, SaveSegmentMask, InitImageRecompositeMask, UseReferenceOnly, RefinerDoTiling, ZeroNegative, Text2VideoBoomerang, FluxDisableGuidance, NoLoadModels, ForwardRawBackendData,
         PlaceholderParamGroupStarred, PlaceholderParamGroupUser1, PlaceholderParamGroupUser2, PlaceholderParamGroupUser3;
 
     public static T2IParamGroup GroupImagePrompting, GroupCore, GroupVariation, GroupResolution, GroupSampling, GroupInitImage, GroupRefiners, GroupRefinerOverrides,
@@ -594,7 +594,7 @@ public class T2IParamTypes
             ));
         // ================================================ Image To Video ================================================
         GroupVideo = new("Image To Video", Open: false, OrderPriority: 0, Toggles: true, Description: $"Generate videos using models that take an image as their primary input.\n<a target=\"_blank\" href=\"{Utilities.RepoDocsRoot}/Video%20Model%20Support.md\">See more docs here.</a>");
-        static bool isVideoClass(string id) => id.Contains("stable-video-diffusion") || id.Contains("lightricks-ltx-video") || id.Contains("-video2world") || id.Contains("-i2v") || id.Contains("-ti2v") || id.Contains("-flf2v") || id.Contains("-image2video") || id.Contains("hunyuan-video-1_5");
+        static bool isVideoClass(string id) => id.Contains("stable-video-diffusion") || id.Contains("lightricks-ltx-video") || id.Contains("-video2world") || id.Contains("-i2v") || id.Contains("-ti2v") || id.Contains("-flf2v") || id.Contains("-image2video") || id.Contains("hunyuan-video-1_5") || id.Contains("kandinsky5-video");
         VideoModel = Register<T2IModel>(new("Video Model", "The model to use for video generation.\nSelect an image-to-video conversion model, note that text-to-video models do not work.",
             "", GetValues: s => CleanModelList(Program.MainSDModels.ListModelsFor(s).Where(m => m.ModelClass is not null && isVideoClass(m.ModelClass.ID)).Select(m => m.Name)),
             OrderPriority: 1, Group: GroupVideo, Permission: Permissions.ParamVideo, FeatureFlag: "video,text2video", Subtype: "Stable-Diffusion", ChangeWeight: 9, DoNotPreview: true
@@ -720,6 +720,12 @@ public class T2IParamTypes
             ));
         NoPreviews = Register<bool>(new("No Previews", "If checked, tells the server that previews are not desired.\nMay make generations slightly faster in some cases.",
             "false", IgnoreIf: "false", IsAdvanced: true, Group: GroupSwarmInternal, AlwaysRetain: true, OrderPriority: -14
+            ));
+        NoLoadModels = Register<bool>(new("No Load Models", "If checked, tells the server to that if this request would cause a backend to load a model, to just skip doing that.\nThe backend will be marked as if the model is loaded, instantly without processing.",
+            "false", IgnoreIf: "false", IsAdvanced: true, Group: GroupSwarmInternal, AlwaysRetain: true, OrderPriority: -13
+            ));
+        ForwardRawBackendData = Register<bool>(new("Forward Raw Backend Data", "If checked, tells the server to forward any raw backend data (eg comfy websocket data) to the caller.\nThis is for advanced usage (eg API calls), not normal users.",
+            "false", IgnoreIf: "false", IsAdvanced: true, Group: GroupSwarmInternal, AlwaysRetain: true, HideFromMetadata: true, VisibleNormally: false
             ));
         Webhooks = Register<string>(new("Webhooks", "What webhooks are enabled for this generation job.",
             "Normal", IgnoreIf: "Normal", GetValues: (_) => ["None", "Normal///Normal (fire 'Every Gen')", "Manual///Manual (fire 'Every Gen' and 'Manual' for each image)", "Manual At End///Manual At End (fire 'Every Gen', then one 'Manual' for the full set of queued gens)"], IsAdvanced: true, AlwaysRetain: true, Group: GroupSwarmInternal, OrderPriority: -12

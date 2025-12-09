@@ -273,6 +273,20 @@ public static class T2IAPI
             setError(ex.Message);
             return;
         }
+        if (user_input.Get(T2IParamTypes.ForwardRawBackendData, false))
+        {
+            user_input.ReceiveRawBackendData = (type, data) =>
+            {
+                output(new JObject()
+                {
+                    ["raw_backend_data"] = new JObject()
+                    {
+                        ["type"] = type,
+                        ["data"] = Convert.ToBase64String(data)
+                    }
+                });
+            };
+        }
         user_input.ApplySpecialLogic();
         images = user_input.Get(T2IParamTypes.Images, images);
         Logs.Info($"User {session.User.UserID} requested {images} image{(images == 1 ? "" : "s")} with model '{user_input.Get(T2IParamTypes.Model)?.Name}'...");
@@ -372,7 +386,7 @@ public static class T2IAPI
                 }
             }
             int numCalls = 0;
-            tasks.Add(Task.Run(() => T2IEngine.CreateImageTask(thisParams, $"{imageIndex}", claim, output, setError, isWS, Program.ServerSettings.Backends.PerRequestTimeoutMinutes,
+            tasks.Add(Task.Run(() => T2IEngine.CreateImageTask(thisParams, $"{imageIndex}", claim, output, setError, isWS,
                 (image, metadata) =>
                 {
                     int actualIndex = imageIndex + numCalls;

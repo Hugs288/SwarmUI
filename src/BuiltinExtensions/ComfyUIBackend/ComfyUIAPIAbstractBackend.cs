@@ -358,6 +358,7 @@ public abstract class ComfyUIAPIAbstractBackend : AbstractT2IBackend
                 byte[] output = await getData;
                 if (output is not null)
                 {
+                    user_input.ReceiveRawBackendData?.Invoke("comfy_websocket", output);
                     if (Encoding.ASCII.GetString(output, 0, 8) == "{\"type\":")
                     {
                         JObject json = Utilities.ParseToJson(Encoding.UTF8.GetString(output));
@@ -1016,6 +1017,11 @@ public abstract class ComfyUIAPIAbstractBackend : AbstractT2IBackend
         input.Set(T2IParamTypes.Seed, 1);
         if (upstreamInput is not null)
         {
+            if (upstreamInput.Get(T2IParamTypes.NoLoadModels, false))
+            {
+                CurrentModelName = model.Name;
+                return true;
+            }
             void copyParam<T>(T2IRegisteredParam<T> param)
             {
                 if (upstreamInput.TryGet(param, out T val))

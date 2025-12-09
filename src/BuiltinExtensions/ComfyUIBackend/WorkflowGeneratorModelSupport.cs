@@ -18,7 +18,7 @@ public partial class WorkflowGenerator
 
     public bool IsVideoModel()
     {
-        return CurrentCompatClass() is "lightricks-ltx-video" or "genmo-mochi-1" or "hunyuan-video" or "hunyuan-video-1_5" or "nvidia-cosmos-1" || CurrentCompatClass().StartsWith("wan-21") || CurrentCompatClass().StartsWith("wan-22");
+        return CurrentCompatClass() is "lightricks-ltx-video" or "genmo-mochi-1" or "hunyuan-video" or "hunyuan-video-1_5" or "nvidia-cosmos-1" or "kandinsky5-vidlite" or "kandinsky5-vidpro" || CurrentCompatClass().StartsWith("wan-21") || CurrentCompatClass().StartsWith("wan-22");
     }
 
     /// <summary>Creates an Empty Latent Image node.</summary>
@@ -192,7 +192,7 @@ public partial class WorkflowGenerator
             {
                 ["unet_name"] = model.ToString(ModelFolderFormat),
                 ["model_type"] = trtType
-            }, id);
+            }, id, false);
             LoadingModel = [trtloader, 0];
             // TODO: This is a hack
             T2IModel[] sameArch = [.. Program.MainSDModels.Models.Values.Where(m => m.ModelClass?.ID == baseArch)];
@@ -219,7 +219,7 @@ public partial class WorkflowGenerator
             {
                 ["ckpt_name"] = model.ToString(ModelFolderFormat),
                 ["model"] = model.ModelClass.ID == "pixart-ms-sigma-xl-2-2k" ? "PixArtMS_Sigma_XL_2_2K" : "PixArtMS_Sigma_XL_2"
-            }, id);
+            }, id, false);
             LoadingModel = [pixartNode, 0];
             string singleClipLoader = CreateNode("CLIPLoader", new JObject()
             {
@@ -240,7 +240,7 @@ public partial class WorkflowGenerator
                 string modelNode = CreateNode("UnetLoaderGGUF", new JObject()
                 {
                     ["unet_name"] = model.ToString(ModelFolderFormat)
-                }, id);
+                }, id, false);
                 LoadingModel = [modelNode, 0];
             }
             else if (model.Metadata?.SpecialFormat is "nunchaku" or "nunchaku-fp4")
@@ -261,7 +261,7 @@ public partial class WorkflowGenerator
                         ["device_id"] = 0,
                         ["data_type"] = model.Metadata?.SpecialFormat == "nunchaku-fp4" ? "bfloat16" : "float16",
                         ["i2f_mode"] = "enabled"
-                    }, id);
+                    }, id, false);
                     LoadingModel = [modelNode, 0];
                 }
                 else if (CurrentCompatClass().StartsWith("qwen-image"))
@@ -272,7 +272,7 @@ public partial class WorkflowGenerator
                         ["cpu_offload"] = "auto",
                         ["num_blocks_on_gpu"] = 1, // TODO: If nunchaku doesn't fix automation here, add a param. Also enable cpu_offload if the param is given.
                         ["use_pin_memory"] = "enable"
-                    }, id);
+                    }, id, false);
                     LoadingModel = [modelNode, 0];
                 }
                 else
@@ -290,7 +290,7 @@ public partial class WorkflowGenerator
                 {
                     ["unet_name"] = model.ToString(ModelFolderFormat),
                     ["bnb_dtype"] = model.Metadata?.SpecialFormat == "bnb_fp4" ? "fp4" : "nf4"
-                }, id);
+                }, id, false);
                 LoadingModel = [modelNode, 0];
             }
             else
@@ -319,7 +319,7 @@ public partial class WorkflowGenerator
                 {
                     ["unet_name"] = model.ToString(ModelFolderFormat),
                     ["weight_dtype"] = dtype
-                }, id);
+                }, id, false);
                 LoadingModel = [modelNode, 0];
             }
             LoadingClip = null;
@@ -335,7 +335,7 @@ public partial class WorkflowGenerator
             {
                 ["ckpt_name"] = model.ToString(ModelFolderFormat),
                 ["bnb_dtype"] = model.Metadata?.SpecialFormat == "bnb_fp4" ? "fp4" : "nf4"
-            }, id);
+            }, id, false);
             LoadingModel = [modelNode, 0];
             LoadingClip = [modelNode, 1];
             LoadingVAE = [modelNode, 2];
@@ -346,7 +346,7 @@ public partial class WorkflowGenerator
             {
                 ["ckpt_name"] = model.ToString(ModelFolderFormat),
                 ["model"] = "SanaMS_1600M_P1_D20"
-            }, id);
+            }, id, false);
             LoadingModel = [sanaNode, 0];
             string clipLoader = CreateNode("GemmaLoader", new JObject()
             {
@@ -373,6 +373,22 @@ public partial class WorkflowGenerator
             LoadingClip = [singleClipLoader, 0];
             helpers.DoVaeLoader("stable-diffusion-xl-v1", "sdxl-vae");
         }
+        else if (CurrentCompatClass() is "pixart-ms-sigma-xl-2")
+        {
+            string pixartNode = CreateNode("PixArtCheckpointLoader", new JObject()
+            {
+                ["ckpt_name"] = model.ToString(ModelFolderFormat),
+                ["model"] = model.ModelClass.ID == "pixart-ms-sigma-xl-2-2k" ? "PixArtMS_Sigma_XL_2_2K" : "PixArtMS_Sigma_XL_2"
+            }, id);
+            LoadingModel = [pixartNode, 0];
+            string singleClipLoader = CreateNode("CLIPLoader", new JObject()
+            {
+                ["clip_name"] = helpers.DoClipLoader("t5xxl", T2IParamTypes.T5XXLModel),
+                ["type"] = "sd3"
+            });
+            LoadingClip = [singleClipLoader, 0];
+            helpers.DoVaeLoader("stable-diffusion-xl-v1", "sdxl-vae");
+        }
         else
         {
             if (model.Metadata?.SpecialFormat is "gguf" or "nunchaku" or "nunchaku-fp4")
@@ -382,7 +398,7 @@ public partial class WorkflowGenerator
             string modelNode = CreateNode("CheckpointLoaderSimple", new JObject()
             {
                 ["ckpt_name"] = model.ToString(ModelFolderFormat)
-            }, id);
+            }, id, false);
             LoadingModel = [modelNode, 0];
             LoadingClip = [modelNode, 1];
             LoadingVAE = [modelNode, 2];

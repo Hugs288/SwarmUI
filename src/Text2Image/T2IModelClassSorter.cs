@@ -258,9 +258,28 @@ public class T2IModelClassSorter
             TextEncoders = ["qwen_3_4b"], ClipType = "stable_diffusion", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingAuraFlow",
             DefaultParameters = ["cfgscale:4", "steps:14"]
         }),
-        CompatOvis = RegisterCompat(new() { ID = "ovis", ShortCode = "Ovis", LorasTargetTextEnc = false,
+        CompatOvis = RegisterCompat(new() {
+            ID = "ovis", ShortCode = "Ovis", LorasTargetTextEnc = false,
             ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["ovis_2.5-5b"], ClipType = "ovis", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage",
+            DefaultParameters = ["cfgscale:4", "steps:14"]
+        }),
+        CompatKandinsky5ImgLite = RegisterCompat(new() {
+            ID = "kandinsky5-imglite", ShortCode = "Kan5IL", LorasTargetTextEnc = false,
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["qwen-2.5-vl-7b"], ClipType = "ovis", VAE = "flux-vae", LatentNode = "EmptyHunyuanLatentVideo",
+            DefaultParameters = ["cfgscale:4", "steps:14"]
+        }),
+        CompatKandinsky5VidLite = RegisterCompat(new() {
+            ID = "kandinsky5-vidlite", ShortCode = "Kan5VL", LorasTargetTextEnc = false,
+            ModelType = ModelType.TextAndImageToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["qwen-2.5-vl-7b"], ClipType = "ovis", VAE = "hunyuan-video-vae", LatentNode = "EmptyHunyuanLatentVideo",
+            DefaultParameters = ["cfgscale:4", "steps:14"]
+        }),
+        CompatKandinsky5VidPro = RegisterCompat(new() {
+            ID = "kandinsky5-vidpro", ShortCode = "Kan5VP", LorasTargetTextEnc = false,
+            ModelType = ModelType.TextAndImageToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            TextEncoders = ["qwen-2.5-vl-7b"], ClipType = "ovis", VAE = "hunyuan-video-vae", LatentNode = "EmptyHunyuanLatentVideo",
             DefaultParameters = ["cfgscale:4", "steps:14"]
         });
 
@@ -371,6 +390,11 @@ public class T2IModelClassSorter
         bool isHyVid15Lora(JObject h) => hasKey(h, "cond_type_embedding.lora_down.weight") && hasKey(h, "byt5_in.fc1.lora_down.weight") && hasKey(h, "vision_in.proj.1.lora_down.weight");
         bool isHyImgRefiner(JObject h) => h.ContainsKey("double_blocks.0.img_attn_k_norm.weight") && h.TryGetValue("time_r_in.mlp.0.bias", out JToken timeTok) && timeTok["shape"].ToArray()[0].Value<long>() == 3328;
         bool isAuraFlow(JObject h) => h.ContainsKey("model.cond_seq_linear.weight") && h.ContainsKey("model.double_layers.0.attn.w1k.weight");
+        bool isKandinsky5(JObject h) => hasKey(h, "pooled_text_embeddings.in_layer.weight") && hasKey(h, "text_transformer_blocks.0.feed_forward.in_layer.weight");
+        bool tryGetKan5IdKey(JObject h, out JToken tok) => h.TryGetValue("text_embeddings.in_layer.weight", out tok);
+        bool isKan5VidLite(JObject h) => tryGetKan5IdKey(h, out JToken tok) && tok["shape"].ToArray()[0].Value<long>() == 1792;
+        bool isKan5ImgLite(JObject h) => tryGetKan5IdKey(h, out JToken tok) && tok["shape"].ToArray()[0].Value<long>() == 2560;
+        bool isKan5VidPro(JObject h) => tryGetKan5IdKey(h, out JToken tok) && tok["shape"].ToArray()[0].Value<long>() == 4096;
         // ====================== Stable Diffusion v1 ======================
         Register(new() { ID = "stable-diffusion-v1", CompatClass = CompatSdv1, Name = "Stable Diffusion v1", StandardWidth = 512, StandardHeight = 512, IsThisModelOfClass = (m, h) =>
         {
@@ -752,6 +776,31 @@ public class T2IModelClassSorter
         Register(new() { ID = "qwen-image/lora", CompatClass = CompatQwenImage, Name = "Qwen Image LoRA", StandardWidth = 1328, StandardHeight = 1328, IsThisModelOfClass = (m, h) =>
         {
             return isQwenImageLora(h);
+        }});
+        // ====================== Kandinsky5 ======================
+        Register(new() { ID = "kandinsky5-image-lite", CompatClass = CompatKandinsky5ImgLite, Name = "Kandinsky5 Image Lite", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        {
+            return isKandinsky5(h) && isKan5ImgLite(h);
+        }});
+        Register(new() { ID = "kandinsky5-image-lite/lora", CompatClass = CompatKandinsky5ImgLite, Name = "Kandinsky5 Image Lite LoRA", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        {
+            return false; // TODO?
+        }});
+        Register(new() { ID = "kandinsky5-video-lite", CompatClass = CompatKandinsky5VidLite, Name = "Kandinsky5 Video Lite", StandardWidth = 640, StandardHeight = 640, IsThisModelOfClass = (m, h) =>
+        {
+            return isKandinsky5(h) && isKan5VidLite(h);
+        }});
+        Register(new() { ID = "kandinsky5-video-lite/lora", CompatClass = CompatKandinsky5VidLite, Name = "Kandinsky5 Video Lite LoRA", StandardWidth = 640, StandardHeight = 640, IsThisModelOfClass = (m, h) =>
+        {
+            return false; // TODO?
+        }});
+        Register(new() { ID = "kandinsky5-video-pro", CompatClass = CompatKandinsky5VidPro, Name = "Kandinsky5 Video Pro", StandardWidth = 640, StandardHeight = 640, IsThisModelOfClass = (m, h) =>
+        {
+            return isKandinsky5(h) && isKan5VidPro(h);
+        }});
+        Register(new() { ID = "kandinsky5-video-pro/lora", CompatClass = CompatKandinsky5VidPro, Name = "Kandinsky5 Video Pro LoRA", StandardWidth = 640, StandardHeight = 640, IsThisModelOfClass = (m, h) =>
+        {
+            return false; // TODO?
         }});
         // ====================== Random Other Models ======================
         Register(new() { ID = "chroma", CompatClass = CompatChroma, Name = "Chroma", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
