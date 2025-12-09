@@ -213,22 +213,6 @@ public partial class WorkflowGenerator
         {
             throw new SwarmUserErrorException($"Model {model.Name} appears to be TensorRT lacks metadata to identify its architecture, cannot load");
         }
-        else if (model.ModelClass?.CompatClass?.ID == "pixart-ms-sigma-xl-2")
-        {
-            string pixartNode = CreateNode("PixArtCheckpointLoader", new JObject()
-            {
-                ["ckpt_name"] = model.ToString(ModelFolderFormat),
-                ["model"] = model.ModelClass.ID == "pixart-ms-sigma-xl-2-2k" ? "PixArtMS_Sigma_XL_2_2K" : "PixArtMS_Sigma_XL_2"
-            }, id, false);
-            LoadingModel = [pixartNode, 0];
-            string singleClipLoader = CreateNode("CLIPLoader", new JObject()
-            {
-                ["clip_name"] = helpers.DoClipLoader("t5xxl", T2IParamTypes.T5XXLModel),
-                ["type"] = "sd3"
-            });
-            LoadingClip = [singleClipLoader, 0];
-            helpers.DoVaeLoader("stable-diffusion-xl-v1", "sdxl-vae");
-        }
         else if (model.IsDiffusionModelsFormat)
         {
             if (model.Metadata?.SpecialFormat is "gguf")
@@ -339,55 +323,6 @@ public partial class WorkflowGenerator
             LoadingModel = [modelNode, 0];
             LoadingClip = [modelNode, 1];
             LoadingVAE = [modelNode, 2];
-        }
-        else if (CurrentCompatClass() is "nvidia-sana-1600")
-        {
-            string sanaNode = CreateNode("SanaCheckpointLoader", new JObject()
-            {
-                ["ckpt_name"] = model.ToString(ModelFolderFormat),
-                ["model"] = "SanaMS_1600M_P1_D20"
-            }, id, false);
-            LoadingModel = [sanaNode, 0];
-            string clipLoader = CreateNode("GemmaLoader", new JObject()
-            {
-                ["model_name"] = "unsloth/gemma-2-2b-it-bnb-4bit",
-                ["device"] = "cpu",
-                ["dtype"] = "default"
-            });
-            LoadingClip = [clipLoader, 0];
-            helpers.DoVaeLoader("nvidia-sana-1600", "sana-dcae");
-        }
-        else if (CurrentCompatClass() is "pixart-ms-sigma-xl-2")
-        {
-            string pixartNode = CreateNode("PixArtCheckpointLoader", new JObject()
-            {
-                ["ckpt_name"] = model.ToString(ModelFolderFormat),
-                ["model"] = model.ModelClass.ID == "pixart-ms-sigma-xl-2-2k" ? "PixArtMS_Sigma_XL_2_2K" : "PixArtMS_Sigma_XL_2"
-            }, id);
-            LoadingModel = [pixartNode, 0];
-            string singleClipLoader = CreateNode("CLIPLoader", new JObject()
-            {
-                ["clip_name"] = helpers.DoClipLoader("t5xxl", T2IParamTypes.T5XXLModel),
-                ["type"] = "sd3"
-            });
-            LoadingClip = [singleClipLoader, 0];
-            helpers.DoVaeLoader("stable-diffusion-xl-v1", "sdxl-vae");
-        }
-        else if (CurrentCompatClass() is "pixart-ms-sigma-xl-2")
-        {
-            string pixartNode = CreateNode("PixArtCheckpointLoader", new JObject()
-            {
-                ["ckpt_name"] = model.ToString(ModelFolderFormat),
-                ["model"] = model.ModelClass.ID == "pixart-ms-sigma-xl-2-2k" ? "PixArtMS_Sigma_XL_2_2K" : "PixArtMS_Sigma_XL_2"
-            }, id);
-            LoadingModel = [pixartNode, 0];
-            string singleClipLoader = CreateNode("CLIPLoader", new JObject()
-            {
-                ["clip_name"] = helpers.DoClipLoader("t5xxl", T2IParamTypes.T5XXLModel),
-                ["type"] = "sd3"
-            });
-            LoadingClip = [singleClipLoader, 0];
-            helpers.DoVaeLoader("stable-diffusion-xl-v1", "sdxl-vae");
         }
         else
         {

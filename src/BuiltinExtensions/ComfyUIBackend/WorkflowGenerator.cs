@@ -673,22 +673,10 @@ public partial class WorkflowGenerator
             return [helper, 0];
         }
         string vaeLoader;
-        if (CurrentCompatClass() == "nvidia-sana-1600")
+        vaeLoader = CreateNode("VAELoader", new JObject()
         {
-            vaeLoader = CreateNode("ExtraVAELoader", new JObject()
-            {
-                ["vae_name"] = vaeFixed,
-                ["vae_type"] = "dcae-f32c32-sana-1.0",
-                ["dtype"] = "FP16"
-            }, id);
-        }
-        else
-        {
-            vaeLoader = CreateNode("VAELoader", new JObject()
-            {
-                ["vae_name"] = vaeFixed
-            }, id);
-        }
+            ["vae_name"] = vaeFixed
+        }, id);
         NodeHelpers[$"vaeloader-{vaeFixed}"] = vaeLoader;
         return [vaeLoader, 0];
     }
@@ -2101,15 +2089,7 @@ public partial class WorkflowGenerator
         }
         bool wantsSwarmCustom = Features.Contains("variation_seed") && (needsAdvancedEncode || (UserInput.TryGet(T2IParamTypes.FluxGuidanceScale, out _) && (CurrentCompatClass().StartsWith("flux-1") && CurrentModelClass().ID != "Flux.1-schnell") || CurrentCompatClass() == "hunyuan-video") || CurrentModelClass().ID is "hunyuan-video-skyreels" or "hunyuan-video-skyreels-i2v");
         JArray qwenImage;
-        if (CurrentCompatClass() == "nvidia-sana-1600")
-        {
-            node = CreateNode("SanaTextEncode", new JObject()
-            {
-                ["GEMMA"] = clip,
-                ["text"] = prompt
-            }, id);
-        }
-        else if (CurrentCompatClass().StartsWith("qwen-image-edit") && (isPositive || CurrentModelClass().ID.StartsWith("qwen-image-edit-plus")) && (qwenImage = GetPromptImage(true, true)) is not null)
+        if (CurrentCompatClass().StartsWith("qwen-image-edit") && (isPositive || CurrentModelClass().ID.StartsWith("qwen-image-edit-plus")) && (qwenImage = GetPromptImage(true, true)) is not null)
         {
             if (wantsSwarmCustom)
             {

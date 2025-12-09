@@ -179,11 +179,6 @@ public class T2IModelClassSorter
             TextEncoders = ["t5xxl"], ClipType = "ltxv", VAE = "ltxv-vae", LatentNode = "EmptyLTXVLatentVideo",
             DefaultParameters = ["cfgscale:3", "steps:30", "scheduler:ltxv", "text2videoframes:97"]
         }),
-        CompatSana = RegisterCompat(new() {
-            ID = "nvidia-sana-1600", ShortCode = "Sana",
-            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.eps,
-            ClipType = null, VAE = "sana-dcae", LatentNode = "EmptySanaLatentImage",
-        }),
         CompatLumina2 = RegisterCompat(new() {
             ID = "lumina-2", ShortCode = "Lumi2",
             ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
@@ -245,12 +240,6 @@ public class T2IModelClassSorter
             ID = "segmind-stable-diffusion-1b", ShortCode = "SSD1B",
             ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.UNet, PredType = PredictionType.eps,
             TextEncoders = ["clip-l", "clip-g"], ClipType = "stable-diffusion", VAE = "sdxl-vae",
-        }),
-        CompatPixartMsSigmaXl2 = RegisterCompat(new() {
-            ID = "pixart-ms-sigma-xl-2", ShortCode = "Pix",
-            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.eps,
-            TextEncoders = ["t5xxl"], ClipType = "sd3", VAE = "sdxl-vae",
-            DefaultParameters = ["cfgscale:4", "steps:14"]
         }),
         CompatZImage = RegisterCompat(new() {
             ID = "z-image", ShortCode = "ZImg",
@@ -342,7 +331,6 @@ public class T2IModelClassSorter
         bool isMochiVae(JObject h) => h.ContainsKey("encoder.layers.4.layers.1.attn_block.attn.qkv.weight") || h.ContainsKey("layers.4.layers.1.attn_block.attn.qkv.weight") || h.ContainsKey("blocks.2.blocks.3.stack.5.weight") || h.ContainsKey("decoder.blocks.2.blocks.3.stack.5.weight");
         bool isLtxv(JObject h) => hasKey(h, "adaln_single.emb.timestep_embedder.linear_1.bias");
         bool isLtxvVae(JObject h) => h.ContainsKey("decoder.conv_in.conv.bias") && h.ContainsKey("decoder.last_time_embedder.timestep_embedder.linear_1.bias");
-        bool isSana(JObject h) => h.ContainsKey("attention_y_norm.weight") && h.ContainsKey("blocks.0.attn.proj.weight");
         bool isHunyuanVideo(JObject h) => h.ContainsKey("model.model.txt_in.individual_token_refiner.blocks.1.self_attn.qkv.weight") || h.ContainsKey("txt_in.individual_token_refiner.blocks.1.self_attn_qkv.weight");
         bool isHunyuanVideoSkyreelsImage2V(JObject h) => h.TryGetValue("img_in.proj.weight", out JToken jtok) && jtok["shape"].ToArray()[1].Value<long>() == 32;
         bool isHunyuanVideoNativeImage2V(JObject h) => h.TryGetValue("img_in.proj.weight", out JToken jtok) && jtok["shape"].ToArray()[1].Value<long>() == 33;
@@ -823,14 +811,6 @@ public class T2IModelClassSorter
         {
             return isLtxvVae(h);
         }});
-        Register(new() { ID = "nvidia-sana-1600", CompatClass = CompatSana, Name = "NVIDIA Sana 1600M", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
-        {
-            return isSana(h);
-        }});
-        Register(new() { ID = "nvidia-sana-1600/vae", CompatClass = CompatSana, Name = "NVIDIA Sana 1600M DC-AE VAE", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
-        {
-            return h.ContainsKey("decoder.stages.0.0.main.conv.bias");
-        }});
         Register(new() { ID = "lumina-2", CompatClass = CompatLumina2, Name = "Lumina 2", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
         {
             return isLumina2(h) && !isZImage(h);
@@ -923,8 +903,6 @@ public class T2IModelClassSorter
         Register(new() { ID = "stable-diffusion-xl-v1-refiner/tensorrt", CompatClass = CompatSdxlRefiner, Name = "Stable Diffusion XL 1.0-Refiner (TensorRT Engine)", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) => { return false; } });
         Register(new() { ID = "stable-video-diffusion-img2vid-v1/tensorrt", CompatClass = CompatSvd, Name = "Stable Video Diffusion Img2Vid v1 (TensorRT Engine)", StandardWidth = 1024, StandardHeight = 576, IsThisModelOfClass = (m, h) => { return false; } });
         // Other model classes
-        Register(new() { ID = "pixart-ms-sigma-xl-2", CompatClass = CompatPixartMsSigmaXl2, Name = "PixArtMS Sigma XL 2", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) => { return false; } });
-        Register(new() { ID = "pixart-ms-sigma-xl-2-2k", CompatClass = CompatPixartMsSigmaXl2, Name = "PixArtMS Sigma XL 2 (2K)", StandardWidth = 2048, StandardHeight = 2048, IsThisModelOfClass = (m, h) => { return false; } });
         Register(new() { ID = "auraflow-v1/tensorrt", CompatClass = CompatAuraFlow, Name = "AuraFlow (TensorRT Engine)", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) => { return false; } });
         // ====================== General correction remaps ======================
         Remaps["flux-1-dev"] = "Flux.1-dev";

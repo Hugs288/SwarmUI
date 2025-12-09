@@ -58,8 +58,6 @@ public class ComfyUIBackendExtension : Extension
         ["GIMMVFI_interpolate"] = "frameinterps_gimmvfi",
         ["Sam2Segmentation"] = "sam2",
         ["SwarmYoloDetection"] = "yolov8",
-        ["PixArtCheckpointLoader"] = "extramodelspixart",
-        ["SanaCheckpointLoader"] = "extramodelssana",
         ["CheckpointLoaderNF4"] = "bnb_nf4",
         ["UnetLoaderGGUF"] = "gguf",
         ["NunchakuFluxDiTLoader"] = "nunchaku",
