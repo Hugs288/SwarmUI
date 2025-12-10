@@ -1785,7 +1785,7 @@ public partial class WorkflowGenerator
                         ["model_type"] = "svd"
                     });
                     Model = [trtloader, 0];
-                    string fname = g.RequireVisionModel("svd-clipvision-h", T2IParamTypes.ClipVisionModel);
+                    string fname = g.RequireVisionModel("CLIP-ViT-H", T2IParamTypes.ClipVisionModel);
                     string cliploader = g.CreateNode("CLIPVisionLoader", new JObject()
                     {
                         ["clip_name"] = fname

@@ -567,7 +567,7 @@ public class WorkflowGeneratorSteps
                     {
                         return visionLoaderId;
                     }
-                    string visModelName = g.RequireVisionModel("clip_vision_g", T2IParamTypes.ClipVisionModel);
+                    string visModelName = g.RequireVisionModel("CLIP-ViT-G-stability", T2IParamTypes.ClipVisionModel);
                     visionLoaderId = g.CreateNode("CLIPVisionLoader", new JObject()
                     {
                         ["clip_name"] = visModelName
@@ -651,7 +651,7 @@ public class WorkflowGeneratorSteps
                         {
                             if ((ipAdapter.Contains("sd15") && !ipAdapter.Contains("vit-G")) || ipAdapter.Contains("vit-h"))
                             {
-                                string targetName = g.RequireVisionModel("clip_vision_h", T2IParamTypes.ClipVisionModel);
+                                string targetName = g.RequireVisionModel("CLIP-ViT-H", T2IParamTypes.ClipVisionModel);
                                 ipAdapterVisionLoader = g.CreateNode("CLIPVisionLoader", new JObject()
                                 {
                                     ["clip_name"] = targetName
