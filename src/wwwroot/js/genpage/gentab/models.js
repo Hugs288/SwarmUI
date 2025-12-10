@@ -4,13 +4,13 @@ class ModelCompatClass {
     constructor(data) {
         this.id = data.id;
         this.shortCode = data.short_code;
-        this.modelType = data.model_type;
         this.architecture = data.architecture;
         this.predType = data.prediction_type;
+        this.standardWidth = data.standard_width;
+        this.standardHeight = data.standard_height;
         this.textEncoders = data.text_encoders;
-        this.vae = data.vae;
         this.clipType = data.clip_type;
-        this.defaultParameters = data.default_parameters;
+        this.vae = data.vae;
     }
 }
 
@@ -21,8 +21,8 @@ class ModelClass {
         this.id = data.id;
         this.name = data.name;
         this.compatClass = compatClass;
-        this.standardWidth = data.standard_width;
-        this.standardHeight = data.standard_height;
+        this.modelType = data.model_type;
+        this.defaultParameters = data.default_parameters;
         if (!compatClass) {
             console.warn(`Model class '${this.id}' has missing compat class!`);
         }

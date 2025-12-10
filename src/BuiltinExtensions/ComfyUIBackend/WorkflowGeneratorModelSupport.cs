@@ -66,7 +66,7 @@ public partial class WorkflowGenerator
             ["height"] = height,
             ["width"] = width
         };
-        if (CurrentModelInfo().ModelType is ModelType.TextToVideo or ModelType.ImageToVideo or ModelType.TextAndImageToVideo)
+        if (CurrentModelClass().ModelType is ModelType.TextToVideo or ModelType.ImageToVideo or ModelType.TextAndImageToVideo)
         {
             inputs["length"] = UserInput.Get(T2IParamTypes.Text2VideoFrames, 25);
         }

@@ -48,6 +48,9 @@ public class T2IModel(T2IModelHandler handler, string folderPath, string filePat
     /// <summary>What class this model is, if known.</summary>
     public T2IModelClass ModelClass;
 
+    /// <summary>What class this model is, if known.</summary>
+    public T2IModelCompatClass ModelCompatClass;
+
     /// <summary>Metadata about this model.</summary>
     public T2IModelHandler.ModelMetadataStore Metadata;
 
@@ -336,8 +339,8 @@ public class T2IModel(T2IModelHandler handler, string folderPath, string filePat
             [$"{prefix}class"] = ModelClass?.Name,
             [$"{prefix}compat_class"] = ModelClass?.CompatClass?.ID,
             [$"{prefix}resolution"] = $"{StandardWidth}x{StandardHeight}",
-            [$"{prefix}standard_width"] = StandardWidth <= 0 ? ModelClass?.StandardWidth ?? 0 : StandardWidth,
-            [$"{prefix}standard_height"] = StandardHeight <= 0 ? ModelClass?.StandardHeight ?? 0 : StandardHeight,
+            [$"{prefix}standard_width"] = StandardWidth <= 0 ? ModelCompatClass?.StandardWidth ?? 0 : StandardWidth,
+            [$"{prefix}standard_height"] = StandardHeight <= 0 ? ModelCompatClass?.StandardHeight ?? 0 : StandardHeight,
             [$"{prefix}license"] = Metadata?.License,
             [$"{prefix}date"] = Metadata?.Date,
             [$"{prefix}prediction_type"] = Metadata?.PredictionType,

@@ -14,6 +14,12 @@ namespace SwarmUI.Text2Image;
 /// <summary>Central manager for Text2Image models.</summary>
 public class T2IModelHandler
 {
+    /// <summary>What class this model is, if known.</summary>
+    public T2IModelClass ModelClass;
+
+    /// <summary>What class this model is, if known.</summary>
+    public T2IModelCompatClass ModelCompatClass;
+
     /// <summary>All models known to this handler.</summary>
     public ConcurrentDictionary<string, T2IModel> Models = new();
 
@@ -557,7 +563,6 @@ public class T2IModelHandler
                 }
             }
             string altTriggerPhrase = triggerPhrases.JoinString(", ");
-            T2IModelClass clazz = T2IModelClassSorter.IdentifyClassFor(model, headerData, ModelType);
             string specialFormat = null;
             foreach (string key in headerData.Properties().Select(p => p.Name))
             {
@@ -619,8 +624,8 @@ public class T2IModelHandler
             }
             else
             {
-                width = (metaHeader?.ContainsKey("standard_width") ?? false) ? metaHeader.Value<int>("standard_width") : (clazz?.StandardWidth ?? 0);
-                height = (metaHeader?.ContainsKey("standard_height") ?? false) ? metaHeader.Value<int>("standard_height") : (clazz?.StandardHeight ?? 0);
+                width = (metaHeader?.ContainsKey("standard_width") ?? false) ? metaHeader.Value<int>("standard_width") : (ModelCompatClass?.StandardWidth ?? 0);
+                height = (metaHeader?.ContainsKey("standard_height") ?? false) ? metaHeader.Value<int>("standard_height") : (ModelCompatClass?.StandardHeight ?? 0);
             }
             img ??= autoImg;
             if (img is not null && img.Length > 1024 * 1024 * 8)
@@ -684,7 +689,7 @@ public class T2IModelHandler
                 TimeModified = modified,
                 TimeCreated = new DateTimeOffset(File.GetCreationTimeUtc(model.RawFilePath)).ToUnixTimeMilliseconds(),
                 ModelName = modelCacheId,
-                ModelClassType = clazz?.ID,
+                ModelClassType = ModelClass?.ID,
                 Title = limitLength(pickBest(metaHeader?.Value<string>("modelspec.title"), metaHeader?.Value<string>("title"), altName, fileName.BeforeLast('.')), basicLimit),
                 Author = limitLength(pickBest(metaHeader?.Value<string>("modelspec.author"), metaHeader?.Value<string>("author")), basicLimit),
                 Description = limitLength(pickBest(metaHeader?.Value<string>("modelspec.description"), metaHeader?.Value<string>("description"), altDescription), 1024 * 1024 * 4),
