@@ -360,7 +360,7 @@ public partial class WorkflowGenerator
                 }, id, false);
                 model = [newId, 0];
             }
-            else if (CurrentCompat()?.LorasTargetTextEnc == false || tencWeight == 0)
+            else if (FinalLoadedModel.IsDiffusionModelsFormat || tencWeight == 0)
             {
                 string newId = CreateNode("LoraLoaderModelOnly", new JObject()
                 {

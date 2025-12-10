@@ -87,64 +87,64 @@ public class T2IModelClassSorter
             DefaultParameters = ["cfgscale:4", "steps:20", "scheduler:sgm_uniform", "sigmashift:3.0"]
         }),
         CompatFlux = RegisterCompat(new() {
-            ID = "flux-1", ShortCode = "Flux-1", ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3, LorasTargetTextEnc = false,
+            ID = "flux-1", ShortCode = "Flux-1", ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["clip-l", "t5xxl"], ClipType = "flux", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingFlux",
         }),
         CompatFluxSchnell = RegisterCompat(new() {
             ID = "flux-1-schnell", ShortCode = "Flux-1S",
             ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
-            TextEncoders = ["clip-l", "t5xxl"], ClipType = "flux", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingFlux", LorasTargetTextEnc = false,
+            TextEncoders = ["clip-l", "t5xxl"], ClipType = "flux", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingFlux",
             DefaultParameters = ["cfgscale:1", "steps:4"]
         }),
         CompatFluxDev = RegisterCompat(new() {
             ID = "flux-1-dev", ShortCode = "Flux-1D",
-            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3, LorasTargetTextEnc = false,
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["clip-l", "t5xxl"], ClipType = "flux", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingFlux",
             DefaultParameters = ["cfgscale:1", "steps:20"]
         }),
         CompatFlux2 = RegisterCompat(new() {
             ID = "flux-2", ShortCode = "Flux-2",
-            ModelType = ModelType.ImageEdit, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3, LorasTargetTextEnc = false,
+            ModelType = ModelType.ImageEdit, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["mistral_3_small_fp8"], ClipType = "flux2", VAE = "flux2-vae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingFlux",
             DefaultParameters = ["cfgscale:1", "steps:20"]
         }),
         CompatWan21 = RegisterCompat(new() {
-            ID = "wan-21", ShortCode = "Wan14B", LorasTargetTextEnc = false,
+            ID = "wan-21", ShortCode = "Wan14B",
             ModelType = ModelType.TextAndImageToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["umt5xxl"], ClipType = "wan", VAE = "wan21-vae", LatentNode = "EmptyHunyuanLatentVideo" }),
         CompatWan21_1_3b_t2v = RegisterCompat(new() {
-            ID = "wan-21-1_3b_t2v", ShortCode = "Wan1B-T2V", LorasTargetTextEnc = false,
+            ID = "wan-21-1_3b_t2v", ShortCode = "Wan1B-T2V",
             ModelType = ModelType.TextToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["umt5xxl"], ClipType = "wan", VAE = "wan21-vae", LatentNode = "EmptyHunyuanLatentVideo",
             DefaultParameters = ["cfgscale:6", "steps:30", "text2videoframes:81", "sampler:uni_pc", "sigmashift:8"]
         }),
         CompatWan21_1_3b_i2v = RegisterCompat(new() {
-            ID = "wan-21-1_3b_i2v", ShortCode = "Wan1B-I2V", LorasTargetTextEnc = false,
+            ID = "wan-21-1_3b_i2v", ShortCode = "Wan1B-I2V",
             ModelType = ModelType.ImageToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["umt5xxl"], ClipType = "wan", VAE = "wan21-vae", LatentNode = "EmptyHunyuanLatentVideo",
             DefaultParameters = ["cfgscale:6", "steps:30", "text2videoframes:81", "sampler:uni_pc", "sigmashift:8"]
         }),
         CompatWan21_14b_t2v = RegisterCompat(new() {
-            ID = "wan-21-14b-t2v", ShortCode = "Wan14B-T2V", LorasTargetTextEnc = false,
+            ID = "wan-21-14b-t2v", ShortCode = "Wan14B-T2V",
             ModelType = ModelType.TextToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["umt5xxl"], ClipType = "wan", VAE = "wan21-vae", LatentNode = "EmptyHunyuanLatentVideo",
             DefaultParameters = ["cfgscale:6", "steps:30", "text2videoframes:81", "sampler:uni_pc", "sigmashift:8"]
         }),
         CompatWan21_14b_i2v = RegisterCompat(new() {
-            ID = "wan-21-14b-i2v", ShortCode = "Wan14B-I2V", LorasTargetTextEnc = false,
+            ID = "wan-21-14b-i2v", ShortCode = "Wan14B-I2V",
             ModelType = ModelType.ImageToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["umt5xxl"], ClipType = "wan", VAE = "wan21-vae", LatentNode = "EmptyHunyuanLatentVideo",
             DefaultParameters = ["cfgscale:6", "steps:30", "text2videoframes:81", "sampler:uni_pc", "sigmashift:8"]
         }),
         CompatWan22_5b = RegisterCompat(new() {
-            ID = "wan-22-5b", ShortCode = "Wan5B", LorasTargetTextEnc = false,
+            ID = "wan-22-5b", ShortCode = "Wan5B",
             ModelType = ModelType.TextAndImageToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["umt5xxl"], ClipType = "wan", VAE = "wan22-vae", LatentNode = "Wan22ImageToVideoLatent",
             DefaultParameters = ["cfgscale:5", "steps:20", "text2videoframes:81", "sigmashift:3.0"]
         }),
         CompatHunyuanVideo = RegisterCompat(new() {
             ID = "hunyuan-video", ShortCode = "HyVid",
-            ModelType = ModelType.TextToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3, LorasTargetTextEnc = false,
+            ModelType = ModelType.TextToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["clip-l", "llava-llama3"], ClipType = "hunyuan_video", VAE = "hunyuan-video-vae", LatentNode = "EmptyHunyuanLatentVideo",
             DefaultParameters = ["cfgscale:6", "steps:20", "text2videoframes:73", "sigmashift:7.0"]
         }),
@@ -187,13 +187,13 @@ public class T2IModelClassSorter
         }),
         CompatHiDreamI1 = RegisterCompat(new() {
             ID = "hidream-i1", ShortCode = "HiDrm",
-            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3, LorasTargetTextEnc = false,
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["clip-l-hidream", "clip-g-hidream", "t5xxl", "llama3.1-8b"], ClipType = "hidream", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage",
             DefaultParameters = ["cfgscale:5", "steps:50", "sampler:uni_pc", "sigmashift:3.0"]
         }),
         CompatHiDreamI1Edit = RegisterCompat(new() {
             ID = "hidream-i1-edit", ShortCode = "HiDrm-E",
-            ModelType = ModelType.ImageEdit, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3, LorasTargetTextEnc = false,
+            ModelType = ModelType.ImageEdit, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["clip-l-hidream", "clip-g-hidream", "t5xxl", "llama3.1-8b"], ClipType = "hidream", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage",
             DefaultParameters = ["cfgscale:5", "steps:28", "scheduler:normal", "sigmashift:3.0"]
         }),
@@ -204,13 +204,13 @@ public class T2IModelClassSorter
         }),
         CompatQwenImage = RegisterCompat(new() {
             ID = "qwen-image", ShortCode = "Qwen",
-            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3, LorasTargetTextEnc = false,
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["qwen-2.5-vl-7b"], ClipType = "qwen_image", VAE = "qwen-image-vae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingAuraFlow",
             DefaultParameters = ["cfgscale:2.5", "steps:20", "sigmashift:3.1"]
         }),
         CompatQwenImageEdit = RegisterCompat(new() {
             ID = "qwen-image-edit", ShortCode = "Qwen-E",
-            ModelType = ModelType.ImageEdit, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3, LorasTargetTextEnc = false,
+            ModelType = ModelType.ImageEdit, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["qwen-2.5-vl-7b"], ClipType = "qwen_image", VAE = "qwen-image-vae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingAuraFlow",
             DefaultParameters = ["cfgscale:2.5", "steps:20", "sigmashift:3.0", "resizeimageprompts:1024"]
         }),
@@ -222,17 +222,17 @@ public class T2IModelClassSorter
         }),
         CompatHunyuanImage2_1 = RegisterCompat(new() {
             ID = "hunyuan-image-2_1", ShortCode = "HyImg",
-            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3, LorasTargetTextEnc = false,
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["qwen-2.5-vl-7b", "byt5-small-glyphxl"], ClipType = "hunyuan_image", VAE = "hunyuan-image-2_1-vae", LatentNode = "EmptyHunyuanImageLatent",
             DefaultParameters = ["cfgscale:3.5", "steps:20", "sigmashift:3.0"]
         }),
         CompatHunyuanImage2_1Refiner = RegisterCompat(new() {
-            ID = "hunyuan-image-2_1-refiner", ShortCode = "HyImg", ModelType = ModelType.Refiner, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3, LorasTargetTextEnc = false,
+            ID = "hunyuan-image-2_1-refiner", ShortCode = "HyImg", ModelType = ModelType.Refiner, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["qwen-2.5-vl-7b", "byt5-small-glyphxl"], ClipType = "hunyuan_image", VAE = "hunyuan-image-2_1-vae", LatentNode = "EmptyHunyuanImageLatent" }),
 
         CompatHunyuanVideo1_5 = RegisterCompat(new() {
             ID = "hunyuan-video-1_5", ShortCode = "HyVid",
-            ModelType = ModelType.TextToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3, LorasTargetTextEnc = false,
+            ModelType = ModelType.TextToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["qwen-2.5-vl-7b", "byt5-small-glyphxl"], ClipType = "hunyuan_video_15", VAE = "hunyuan-video-1_5-vae",
             DefaultParameters = ["cfgscale:6", "steps:20", "text2videoframes:73", "sigmashift:7.0"]
         }),
@@ -243,30 +243,30 @@ public class T2IModelClassSorter
         }),
         CompatZImage = RegisterCompat(new() {
             ID = "z-image", ShortCode = "ZImg",
-            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3, LorasTargetTextEnc = false,
+            ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["qwen_3_4b"], ClipType = "stable_diffusion", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingAuraFlow",
             DefaultParameters = ["cfgscale:4", "steps:14"]
         }),
         CompatOvis = RegisterCompat(new() {
-            ID = "ovis", ShortCode = "Ovis", LorasTargetTextEnc = false,
+            ID = "ovis", ShortCode = "Ovis",
             ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["ovis_2.5-5b"], ClipType = "ovis", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage",
             DefaultParameters = ["cfgscale:4", "steps:14"]
         }),
         CompatKandinsky5ImgLite = RegisterCompat(new() {
-            ID = "kandinsky5-imglite", ShortCode = "Kan5IL", LorasTargetTextEnc = false,
+            ID = "kandinsky5-imglite", ShortCode = "Kan5IL",
             ModelType = ModelType.TextToImage, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["qwen-2.5-vl-7b"], ClipType = "ovis", VAE = "flux-vae", LatentNode = "EmptyHunyuanLatentVideo",
             DefaultParameters = ["cfgscale:4", "steps:14"]
         }),
         CompatKandinsky5VidLite = RegisterCompat(new() {
-            ID = "kandinsky5-vidlite", ShortCode = "Kan5VL", LorasTargetTextEnc = false,
+            ID = "kandinsky5-vidlite", ShortCode = "Kan5VL",
             ModelType = ModelType.TextAndImageToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["qwen-2.5-vl-7b"], ClipType = "ovis", VAE = "hunyuan-video-vae", LatentNode = "EmptyHunyuanLatentVideo",
             DefaultParameters = ["cfgscale:4", "steps:14"]
         }),
         CompatKandinsky5VidPro = RegisterCompat(new() {
-            ID = "kandinsky5-vidpro", ShortCode = "Kan5VP", LorasTargetTextEnc = false,
+            ID = "kandinsky5-vidpro", ShortCode = "Kan5VP",
             ModelType = ModelType.TextAndImageToVideo, Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             TextEncoders = ["qwen-2.5-vl-7b"], ClipType = "ovis", VAE = "hunyuan-video-vae", LatentNode = "EmptyHunyuanLatentVideo",
             DefaultParameters = ["cfgscale:4", "steps:14"]

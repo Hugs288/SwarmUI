@@ -95,9 +95,6 @@ public record class T2IModelCompatClass
     /// <summary>Default generation parameters for this model type.</summary>
     public List<string> DefaultParameters = ["steps:20", "cfgscale:7", "sampler:euler", "scheduler:normal"];
 
-    /// <summary>If true, loras may target the text encoder. If false, they never do.</summary>
-    public bool LorasTargetTextEnc = true;
-
     /// <summary>Get a networkable JObject for this compat class.</summary>
     public JObject ToNetData()
     {
@@ -111,8 +108,7 @@ public record class T2IModelCompatClass
             ["text_encoders"] = new JArray(TextEncoders),
             ["clip_type"] = ClipType,
             ["vae"] = VAE,
-            ["default_parameters"] = new JArray(DefaultParameters),
-            ["loras_target_text_enc"] = LorasTargetTextEnc
+            ["default_parameters"] = new JArray(DefaultParameters)
         };
     }
 }

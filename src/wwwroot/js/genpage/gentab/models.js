@@ -11,7 +11,6 @@ class ModelCompatClass {
         this.vae = data.vae;
         this.clipType = data.clip_type;
         this.defaultParameters = data.default_parameters;
-        this.lorasTargetTextEnc = data.loras_target_text_enc;
     }
 }
 
