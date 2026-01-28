@@ -470,9 +470,9 @@ function genInputs(delay_final = false) {
                         sideLen = parseInt(inputSideLength.value);
                     }
                     else {
-                        sideLen = curModelWidth;
-                        if (curModelWidth != curModelHeight) {
-                            sideLen = Math.round(Math.sqrt(curModelWidth * curModelHeight));
+                        sideLen = currentModelHelper.curWidth;
+                        if (currentModelHelper.curWidth != currentModelHelper.curHeight) {
+                            sideLen = Math.round(Math.sqrt(currentModelHelper.curWidth * currentModelHelper.curHeight));
                         }
                     }
                     let width, height;
@@ -486,8 +486,8 @@ function genInputs(delay_final = false) {
                             height = roundTo(sideLen / Math.sqrt(ratio), 16);
                         }
                     }
-                    inputWidth.value = width ?? curModelWidth;
-                    inputHeight.value = height ?? curModelHeight;
+                    inputWidth.value = width ?? currentModelHelper.curWidth;
+                    inputHeight.value = height ?? currentModelHelper.curHeight;
                     triggerChangeFor(inputWidth);
                     triggerChangeFor(inputHeight);
                 }
