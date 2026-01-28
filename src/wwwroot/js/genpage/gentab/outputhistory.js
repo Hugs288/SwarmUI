@@ -93,7 +93,7 @@ function buttonsForImage(fullsrc, src, metadata) {
                 });
             }
         });
-     }
+    }
     buttons.push({
         label: 'Download',
         title: 'Downloads this image to your PC.',

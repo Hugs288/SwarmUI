@@ -1,3 +1,6 @@
+using System;
+using System.Text;
+using System.Collections.Generic;
 using System.IO;
 using SwarmUI.Core;
 using SwarmUI.Media;
