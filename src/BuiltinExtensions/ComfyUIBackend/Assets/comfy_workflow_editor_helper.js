@@ -1171,10 +1171,20 @@ function comfySaveModalSaveNow() {
         params = JSON.parse(JSON.stringify(params));
         delete params.comfyworkflowparammetadata;
         delete params.comfyworkflowraw;
+        let description = getRequiredElementById('comfy_save_description').value;
+        let simpleTab = getRequiredElementById('comfy_save_enable_simple').checked;
+        for (let node of workflow.nodes) {
+            if (node.type == 'SwarmWorkflowDescription') {
+                console.log(node);
+                description = node.widgets_values[0];
+                simpleTab = node.widgets_values[1];
+                break;
+            }
+        }
         let inputs = {
             'name': saveName,
-            'description': getRequiredElementById('comfy_save_description').value,
-            'enable_in_simple': getRequiredElementById('comfy_save_enable_simple').checked,
+            'description': description,
+            'enable_in_simple': simpleTab,
             'workflow': JSON.stringify(workflow),
             'prompt': prompt_text,
             'custom_params': params,
@@ -1355,7 +1365,7 @@ function comfyDescribeWorkflowForBrowser(workflow) {
             }
         }
     ];
-    return { name: workflow.name, description: `<b>${escapeHtmlNoBr(workflow.name)}</b><br>${escapeHtmlNoBr(workflow.data.description ?? "")}`, image: workflow.data.image, buttons: buttons, className: '', searchable: `${workflow.name}\n${workflow.description}` };
+    return { name: workflow.name, description: `<b>${escapeHtmlNoBr(workflow.name)}</b><br>${safeHtmlOnly(workflow.data.description ?? "")}`, image: workflow.data.image, buttons: buttons, className: '', searchable: `${workflow.name}\n${workflow.description}` };
 }
 
 function comfySelectWorkflowForBrowser(workflow) {
@@ -1394,7 +1404,7 @@ function comfyBrowseWorkflowsNow() {
 let comfyTabBody = getRequiredElementById('comfyworkflow');
 let wasComfyTabActive = comfyTabBody.classList.contains('show');
 
-/** Hack-around for firefox bug: block the internal comfy canvas from rendering when the tab is inactive. */
+/** Workaround browser-specific comfy canvas bugs. */
 function comfyDoCanvasFreeze() {
     if (!hasComfyLoaded) {
         return;
@@ -1405,10 +1415,10 @@ function comfyDoCanvasFreeze() {
         return;
     }
     if (comfyTabBody.classList.contains('show')) {
-        canvas.startRendering();
+        comfyTabBody.classList.remove('comfy_tab_hackhide');
     }
     else {
-        canvas.stopRendering();
+        comfyTabBody.classList.add('comfy_tab_hackhide');
     }
 }
 

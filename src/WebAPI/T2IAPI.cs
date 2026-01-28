@@ -176,7 +176,7 @@ public static class T2IAPI
                 discards = [.. discard.Values<int>()];
             }
         }
-        if (discards != null)
+        if (discards is not null)
         {
             foreach (int x in discards)
             {
@@ -288,7 +288,8 @@ public static class T2IAPI
             };
         }
         user_input.ApplySpecialLogic();
-        images = user_input.Get(T2IParamTypes.Images, images);
+        images = user_input.Get(T2IParamTypes.Images, 1);
+        claim.Extend(images - claim.WaitingGenerations);
         Logs.Info($"User {session.User.UserID} requested {images} image{(images == 1 ? "" : "s")} with model '{user_input.Get(T2IParamTypes.Model)?.Name}'...");
         if (Logs.MinimumLevel <= Logs.LogLevel.Verbose)
         {
@@ -357,6 +358,10 @@ public static class T2IAPI
                 imageSet.Add(image);
             }
             WebhookManager.SendEveryGenWebhook(thisParams, url, image.File);
+            if (thisParams.Get(T2IParamTypes.ForwardSwarmData, false))
+            {
+                output(new JObject() { ["raw_swarm_data"] = new JObject() { ["params_used"] = JArray.FromObject(thisParams.ParamsQueried.ToArray()) } });
+            }
             output(new JObject() { ["image"] = url, ["batch_index"] = $"{actualIndex}", ["request_id"] = $"{thisParams.UserRequestId}", ["metadata"] = string.IsNullOrWhiteSpace(metadata) ? null : metadata });
         }
         for (int i = 0; i < images && !claim.ShouldCancel; i++)
@@ -444,10 +449,12 @@ public static class T2IAPI
             });
             Image gridImg = new(grid);
             long genTime = Environment.TickCount64 - timeStart;
-            user_input.ExtraMeta["generation_time"] = $"{genTime / 1000.0:0.00} total seconds (average {(finalTime - timeStart) / griddables.Length / 1000.0:0.00} seconds per image)";
-            (Task<MediaFile> gridFileTask, string metadata) = user_input.SourceSession.ApplyMetadata(gridImg, user_input, imgs.Length);
+            T2IParamInput finalInput = user_input.Clone();
+            finalInput.NoUnusedParams = true;
+            finalInput.ExtraMeta["generation_time"] = $"{genTime / 1000.0:0.00} total seconds (average {(finalTime - timeStart) / griddables.Length / 1000.0:0.00} seconds per image)";
+            (Task<MediaFile> gridFileTask, string metadata) = finalInput.SourceSession.ApplyMetadata(gridImg, finalInput, imgs.Length);
             T2IEngine.ImageOutput gridOutput = new() { File = gridImg, ActualFileTask = gridFileTask, GenTimeMS = genTime };
-            saveImage(gridOutput, -1, user_input, metadata);
+            saveImage(gridOutput, -1, finalInput, metadata);
         }
         T2IEngine.PostBatchEvent?.Invoke(new(user_input, [.. griddables]));
         output(new JObject() { ["discard_indices"] = JToken.FromObject(discard) });

@@ -168,7 +168,7 @@ function reviseStatusBar() {
 
 /** Array of functions called on key events (eg model selection change) to update displayed features.
  * Return format [array addMe, array removeMe]. For example `[[], ['sd3']]` indicates that the 'sd3' feature flag is not currently supported (eg by current model).
- * Can use 'curModelCompatClass', 'curModelArch' to check the current model architecture. Note these values may be null.
+ * Can use 'currentModelHelper.curCompatClass', 'currentModelHelper.curArch' to check the current model architecture. Note these values may be null.
  * */
 let featureSetChangers = [];
 
@@ -176,7 +176,7 @@ function reviseBackendFeatureSet() {
     currentBackendFeatureSet = Array.from(currentBackendFeatureSet);
     let addMe = [], removeMe = [];
     function doCompatFeature(compatClass, featureFlag) {
-        if (curModelCompatClass && curModelCompatClass.startsWith(compatClass)) {
+        if (currentModelHelper.curCompatClass && currentModelHelper.curCompatClass.startsWith(compatClass)) {
             addMe.push(featureFlag);
         }
         else {
@@ -185,7 +185,7 @@ function reviseBackendFeatureSet() {
     }
     function doAnyCompatFeature(compatClasses, featureFlag) {
         for (let compatClass of compatClasses) {
-            if (curModelCompatClass && curModelCompatClass.startsWith(compatClass)) {
+            if (currentModelHelper.curCompatClass && currentModelHelper.curCompatClass.startsWith(compatClass)) {
                 addMe.push(featureFlag);
                 return;
             }
@@ -194,7 +194,7 @@ function reviseBackendFeatureSet() {
     }
     function doAnyArchFeature(archIds, featureFlag) {
         for (let archId of archIds) {
-            if (curModelArch && curModelArch.startsWith(archId)) {
+            if (currentModelHelper.curArch && currentModelHelper.curArch.startsWith(archId)) {
                 addMe.push(featureFlag);
                 return;
             }
@@ -203,7 +203,7 @@ function reviseBackendFeatureSet() {
     }
     doCompatFeature('stable-diffusion-v3', 'sd3');
     doCompatFeature('stable-cascade-v1', 'cascade');
-    doAnyArchFeature(['Flux.1-dev', 'Flux.2-dev', 'hunyuan-video'], 'flux-dev');
+    doAnyArchFeature(['Flux.1-dev', 'flux.2-dev', 'flux.2-klein-4b', 'flux.2-klein-9b', 'hunyuan-video'], 'flux-dev');
     doCompatFeature('stable-diffusion-xl-v1', 'sdxl');
     doAnyCompatFeature(['genmo-mochi-1', 'lightricks-ltx-video', 'hunyuan-video', 'nvidia-cosmos-1', `wan-21`, `wan-22`, 'kandinsky5-vidlite', 'kandinsky5-vidpro'], 'text2video');
     for (let changer of featureSetChangers) {
@@ -473,15 +473,17 @@ function installTensorRT() {
     });
 }
 
-function clearPromptImages() {
+function clearPromptImages(hideRevision = true) {
     let promptImageArea = getRequiredElementById('alt_prompt_image_area');
     promptImageArea.innerHTML = '';
     let clearButton = getRequiredElementById('alt_prompt_image_clear_button');
     clearButton.style.display = 'none';
-    autoRevealRevision();
+    if (hideRevision) {
+        hideRevisionInputs(false);
+    }
 }
 
-function hideRevisionInputs() {
+function hideRevisionInputs(doClear = true) {
     let revisionGroup = document.getElementById('input_group_imageprompting');
     let revisionToggler = document.getElementById('input_group_content_imageprompting_toggle');
     if (revisionGroup) {
@@ -491,6 +493,9 @@ function hideRevisionInputs() {
         revisionGroup.style.display = 'none';
     }
     genTabLayout.altPromptSizeHandle();
+    if (doClear) {
+        clearPromptImages(false);
+    }
 }
 
 function showRevisionInputs(toggleOn = false) {
@@ -761,7 +766,7 @@ function genpageLoad() {
             reviseStatusBar();
             getRequiredElementById('advanced_options_checkbox').checked = localStorage.getItem('display_advanced') == 'true';
             toggle_advanced();
-            setCurrentModel();
+            currentModelHelper.ensureCurrentModel();
             loadUserData(() => {
                 if (permissions.hasPermission('view_backends_list')) {
                     loadBackendTypesMenu();

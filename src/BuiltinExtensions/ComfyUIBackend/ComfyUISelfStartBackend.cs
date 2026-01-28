@@ -5,6 +5,7 @@ using FreneticUtilities.FreneticToolkit;
 using SwarmUI.Accounts;
 using SwarmUI.Backends;
 using SwarmUI.Core;
+using SwarmUI.Text2Image;
 using SwarmUI.Utils;
 using System.Diagnostics;
 using System.IO;
@@ -69,6 +70,56 @@ public class ComfyUISelfStartBackend : ComfyUIAPIAbstractBackend
 
     public static bool IsComfyModelFileEmitted = false;
 
+    /// <summary>Names of folders in comfy paths that should be blindly forwarded to correct for Comfy not properly propagating base_path without manual forwards.</summary>
+    public static List<string> FoldersToForwardInComfyPath = ["unet", "diffusion_models", "gligen", "ipadapter", "yolov8", "tensorrt", "clipseg", "style_models", "latent_upscale_models"];
+
+    /// <summary>Filepaths to where custom node packs for comfy can be found, such as extension dirs.</summary>
+    public static List<string> CustomNodePaths = [];
+
+    /// <summary>Mapping of node folder names to exact git commits to maintain.</summary>
+    public static ConcurrentDictionary<string, string> ComfyNodeGitPins = new()
+    {
+        // Example: ["ComfyUI-TeaCache"] = "b3429ef3dea426d2f167e348b44cd2f5a3674e7d"
+    };
+
+    public static string SwarmValidatedFrontendVersion = "1.35.9";
+
+    /// <summary>List of known required python packages, as pairs of strings: Item1 is the folder name within python packages to look for, Item2 is the pip install command.</summary>
+    public static List<(string, string)> RequiredPythonPackages =
+    [
+        // ComfyUI added these dependencies, didn't used to have it
+        ("kornia", "kornia"),
+        ("sentencepiece", "sentencepiece"),
+        ("spandrel", "spandrel"),
+        ("av", "av"),
+        ("pydantic", "pydantic"),
+        ("pydantic_settings", "pydantic-settings"),
+        ("comfyui_frontend_package", $"comfyui_frontend_package=={SwarmValidatedFrontendVersion}"),
+        ("alembic", "alembic"),
+        // Other added dependencies
+        ("rembg", "rembg"),
+        ("onnxruntime", "onnxruntime"), // subdependency of rembg but inexplicably not autoinstalled anymore?
+        ("matplotlib", "matplotlib"),
+        ("opencv_python_headless", "opencv-python-headless"),
+        ("imageio_ffmpeg", "imageio-ffmpeg"),
+        ("dill", "dill"),
+        ("omegaconf", "omegaconf"), // some yolo models require this but ultralytics itself doesn't? wut?
+        //("mesonpy", "meson-python") // Build requirement sometimes. Probably will be required when python 3.13 is stably supported.
+    ];
+
+    /// <summary>List of required python packages that need a specific version, in structure (string libFolder, string pipName, string rel, string version).</summary>
+    public static List<(string, string, string, string)> RequiredVersionPythonPackages =
+    [
+        ("diffusers", "diffusers", ">=", "0.36.0"),
+        ("aiohttp", "aiohttp", ">=", "3.11.8"),
+        ("yarl", "yarl", ">=", "1.18.0"),
+        ("av", "av", ">=", "14.2.0"),
+        ("spandrel", "spandrel", ">=", "0.4.1"),
+        ("transformers", "transformers", ">=", "4.57.3"),
+        ("ultralytics", "ultralytics", "==", "8.3.197"), // This is hard-pinned due to the malicious 8.3.41 incident, only manual updates when needed until security practices are improved.
+        ("pip", "pip", ">=", "25.0") // Don't need latest, just can't be too old, this is mostly just here for a sanity check.
+    ];
+
     /// <summary>Downloads or updates the named relevant ComfyUI custom node repo.</summary>
     public async Task<ComfyUISelfStartBackend[]> EnsureNodeRepo(string url, bool skipPipCache = false, bool doRestart = true)
     {
@@ -122,12 +173,6 @@ public class ComfyUISelfStartBackend : ComfyUIAPIAbstractBackend
         }
         return null;
     }
-
-    /// <summary>Mapping of node folder names to exact git commits to maintain.</summary>
-    public static ConcurrentDictionary<string, string> ComfyNodeGitPins = new()
-    {
-        // Example: ["ComfyUI-TeaCache"] = "b3429ef3dea426d2f167e348b44cd2f5a3674e7d"
-    };
 
     public async Task EnsureNodeRepos()
     {
@@ -186,12 +231,6 @@ public class ComfyUISelfStartBackend : ComfyUIAPIAbstractBackend
             AddLoadStatus($"Error while ensuring comfy backend node repos: {ex.GetType().Name}: {ex.Message}");
         }
     }
-
-    /// <summary>Names of folders in comfy paths that should be blindly forwarded to correct for Comfy not properly propagating base_path without manual forwards.</summary>
-    public static List<string> FoldersToForwardInComfyPath = ["unet", "diffusion_models", "gligen", "ipadapter", "yolov8", "tensorrt", "clipseg", "style_models", "latent_upscale_models"];
-
-    /// <summary>Filepaths to where custom node packs for comfy can be found, such as extension dirs.</summary>
-    public static List<string> CustomNodePaths = [];
 
     private static readonly bool IsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
@@ -284,8 +323,6 @@ public class ComfyUISelfStartBackend : ComfyUIAPIAbstractBackend
         start.Arguments = $"{forcePrior} {call.Trim()}".Trim();
         return Process.Start(start);
     }
-
-    public static string SwarmValidatedFrontendVersion = "1.34.5";
 
     public override async Task Init()
     {
@@ -463,7 +500,7 @@ public class ComfyUISelfStartBackend : ComfyUIAPIAbstractBackend
                 await pipCall($"Updating '{name}'", $"install {pip}");
                 libs.Add(name);
             }
-            string getVers(string package)
+            string getRawVersion(string package)
             {
                 string prefix = $"{package}-";
                 string dir = distinfos.FirstOrDefault(d => d.StartsWith(prefix));
@@ -471,7 +508,11 @@ public class ComfyUISelfStartBackend : ComfyUIAPIAbstractBackend
                 {
                     return null;
                 }
-                return dir[prefix.Length..].Before(".dist-info").Before('+');
+                return dir[prefix.Length..].Before(".dist-info");
+            }
+            string getVers(string package)
+            {
+                return getRawVersion(package)?.Before('+');
             }
             if (!libs.Contains("pip"))
             {
@@ -531,7 +572,7 @@ public class ComfyUISelfStartBackend : ComfyUIAPIAbstractBackend
                 await update("comfyui_workflow_templates", $"comfyui-workflow-templates=={templateVers}");
             }
             string actualEmbedVers = getVers("comfyui_embedded_docs");
-            if ((doFixFrontend || doLatestFrontend) && reqs.TryGetValue("comfyui-embedded-docs", out Version embedDocsVers) && (actualEmbedVers is null || embedDocsVers < Version.Parse(actualEmbedVers)))
+            if ((doFixFrontend || doLatestFrontend) && reqs.TryGetValue("comfyui-embedded-docs", out Version embedDocsVers) && (actualEmbedVers is null || Version.Parse(actualEmbedVers) < embedDocsVers))
             {
                 await update("comfyui_embedded_docs", $"comfyui-embedded-docs=={embedDocsVers}");
             }
@@ -542,6 +583,11 @@ public class ComfyUISelfStartBackend : ComfyUIAPIAbstractBackend
             else if (!doFixFrontend)
             {
                 await install("comfyui_frontend_package", "comfyui-frontend-package");
+            }
+            string actualKitchenVers = getVers("comfy_kitchen");
+            if (reqs.TryGetValue("comfy-kitchen", out Version kitchenVers) && (actualKitchenVers is null || Version.Parse(actualKitchenVers) < kitchenVers))
+            {
+                await update("comfy_kitchen", $"comfy-kitchen=={kitchenVers}");
             }
             if (Directory.Exists($"{ComfyUIBackendExtension.Folder}/DLNodes/ComfyUI_IPAdapter_plus") || Directory.Exists($"{ComfyUIBackendExtension.Folder}/DLNodes/ComfyUI-nunchaku"))
             {
@@ -602,21 +648,28 @@ public class ComfyUISelfStartBackend : ComfyUIAPIAbstractBackend
                     isValid = false;
                 }
                 string osVers = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "win_amd64" : "linux_x86_64";
-                string torchPipVers = getVers("torch");
+                (string torchPipVers, string cudaVers) = getRawVersion("torch").BeforeAndAfter('+');
                 string torchVers = "2.8";
-                if (torchPipVers.StartsWith("2.5.")) { torchVers = "2.5"; }
-                else if (torchPipVers.StartsWith("2.6.")) { torchVers = "2.6"; }
-                else if (torchPipVers.StartsWith("2.7.")) { torchVers = "2.7"; }
-                else if (torchPipVers.StartsWith("2.8.")) { torchVers = "2.8"; }
+                if (torchPipVers.StartsWith("2.8.")) { torchVers = "2.8"; }
                 else if (torchPipVers.StartsWith("2.9.")) { torchVers = "2.9"; }
+                else if (torchPipVers.StartsWith("2.10.")) { torchVers = "2.10"; }
+                else if (torchPipVers.StartsWith("2.11.")) { torchVers = "2.11"; }
                 else
                 {
-                    Logs.Error($"Nunchaku is not currently supported on your Torch version ({torchPipVers} not in range [2.5, 2.9]).");
+                    Logs.Error($"Nunchaku is not currently supported on your Torch version, you have torch {torchPipVers} but you need at least Torch 2.8 (up to 2.11).");
                     isValid = false;
                 }
-                string nunchakuTargetVersion = "1.0.2";
-                // eg https://github.com/nunchaku-tech/nunchaku/releases/download/v0.3.2/nunchaku-0.3.2+torch2.5-cp310-cp310-linux_x86_64.whl
-                string url = $"https://github.com/nunchaku-tech/nunchaku/releases/download/v{nunchakuTargetVersion}/nunchaku-{nunchakuTargetVersion}+torch{torchVers}-cp{pyVers}-cp{pyVers}-{osVers}.whl";
+                string cutarget = "cu12.8";
+                if (cudaVers == "cu128") { cutarget = "cu12.8"; }
+                else if (cudaVers == "cu130") { cutarget = "cu13.0"; }
+                else
+                {
+                    Logs.Error($"Nunchaku is not currently supported on your Torch CUDA version, you have torch+{cudaVers} but you need cu12.8 or cu13.0.");
+                    isValid = false;
+                }
+                string nunchakuTargetVersion = "1.2.1";
+                // eg https://github.com/nunchaku-ai/nunchaku/releases/download/v1.2.1/nunchaku-1.2.1+cu12.8torch2.10-cp310-cp310-linux_x86_64.whl
+                string url = $"https://github.com/nunchaku-tech/nunchaku/releases/download/v{nunchakuTargetVersion}/nunchaku-{nunchakuTargetVersion}+{cutarget}torch{torchVers}-cp{pyVers}-cp{pyVers}-{osVers}.whl";
                 if (isValid)
                 {
                     string nunchakuVers = getVers("nunchaku");
@@ -654,41 +707,6 @@ public class ComfyUISelfStartBackend : ComfyUIAPIAbstractBackend
     /// <summary>Strict matcher that will block any muckery, excluding URLs and etc.</summary>
     public static AsciiMatcher RequirementPartMatcher = new(AsciiMatcher.BothCaseLetters + AsciiMatcher.Digits + ".-_");
 
-    /// <summary>List of known required python packages, as pairs of strings: Item1 is the folder name within python packages to look for, Item2 is the pip install command.</summary>
-    public static List<(string, string)> RequiredPythonPackages =
-    [
-        // ComfyUI added these dependencies, didn't used to have it
-        ("kornia", "kornia"),
-        ("sentencepiece", "sentencepiece"),
-        ("spandrel", "spandrel"),
-        ("av", "av"),
-        ("pydantic", "pydantic"),
-        ("pydantic_settings", "pydantic-settings"),
-        ("comfyui_frontend_package", $"comfyui_frontend_package=={SwarmValidatedFrontendVersion}"),
-        ("alembic", "alembic"),
-        // Other added dependencies
-        ("rembg", "rembg"),
-        ("onnxruntime", "onnxruntime"), // subdependency of rembg but inexplicably not autoinstalled anymore?
-        ("matplotlib", "matplotlib"),
-        ("opencv_python_headless", "opencv-python-headless"),
-        ("imageio_ffmpeg", "imageio-ffmpeg"),
-        ("dill", "dill"),
-        ("omegaconf", "omegaconf"), // some yolo models require this but ultralytics itself doesn't? wut?
-        //("mesonpy", "meson-python") // Build requirement sometimes. Probably will be required when python 3.13 is stably supported.
-    ];
-
-    /// <summary>List of required python packages that need a specific version, in structure (string libFolder, string pipName, string rel, string version).</summary>
-    public static List<(string, string, string, string)> RequiredVersionPythonPackages =
-    [
-        ("aiohttp", "aiohttp", ">=", "3.11.8"),
-        ("yarl", "yarl", ">=", "1.18.0"),
-        ("av", "av", ">=", "14.2.0"),
-        ("spandrel", "spandrel", ">=", "0.4.1"),
-        ("transformers", "transformers", ">=", "4.50.3"),
-        ("ultralytics", "ultralytics", "==", "8.3.197"), // This is hard-pinned due to the malicious 8.3.41 incident, only manual updates when needed until security practices are improved.
-        ("pip", "pip", ">=", "25.0") // Don't need latest, just can't be too old, this is mostly just here for a sanity check.
-    ];
-
     public override async Task Shutdown()
     {
         await base.Shutdown();
@@ -709,16 +727,19 @@ public class ComfyUISelfStartBackend : ComfyUIAPIAbstractBackend
 
     public string ComfyPathBase => (SettingsRaw as ComfyUISelfStartSettings).StartScript.Replace('\\', '/').BeforeLast('/');
 
-    public override void PostResultCallback(string filename)
+    public override void PostResultCallback(string filename, T2IParamInput input)
     {
         string path = $"{ComfyPathBase}/output/{filename}";
-        Task.Run(() =>
+        if (!input.Get(T2IParamTypes.NoInternalSpecialHandling, false))
         {
-            if (File.Exists(path))
+            Task.Run(() =>
             {
-                File.Delete(path);
-            }
-        });
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+            });
+        }
     }
 
     public override bool RemoveInputFile(string filename)

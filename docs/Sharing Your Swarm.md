@@ -22,7 +22,6 @@ Currently, SwarmUI is only validated to be safely usable by **Friends and Family
 
 - Two-Factor Authentication
 - Easy account-quick-swapper for admins
-- Account registration
 - automatic/forced "you must change your password" popup
 - Simple tab stable access for non-power-users
 - Preset serverwide sharing
@@ -74,8 +73,20 @@ Currently, SwarmUI is only validated to be safely usable by **Friends and Family
             - If they've never used Swarm before, give them some tips for how to get started! Show them your favorite models and prompting techniques.
             - Or, have your friend watch while you operate the UI and do some generations, so they can see how you do it and ask questions.
 
+## User Registration
+
+- You can enable user registration via the options under Server Configuration.
+    - `AllowRegistration` to turn it on, and other checkboxes to configure what registration methods are allowed.
+        - Simple username/password is available.
+        - Also, Google OAuth is available. Follow <https://developers.google.com/identity/protocols/oauth2> for information about how to set this up.
+    - You can also configure `NewUserDefaultRole` (defaults to `user`)
+    - You should set the `RegisterNotice` text too
+- If enabled, when a user goes to login, there's a link to the `/Register` page they can click to register an account.
+
 ## Using Shared Swarms As A Backend
 
 You can hook up someone else's shared SwarmUI instance as a backend in your own Swarm!
 
 (TODO: Explain how to. Need easy way to gen and apply account auth stuff.)
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>

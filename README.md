@@ -4,7 +4,7 @@
 
 *Formerly known as StableSwarmUI.*
 
-A Modular AI Image Generation Web-User-Interface, with an emphasis on making powertools easily accessible, high performance, and extensibility. Supports AI image models (*Stable Diffusion, Flux, Qwen Image, etc.*), and AI video models (*Wan, Hunyuan Video, etc.*), with plans to support eg audio and more in the future.
+A Modular AI Image Generation Web-User-Interface, with an emphasis on making powertools easily accessible, high performance, and extensibility. Supports AI image models (*Stable Diffusion, Z-Image, Flux, Qwen Image, etc.*), and AI video models (*Wan, Hunyuan Video, etc.*), with plans to support eg audio and more in the future.
 
 ![ui-screenshot](.github/images/swarmui.jpg)
 
@@ -173,7 +173,7 @@ Copyright (c) 2024 Stability AI
 
 The MIT License (MIT)
 
-Copyright (c) 2024-2025 Alex "mcmonkey" Goodwin
+Copyright (c) 2024-2026 Alex "mcmonkey" Goodwin
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

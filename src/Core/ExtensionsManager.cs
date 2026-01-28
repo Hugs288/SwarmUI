@@ -34,6 +34,7 @@ public class ExtensionsManager
                 "hidden" => "<span class=\"tag hidden-tag\" title=\"Should not be visible\">Hidden</span>",
                 "paid" => "<span class=\"tag paid-tag\" title=\"Requires a paid account\">Paid</span>",
                 "beta" => "<span class=\"tag beta-tag\" title=\"Not ready for general use\">Beta</span>",
+                "conflicts" => "<span class=\"tag beta-tag\" title=\"may conflict with core systems or with other extensions (eg overrides core features)\">Conflicts</span>",
                 "none" => "<span class=\"tag\" title=\"No tags\">None</span>",
                 _ => $"<abbr class=\"tag\" title=\"Unrecognized tag\">{t}</abbr>"
             };
@@ -123,12 +124,19 @@ public class ExtensionsManager
             }
         }
         RunOnAllExtensions(e => e.OnFirstInit());
-        FDSSection extensionsOutThere = FDSUtility.ReadFile("./launchtools/extension_list.fds");
-        foreach (string name in extensionsOutThere.GetRootKeys())
+        try
         {
-            FDSSection section = extensionsOutThere.GetSection(name);
-            string url = section.GetString("url");
-            KnownExtensions.Add(new ExtensionInfo(name, section.GetString("author"), section.GetString("license"), section.GetString("description"), url, [.. section.GetStringList("tags")], url.AfterLast('/')));
+            FDSSection extensionsOutThere = FDSUtility.ReadFile("./launchtools/extension_list.fds");
+            foreach (string name in extensionsOutThere.GetRootKeys())
+            {
+                FDSSection section = extensionsOutThere.GetSection(name);
+                string url = section.GetString("url");
+                KnownExtensions.Add(new ExtensionInfo(name, section.GetString("author"), section.GetString("license"), section.GetString("description"), url, [.. section.GetStringList("tags")], url.AfterLast('/')));
+            }
+        }
+        catch (Exception ex)
+        {
+            Logs.Error($"Failed to read known extensions list: {ex.ReadableString()}");
         }
         RunOnAllExtensions(e => e.PopulateMetadata());
     }

@@ -20,14 +20,14 @@ public class T2IModelClassSorter
     /// <summary>Register a new model class to the sorter.</summary>
     public static T2IModelClass Register(T2IModelClass clazz)
     {
-        ModelClasses.Add(clazz.ID, clazz);
+        ModelClasses.Add(clazz.ID.ToLowerFast(), clazz);
         return clazz;
     }
 
     /// <summary>Register a new model compat class to the sorter.</summary>
     public static T2IModelCompatClass RegisterCompat(T2IModelCompatClass clazz)
     {
-        CompatClasses.Add(clazz.ID, clazz);
+        CompatClasses.Add(clazz.ID.ToLowerFast(), clazz);
         return clazz;
     }
 
@@ -281,11 +281,16 @@ public class T2IModelClassSorter
             StandardWidth = 640, StandardHeight = 640,
             TextEncoders = ["qwen-2.5-vl-7b"], ClipType = "ovis", VAE = "hunyuan-video-vae", LatentNode = "EmptyHunyuanLatentVideo"
         });
+                CompatLtxv = RegisterCompat(new() { ID = "lightricks-ltx-video", ShortCode = "LTXV", IsText2Video = true, IsImage2Video = true }),
+        CompatLtxv2 = RegisterCompat(new() { ID = "lightricks-ltx-video-2", ShortCode = "LTXV2", IsText2Video = true, IsImage2Video = true }),
+                CompatFlux2Klein4B = RegisterCompat(new() { ID = "flux-2-klein-4b", ShortCode = "Fl2K4", LorasTargetTextEnc = false }),
+        CompatFlux2Klein9B = RegisterCompat(new() { ID = "flux-2-klein-9b", ShortCode = "Fl2K9", LorasTargetTextEnc = false }),
 
     /// <summary>Initialize the class sorter.</summary>
     public static void Init()
     {
         bool hasKey(JObject h, string key) => h.ContainsKey(key) || h.ContainsKey($"diffusion_model.{key}") || h.ContainsKey($"model.diffusion_model.{key}");
+        bool tryGetKey(JObject h, string key, out JToken tok) => h.TryGetValue(key, out tok) || h.TryGetValue($"diffusion_model.{key}", out tok) || h.TryGetValue($"model.diffusion_model.{key}", out tok);
         bool IsAlt(JObject h) => h.ContainsKey("cond_stage_model.roberta.embeddings.word_embeddings.weight");
         bool isV1(JObject h) => h.ContainsKey("cond_stage_model.transformer.text_model.embeddings.position_ids") || h.ContainsKey("cond_stage_model.transformer.embeddings.position_ids");
         bool isV1Lora(JObject h) => h.ContainsKey("lora_unet_up_blocks_3_attentions_2_transformer_blocks_0_ff_net_2.lora_up.weight");
@@ -334,13 +339,21 @@ public class T2IModelClassSorter
             }
             return false;
         }
-        bool isFlux2Dev(JObject h) => hasKey(h, "double_stream_modulation_img.lin.weight");
+        bool tryGetFlux2Tok(JObject h, out JToken tok) => tryGetKey(h, "double_stream_modulation_img.lin.weight", out tok);
+        bool isFlux2Dev(JObject h) => tryGetFlux2Tok(h, out JToken tok) && (tok["shape"].ToArray()[0].Value<long>() == 36864 || tok["shape"].ToArray()[1].Value<long>() == 36864); // ggufs sometimes have this shape backwards
+        bool isFlux2Klein4B(JObject h) => tryGetFlux2Tok(h, out JToken tok) && (tok["shape"].ToArray()[0].Value<long>() == 18432 || tok["shape"].ToArray()[1].Value<long>() == 18432);
+        bool isFlux2Klein9B(JObject h) => tryGetFlux2Tok(h, out JToken tok) && (tok["shape"].ToArray()[0].Value<long>() == 24576 || tok["shape"].ToArray()[1].Value<long>() == 24576);
+        bool isFlux2KleinLora(JObject h) => hasKey(h, "double_blocks.4.img_attn.proj.lora_A.weight") && hasKey(h, "double_blocks.4.txt_mlp.2.lora_B.weight") && hasKey(h, "single_blocks.18.linear1.lora_A.weight") && hasKey(h, "single_blocks.19.linear2.lora_B.weight");
+        bool isFlux2Klein9BLora(JObject h) => hasKey(h, "single_blocks.23.linear1.lora_A.weight");
         bool isFlux2DevLora(JObject h) => h.ContainsKey("diffusion_model.single_blocks.47.linear2.lora_A.weight");
-        bool isSD35Lora(JObject h) => h.ContainsKey("transformer.transformer_blocks.0.attn.to_k.lora_A.weight") && !isFluxLora(h);
+        bool isSD35Lora(JObject h) => h.ContainsKey("transformer.transformer_blocks.0.attn.to_k.lora_A.weight") && h.ContainsKey("transformer.transformer_blocks.37.attn.to_out.0.lora_B.weight");
         bool isMochi(JObject h) => hasKey(h, "blocks.0.attn.k_norm_x.weight");
         bool isMochiVae(JObject h) => h.ContainsKey("encoder.layers.4.layers.1.attn_block.attn.qkv.weight") || h.ContainsKey("layers.4.layers.1.attn_block.attn.qkv.weight") || h.ContainsKey("blocks.2.blocks.3.stack.5.weight") || h.ContainsKey("decoder.blocks.2.blocks.3.stack.5.weight");
         bool isLtxv(JObject h) => hasKey(h, "adaln_single.emb.timestep_embedder.linear_1.bias");
         bool isLtxvVae(JObject h) => h.ContainsKey("decoder.conv_in.conv.bias") && h.ContainsKey("decoder.last_time_embedder.timestep_embedder.linear_1.bias");
+        bool isLtxv2(JObject h) => hasKey(h, "transformer_blocks.1.audio_to_video_attn.k_norm.weight");
+        bool isLtxv2Lora(JObject h) => hasKey(h, "transformer_blocks.0.attn1.to_k.lora_A.weight") && hasKey(h, "transformer_blocks.0.attn1.to_out.0.lora_A.weight") && hasKey(h, "transformer_blocks.9.attn2.to_v.lora_B.weight");
+        bool isSana(JObject h) => h.ContainsKey("attention_y_norm.weight") && h.ContainsKey("blocks.0.attn.proj.weight");
         bool isHunyuanVideo(JObject h) => h.ContainsKey("model.model.txt_in.individual_token_refiner.blocks.1.self_attn.qkv.weight") || h.ContainsKey("txt_in.individual_token_refiner.blocks.1.self_attn_qkv.weight");
         bool isHunyuanVideoSkyreelsImage2V(JObject h) => h.TryGetValue("img_in.proj.weight", out JToken jtok) && jtok["shape"].ToArray()[1].Value<long>() == 32;
         bool isHunyuanVideoNativeImage2V(JObject h) => h.TryGetValue("img_in.proj.weight", out JToken jtok) && jtok["shape"].ToArray()[1].Value<long>() == 33;
@@ -352,7 +365,7 @@ public class T2IModelClassSorter
         bool isCosmosPredict2_2B(JObject h) => h.ContainsKey("norm_out.linear_1.weight") && h.ContainsKey("time_embed.t_embedder.linear_1.weight");
         bool isCosmosPredict2_14B(JObject h) => h.ContainsKey("net.blocks.0.adaln_modulation_cross_attn.1.weight");
         bool isLumina2(JObject h) => hasKey(h, "cap_embedder.0.weight");
-        bool isZImage(JObject h) => hasKey(h, "context_refiner.0.attention.k_norm.weight") && hasKey(h, "layers.0.adaLN_modulation.0.bias");
+        bool isZImage(JObject h) => (hasKey(h, "context_refiner.0.attention.k_norm.weight") || hasKey(h, "context_refiner.0.attention.norm_k.weight")) && hasKey(h, "layers.0.adaLN_modulation.0.bias");
         bool isOvis(JObject h) => hasKey(h, "double_blocks.0.img_mlp.down_proj.weight");
         bool isZImageLora(JObject h) => hasKey(h, "layers.0.adaLN_modulation.0.lora_A.weight") && hasKey(h, "layers.9.feed_forward.w3.lora_B.weight");
         bool isZImageControlNetDiffPatch(JObject h) => h.ContainsKey("control_layers.0.adaLN_modulation.0.weight") && h.ContainsKey("control_noise_refiner.0.adaLN_modulation.0.weight") && h.ContainsKey("control_layers.0.feed_forward.w3.weight");
@@ -361,7 +374,7 @@ public class T2IModelClassSorter
         bool isWan21_1_3b(JObject h) => tryGetWanTok(h, out JToken tok) && tok["shape"].ToArray()[0].Value<long>() == 1536;
         bool isWan21_14b(JObject h) => tryGetWanTok(h, out JToken tok) && tok["shape"].ToArray()[0].Value<long>() == 5120;
         bool isWan22_5b(JObject h) => tryGetWanTok(h, out JToken tok) && tok["shape"].ToArray()[0].Value<long>() == 3072;
-        bool tryGetWanLoraTok(JObject h, out JToken tok) => h.TryGetValue("diffusion_model.blocks.0.cross_attn.k.lora_A.weight", out tok) || h.TryGetValue("blocks.0.cross_attn.k.lora_A.weight", out tok) || h.TryGetValue("diffusion_model.blocks.0.cross_attn.k.lora_down.weight", out tok) || h.TryGetValue("blocks.0.cross_attn.k.lora_down.weight", out tok) || h.TryGetValue("diffusion_model.blocks.1.cross_attn.k.lora_down.weight", out tok) || h.TryGetValue("blocks.1.cross_attn.k.lora_down.weight", out tok) || h.TryGetValue("lora_unet_blocks_0_cross_attn_k.lora_down.weight", out tok);
+        bool tryGetWanLoraTok(JObject h, out JToken tok) => tryGetKey(h, "blocks.0.cross_attn.k.lora_A.weight", out tok) || tryGetKey(h, "blocks.0.cross_attn.k.lora_down.weight", out tok) || tryGetKey(h, "blocks.1.cross_attn.k.lora_down.weight", out tok) || tryGetKey(h, "lora_unet_blocks_0_cross_attn_k.lora_down.weight", out tok);
         bool isWan21_1_3bLora(JObject h) => tryGetWanLoraTok(h, out JToken tok) && tok["shape"].ToArray()[1].Value<long>() == 1536;
         bool isWan21_14bLora(JObject h) => tryGetWanLoraTok(h, out JToken tok) && tok["shape"].ToArray()[1].Value<long>() == 5120;
         bool isWanI2v(JObject h) => h.ContainsKey("model.diffusion_model.blocks.0.cross_attn.k_img.bias") || h.ContainsKey("blocks.0.cross_attn.k_img.bias");
@@ -376,6 +389,7 @@ public class T2IModelClassSorter
         bool isOmniGen(JObject h) => h.ContainsKey("time_caption_embed.timestep_embedder.linear_2.weight") && h.ContainsKey("context_refiner.0.attn.norm_k.weight");
         bool isQwenImage(JObject h) => (h.ContainsKey("time_text_embed.timestep_embedder.linear_1.bias") && h.ContainsKey("img_in.bias") && (h.ContainsKey("transformer_blocks.0.attn.add_k_proj.bias") || h.ContainsKey("transformer_blocks.0.attn.add_qkv_proj.bias")))
             || (h.ContainsKey("model.diffusion_model.time_text_embed.timestep_embedder.linear_1.bias") && h.ContainsKey("model.diffusion_model.img_in.bias") && (h.ContainsKey("model.diffusion_model.transformer_blocks.0.attn.add_k_proj.bias") || h.ContainsKey("model.diffusion_model.transformer_blocks.0.attn.add_qkv_proj.bias")));
+        bool isQwenImageEdit2511(JObject h) => h.ContainsKey("__index_timestep_zero__");
         bool isQwenImageLora(JObject h) => (h.ContainsKey("transformer_blocks.0.attn.add_k_proj.lora_down.weight") && h.ContainsKey("transformer_blocks.0.img_mlp.net.0.proj.lora_down.weight"))
                                             || (h.ContainsKey("transformer.transformer_blocks.0.attn.to_k.lora.down.weight") && h.ContainsKey("transformer.transformer_blocks.0.attn.to_out.0.lora.down.weight"))
                                             || (h.ContainsKey("transformer_blocks.0.attn.add_k_proj.lora_A.default.weight") && h.ContainsKey("transformer_blocks.0.img_mlp.net.2.lora_A.default.weight"))
@@ -547,7 +561,7 @@ public class T2IModelClassSorter
         }});
         Register(new() { ID = "stable-diffusion-v3.5-large/lora", CompatClass = CompatSd35, Name = "Stable Diffusion 3.5 Large LoRA", IsThisModelOfClass = (m, h) =>
         {
-            return isSD35Lora(h);
+            return isSD35Lora(h) && !isFluxLora(h) && !isFlux2DevLora(h);
         }});
         Register(new() { ID = "stable-diffusion-v3.5-medium/lora", CompatClass = CompatSd35, Name = "Stable Diffusion 3.5 Medium LoRA", IsThisModelOfClass = (m, h) =>
         {
@@ -573,11 +587,11 @@ public class T2IModelClassSorter
         Register(new() { ID = "flux.1/vae", CompatClass = CompatFlux, Name = "Flux.1 Autoencoder", IsThisModelOfClass = (m, h) => { return false; } });
         Register(new() { ID = "Flux.1-schnell", CompatClass = CompatFluxSchnell, Name = "Flux.1 Schnell", DefaultParameters = ["cfgscale:1", "steps:4"], IsThisModelOfClass = (m, h) =>
         {
-            return isFluxSchnell(h) && !isChroma(h) && !isFlux2Dev(h) && !isOvis(h);;
+            return isFluxSchnell(h) && !isChroma(h) && !tryGetFlux2Tok(h, out _) && !isOvis(h);
         }});
         Register(new() { ID = "Flux.1-dev", CompatClass = CompatFluxDev, Name = "Flux.1 Dev", DefaultParameters = ["cfgscale:1", "steps:20"], IsThisModelOfClass = (m, h) =>
         {
-            return isFluxDev(h) && !isFlux2Dev(h) && !isOvis(h);
+            return isFluxDev(h) && !tryGetFlux2Tok(h, out _) && !isOvis(h);
         }});
         Register(new() { ID = "Flux.1-dev/lora", CompatClass = CompatFluxDev, Name = "Flux.1 LoRA", IsThisModelOfClass = (m, h) =>
         {
@@ -616,13 +630,29 @@ public class T2IModelClassSorter
             return false;
         }});
         // ====================== BFL Flux.2 ======================
-        Register(new() { ID = "Flux.2-dev", CompatClass = CompatFlux2, Name = "Flux.2 Dev", ModelType = ModelType.ImageEdit, DefaultParameters = ["cfgscale:1", "steps:20"], IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "flux.2-dev", CompatClass = CompatFlux2, Name = "Flux.2 Dev", ModelType = ModelType.ImageEdit, DefaultParameters = ["cfgscale:1", "steps:20"], IsThisModelOfClass = (m, h) =>
         {
             return isFlux2Dev(h);
         }});
-        Register(new() { ID = "Flux.2-dev/lora", CompatClass = CompatFlux2, Name = "Flux.2 Dev LoRA", IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "flux.2-dev/lora", CompatClass = CompatFlux2, Name = "Flux.2 Dev LoRA", IsThisModelOfClass = (m, h) =>
         {
             return isFlux2DevLora(h);
+        }});
+        Register(new() { ID = "flux.2-klein-4b", CompatClass = CompatFlux2Klein4B, Name = "Flux.2 Klein 4B", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        {
+            return isFlux2Klein4B(h);
+        }});
+        Register(new() { ID = "flux.2-klein-4b/lora", CompatClass = CompatFlux2Klein4B, Name = "Flux.2 Klein 4B LoRA", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        {
+            return isFlux2KleinLora(h) && !isFlux2Klein9BLora(h);
+        }});
+        Register(new() { ID = "flux.2-klein-9b", CompatClass = CompatFlux2Klein9B, Name = "Flux.2 Klein 9B", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        {
+            return isFlux2Klein9B(h);
+        }});
+        Register(new() { ID = "flux.2-klein-9b/lora", CompatClass = CompatFlux2Klein9B, Name = "Flux.2 Klein 9B LoRA", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        {
+            return isFlux2KleinLora(h) && isFlux2Klein9BLora(h);
         }});
         // ====================== Wan Video ======================
         Register(new() { ID = "wan-2_1-text2video/vae", CompatClass = CompatWan21, Name = "Wan 2.1 VAE", IsThisModelOfClass = (m, h) => { return false; }});
@@ -749,7 +779,7 @@ public class T2IModelClassSorter
         // ====================== Qwen Image ======================
         Register(new() { ID = "qwen-image", CompatClass = CompatQwenImage, Name = "Qwen Image", DefaultParameters = ["cfgscale:2.5", "steps:20", "sigmashift:3.1"], IsThisModelOfClass = (m, h) =>
         {
-            return isQwenImage(h) && !isControlnetX(h) && !isSD3Controlnet(h);
+            return isQwenImage(h) && !isControlnetX(h) && !isSD3Controlnet(h) && !isQwenImageEdit2511(h);
         }});
         Register(new() { ID = "qwen-image-edit", CompatClass = CompatQwenImageEdit, Name = "Qwen Image Edit", ModelType = ModelType.ImageEdit, DefaultParameters = ["cfgscale:2.5", "steps:20", "sigmashift:3.0", "resizeimageprompts:1024"], IsThisModelOfClass = (m, h) =>
         {
@@ -757,7 +787,7 @@ public class T2IModelClassSorter
         }});
         Register(new() { ID = "qwen-image-edit-plus", CompatClass = CompatQwenImageEdit, Name = "Qwen Image Edit Plus", ModelType = ModelType.ImageEdit, DefaultParameters = ["cfgscale:2.5", "steps:20", "sigmashift:3.0", "resizeimageprompts:1024"], IsThisModelOfClass = (m, h) =>
         {
-            return false;
+            return isQwenImage(h) && !isControlnetX(h) && !isSD3Controlnet(h) && isQwenImageEdit2511(h);
         }});
         Register(new() { ID = "qwen-image/controlnet", CompatClass = CompatQwenImage, Name = "Qwen Image ControlNet", IsThisModelOfClass = (m, h) =>
         {
@@ -799,6 +829,23 @@ public class T2IModelClassSorter
         Register(new() { ID = "kandinsky5-video-pro/lora", CompatClass = CompatKandinsky5VidPro, Name = "Kandinsky5 Video Pro LoRA", IsThisModelOfClass = (m, h) =>
         {
             return false; // TODO?
+        }});
+        // ====================== LTX-V ======================
+        Register(new() { ID = "lightricks-ltx-video", CompatClass = CompatLtxv, Name = "Lightricks LTX Video", StandardWidth = 768, StandardHeight = 512, IsThisModelOfClass = (m, h) =>
+        {
+            return isLtxv(h) && !isLtxv2(h);
+        }});
+        Register(new() { ID = "lightricks-ltx-video/vae", CompatClass = CompatLtxv, Name = "Lightricks LTX Video VAE", StandardWidth = 768, StandardHeight = 512, IsThisModelOfClass = (m, h) =>
+        {
+            return isLtxvVae(h);
+        }});
+        Register(new() { ID = "lightricks-ltx-video-2", CompatClass = CompatLtxv2, Name = "Lightricks LTX Video 2", StandardWidth = 960, StandardHeight = 960, IsThisModelOfClass = (m, h) =>
+        {
+            return isLtxv2(h);
+        }});
+        Register(new() { ID = "lightricks-ltx-video-2/lora", CompatClass = CompatLtxv2, Name = "Lightricks LTX Video 2 LoRA", StandardWidth = 960, StandardHeight = 960, IsThisModelOfClass = (m, h) =>
+        {
+            return isLtxv2Lora(h);
         }});
         // ====================== Random Other Models ======================
         Register(new() { ID = "chroma", CompatClass = CompatChroma, Name = "Chroma", DefaultParameters = ["cfgscale:3.5", "steps:26", "scheduler:beta", "sigmashift:3.0"], IsThisModelOfClass = (m, h) =>
@@ -919,17 +966,17 @@ public class T2IModelClassSorter
         Remaps["flux-1-dev/lora"] = "Flux.1-dev/lora";
         Remaps["flux-1-dev/lora"] = "Flux.1-dev/lora";
         Remaps["flux-dev/lora"] = "Flux.1-dev/lora";
-        Remaps["Flux.1-depth-dev-lora"] = "Flux.1-dev/lora-depth";
-        Remaps["Flux.1-canny-dev-lora"] = "Flux.1-dev/lora-canny";
-        Remaps["Flux.1-depth-dev"] = "Flux.1-dev/depth";
-        Remaps["Flux.1-canny-dev"] = "Flux.1-dev/canny";
-        Remaps["Flux.1-fill-dev"] = "Flux.1-dev/inpaint";
+        Remaps["flux.1-depth-dev-lora"] = "Flux.1-dev/lora-depth";
+        Remaps["flux.1-canny-dev-lora"] = "Flux.1-dev/lora-canny";
+        Remaps["flux.1-depth-dev"] = "Flux.1-dev/depth";
+        Remaps["flux.1-canny-dev"] = "Flux.1-dev/canny";
+        Remaps["flux.1-fill-dev"] = "Flux.1-dev/inpaint";
         Remaps["flux-1-schnell"] = "Flux.1-schnell";
         Remaps["flux-1-schnell/lora"] = "Flux.1-dev/lora";
         Remaps["flux-1-schnell/controlnet"] = "Flux.1-dev/controlnet";
-        Remaps["Flux.1-schnell/lora"] = "Flux.1-dev/lora";
-        Remaps["Flux.1-schnell/controlnet"] = "Flux.1-dev/controlnet";
-        Remaps["Flux.1-AE"] = "flux.1/vae";
+        Remaps["flux.1-schnell/lora"] = "Flux.1-dev/lora";
+        Remaps["flux.1-schnell/controlnet"] = "Flux.1-dev/controlnet";
+        Remaps["flux.1-ae"] = "flux.1/vae";
         Remaps["stable-cascade-v1-stage-a"] = "stable-cascade-v1-stage-a/vae";
         Remaps["stable-diffusion-3-3-5-large"] = "stable-diffusion-v3.5-large";
         Remaps["stable-diffusion-3-3-5-large/lora"] = "stable-diffusion-v3.5-large/lora";
@@ -968,6 +1015,7 @@ public class T2IModelClassSorter
             ?? fix(header.Value<string>("model_type"));
         if (arch is not null)
         {
+            arch = arch.ToLowerFast();
             string res = fix(header["__metadata__"]?.Value<string>("modelspec.resolution"))
                 ?? fix(header["__metadata__"]?.Value<string>("resolution"))
                 ?? fix(header.Value<string>("modelspec.resolution"))
@@ -977,7 +1025,7 @@ public class T2IModelClassSorter
             int height = string.IsNullOrWhiteSpace(h) ? 0 : int.Parse(h);
             if (Remaps.TryGetValue(arch, out string remapTo))
             {
-                arch = remapTo;
+                arch = remapTo.ToLowerFast();
             }
             if (ModelClasses.TryGetValue(arch, out T2IModelClass clazz))
             {

@@ -98,6 +98,7 @@ public enum ParamViewType
 /// <param name="DoNotPreview">If this is true, the parameter is unfit for previewing (eg long generation addons or unnecessary refinements).</param>
 /// <param name="Nonreusable">If this is true, the parameter can never be 'reused'.</param>
 /// <param name="DependNonDefault">If non-null, the name of another parameter. This parameter is only visible if that other parameter is enabled and non-default value.</param>
+/// <param name="IntentionalUnused">If true, this parameter is intentional marked as unused and should not be reported to the user.</param>
 /// <param name="Subtype">The sub-type of the type - for models, this might be eg "Stable-Diffusion".</param>
 /// <param name="ID">The raw ID of this parameter (will be set when registering).</param>
 /// <param name="SharpType">The C# datatype.</param>
@@ -105,7 +106,7 @@ public record class T2IParamType(string Name, string Description, string Default
     Func<string, string, string> Clean = null, Func<Session, List<string>> GetValues = null, string[] Examples = null, Func<List<string>, List<string>> ParseList = null, bool ValidateValues = true,
     bool VisibleNormally = true, bool IsAdvanced = false, string FeatureFlag = null, PermInfo Permission = null, bool Toggleable = false, double OrderPriority = 10, T2IParamGroup Group = null, string IgnoreIf = null,
     ParamViewType ViewType = ParamViewType.SMALL, bool HideFromMetadata = false, Func<string, string> MetadataFormat = null, bool AlwaysRetain = false, double ChangeWeight = 0, bool ExtraHidden = false, bool CanSectionalize = false,
-    T2IParamDataType Type = T2IParamDataType.UNSET, bool DoNotSave = false, bool ImageShouldResize = true, bool ImageAlwaysB64 = false, bool DoNotPreview = false, bool Nonreusable = false, string DependNonDefault = null,
+    T2IParamDataType Type = T2IParamDataType.UNSET, bool DoNotSave = false, bool ImageShouldResize = true, bool ImageAlwaysB64 = false, bool DoNotPreview = false, bool Nonreusable = false, string DependNonDefault = null, bool IntentionalUnused = false,
     string Subtype = null, string ID = null, Type SharpType = null)
 {
     public JObject ToNet(Session session)
@@ -312,15 +313,15 @@ public class T2IParamTypes
         return update;
     }
 
-    public static T2IRegisteredParam<string> Prompt, NegativePrompt, AspectRatio, CustomAspectRatio, BackendType, RefinerMethod, PersonalNote, VideoFormat, VideoResolution, UnsamplerPrompt, MaskBehavior, ColorCorrectionBehavior, SeamlessTileable, BitDepth, Webhooks, Text2VideoFormat, WildcardSeedBehavior, SegmentSortOrder, SegmentTargetResolution, TorchCompile, VideoExtendFormat, ExactBackendID;
+    public static T2IRegisteredParam<string> Prompt, NegativePrompt, AspectRatio, CustomAspectRatio, BackendType, RefinerMethod, PersonalNote, VideoFormat, VideoResolution, UnsamplerPrompt, MaskBehavior, ColorCorrectionBehavior, SeamlessTileable, BitDepth, Webhooks, Text2VideoFormat, WildcardSeedBehavior, SegmentSortOrder, SegmentTargetResolution, SegmentApplyAfter, TorchCompile, VideoExtendFormat, ExactBackendID;
     public static T2IRegisteredParam<int> Images, Steps, Width, Height, SideLength, BatchSize, VAETileSize, VAETileOverlap, VAETemporalTileSize, VAETemporalTileOverlap, VideoFrames, VideoMotionBucket, VideoFPS, VideoSteps, RefinerSteps, CascadeLatentCompression, MaskShrinkGrow, MaskBlur, MaskGrow, SegmentMaskBlur, SegmentMaskGrow, SegmentMaskOversize, SegmentSteps, Text2VideoFrames, Text2VideoFPS, TrimVideoStartFrames, TrimVideoEndFrames, VideoExtendFrameOverlap, ResizeImagePrompts;
     public static T2IRegisteredParam<long> Seed, VariationSeed, WildcardSeed;
     public static T2IRegisteredParam<double> CFGScale, VariationSeedStrength, InitImageCreativity, InitImageResetToNorm, InitImageNoise, RefinerControl, RefinerUpscale, RefinerCFGScale, ReVisionStrength, GlobalRegionFactor, SamplerSigmaMin, SamplerSigmaMax, SamplerRho, VideoAugmentationLevel, VideoCFG, VideoMinCFG, Video2VideoCreativity, VideoSwapPercent, VideoExtendSwapPercent, IP2PCFG2, RegionalObjectCleanupFactor, SigmaShift, SegmentThresholdMax, SegmentCFGScale, FluxGuidanceScale;
     public static T2IRegisteredParam<Image> InitImage, MaskImage, VideoEndFrame;
-    public static T2IRegisteredParam<T2IModel> Model, RefinerModel, VAE, RegionalObjectInpaintingModel, SegmentModel, VideoModel, VideoSwapModel, RefinerVAE, ClipLModel, ClipGModel, ClipVisionModel, T5XXLModel, LLaVAModel, LLaMAModel, QwenModel, MistralModel, VideoExtendModel, VideoExtendSwapModel;
+    public static T2IRegisteredParam<T2IModel> Model, RefinerModel, VAE, RegionalObjectInpaintingModel, SegmentModel, VideoModel, VideoSwapModel, RefinerVAE, ClipLModel, ClipGModel, ClipVisionModel, T5XXLModel, LLaVAModel, LLaMAModel, QwenModel, MistralModel, GemmaModel, VideoExtendModel, VideoExtendSwapModel;
     public static T2IRegisteredParam<List<string>> Loras, LoraWeights, LoraTencWeights, LoraSectionConfinement;
     public static T2IRegisteredParam<List<Image>> PromptImages;
-    public static T2IRegisteredParam<bool> OutputIntermediateImages, DoNotSave, DoNotSaveIntermediates, ControlNetPreviewOnly, RevisionZeroPrompt, NoSeedIncrement, NoPreviews, VideoBoomerang, ModelSpecificEnhancements, UseInpaintingEncode, MaskCompositeUnthresholded, SaveSegmentMask, InitImageRecompositeMask, UseReferenceOnly, RefinerDoTiling, ZeroNegative, Text2VideoBoomerang, FluxDisableGuidance, NoLoadModels, ForwardRawBackendData,
+    public static T2IRegisteredParam<bool> OutputIntermediateImages, DoNotSave, DoNotSaveIntermediates, ControlNetPreviewOnly, RevisionZeroPrompt, NoSeedIncrement, NoPreviews, VideoBoomerang, ModelSpecificEnhancements, UseInpaintingEncode, MaskCompositeUnthresholded, SaveSegmentMask, InitImageRecompositeMask, UseReferenceOnly, RefinerDoTiling, ZeroNegative, Text2VideoBoomerang, FluxDisableGuidance, NoLoadModels, NoInternalSpecialHandling, ForwardRawBackendData, ForwardSwarmData,
         PlaceholderParamGroupStarred, PlaceholderParamGroupUser1, PlaceholderParamGroupUser2, PlaceholderParamGroupUser3;
 
     public static T2IParamGroup GroupImagePrompting, GroupCore, GroupVariation, GroupResolution, GroupSampling, GroupInitImage, GroupRefiners, GroupRefinerOverrides,
@@ -389,7 +390,7 @@ public class T2IParamTypes
         Seed = Register<long>(new("Seed", "Image seed.\n-1 = random.\nDifferent seeds produce different results for the same prompt.",
             "-1", Min: -1, Max: long.MaxValue, Step: 1, Examples: ["1", "2", "...", "10"], OrderPriority: -30, ViewType: ParamViewType.SEED, Group: GroupCore, ChangeWeight: -5
             ));
-        Steps = Register<int>(new("Steps", "Diffusion works by running a model repeatedly to slowly build and then refine an image.\nThis parameter is how many times to run the model.\nMore steps = better quality, but more time.\n20 is a good baseline for speed, 40 is good for maximizing quality.\nSome models, such as Turbo models, are intended for low step counts like 4 or 8.\nYou can go much higher, but it quickly becomes pointless above 70 or so.\nNote that steps is a core parameter used for defining diffusion schedules and other advanced internals,\nand merely running the model over top of an existing image is not the same as increasing the steps.\nNote that the number of steps actually ran can be influenced by other parameters such as Init Image Creativity when applied.",
+        Steps = Register<int>(new("Steps", "Diffusion works by running a model repeatedly to slowly build and then refine an image.\nThis parameter is how many times to run the model.\nMore steps = better quality, but more time.\n20 is a good baseline for speed, 40 is good for maximizing quality.\nSome models, such as Turbo models, are intended for low step counts like 4 or 8.\nYou can go much higher, but it quickly becomes pointless above 70 or so.\nNote that steps is a core parameter used for defining diffusion schedules and other advanced internals, and merely running the model over top of an existing image is not the same as increasing the steps.\nNote that the number of steps actually ran can be influenced by other parameters such as Init Image Creativity when applied.",
             "20", Min: 0, Max: 500, ViewMax: 100, Step: 1, Examples: ["10", "15", "20", "30", "40"], OrderPriority: -20, Group: GroupCore, ViewType: ParamViewType.SLIDER, CanSectionalize: true
             ));
         CFGScale = Register<double>(new("CFG Scale", "How strongly to scale prompt input.\nHigher CFG scales tend to produce more contrast, and lower CFG scales produce less contrast.\n"
@@ -428,13 +429,13 @@ public class T2IParamTypes
             "1:1", IgnoreIf: "1:1", OrderPriority: -11, Group: GroupResolution
             ));
         Width = Register<int>(new("Width", "Image width, in pixels.\nSDv1 uses 512, SDv2 uses 768, SDXL prefers 1024.\nSome models allow variation within a range (eg 512 to 768) but almost always want a multiple of 64.\nFlux is very open to differing values.",
-            "512", Min: 64, ViewMin: 256, Max: 16384, ViewMax: 2048, Step: 32, Examples: ["512", "768", "1024"], OrderPriority: -10, ViewType: ParamViewType.POT_SLIDER, Group: GroupResolution
+            "512", Min: 64, ViewMin: 256, Max: 16384, ViewMax: 2048, Step: 32, Examples: ["512", "768", "1024"], OrderPriority: -10, ViewType: ParamViewType.POT_SLIDER, Group: GroupResolution, IntentionalUnused: true
             ));
         Height = Register<int>(new("Height", "Image height, in pixels.\nSDv1 uses 512, SDv2 uses 768, SDXL prefers 1024.\nSome models allow variation within a range (eg 512 to 768) but almost always want a multiple of 64.\nFlux is very open to differing values.",
-            "512", Min: 64, ViewMin: 256, Max: 16384, ViewMax: 2048, Step: 32, Examples: ["512", "768", "1024"], OrderPriority: -9, ViewType: ParamViewType.POT_SLIDER, Group: GroupResolution
+            "512", Min: 64, ViewMin: 256, Max: 16384, ViewMax: 2048, Step: 32, Examples: ["512", "768", "1024"], OrderPriority: -9, ViewType: ParamViewType.POT_SLIDER, Group: GroupResolution, IntentionalUnused: true
             ));
         SideLength = Register<int>(new("Side Length", "Image Side Length, in pixels.\nThis value is only used with Aspect Ratio not set to 'Custom'.\nIf unchecked, the model native size is used.\nSDv1 uses 512, SDv2 uses 768, SDXL prefers 1024.\nSome models allow variation within a range (eg 512 to 768) but almost always want a multiple of 64.\nFlux is very open to differing values.",
-            "1024", Min: 64, ViewMin: 256, Max: 16384, ViewMax: 4096, Step: 32, Examples: ["512", "768", "1024"], OrderPriority: -8, ViewType: ParamViewType.POT_SLIDER, Group: GroupResolution, Toggleable: true
+            "1024", Min: 64, ViewMin: 256, Max: 16384, ViewMax: 4096, Step: 32, Examples: ["512", "768", "1024"], OrderPriority: -8, ViewType: ParamViewType.POT_SLIDER, Group: GroupResolution, Toggleable: true, IntentionalUnused: true
             ));
         // ================================================ Sampling ================================================
         GroupSampling = new("Sampling", Toggles: false, Open: false, OrderPriority: -8);
@@ -704,6 +705,9 @@ public class T2IParamTypes
         MistralModel = Register<T2IModel>(new("Mistral Model", "Which Mistral LLM to use as a text encoder, for Flux.2-style 'diffusion_models' folder models.",
             "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 20, ChangeWeight: 7
             ));
+        GemmaModel = Register<T2IModel>(new("Gemma Model", "Which Gemma LLM to use as a text encoder, for models that use Gemma (such as Lumina2, LTX2).",
+            "", IgnoreIf: "", Group: GroupAdvancedModelAddons, Subtype: "Clip", Permission: Permissions.ModelParams, Toggleable: true, IsAdvanced: true, OrderPriority: 20, ChangeWeight: 7
+            ));
         // ================================================ Swarm Internal ================================================
         GroupSwarmInternal = new("Swarm Internal", Open: false, OrderPriority: 0, IsAdvanced: true);
         BatchSize = Register<int>(new("Batch Size", "Batch size - generates more images at once on a single GPU.\nThis increases VRAM usage.\nMay in some cases increase overall speed by a small amount (runs slower to get the images, but slightly faster per-image).",
@@ -721,10 +725,16 @@ public class T2IParamTypes
         NoPreviews = Register<bool>(new("No Previews", "If checked, tells the server that previews are not desired.\nMay make generations slightly faster in some cases.",
             "false", IgnoreIf: "false", IsAdvanced: true, Group: GroupSwarmInternal, AlwaysRetain: true, OrderPriority: -14
             ));
-        NoLoadModels = Register<bool>(new("No Load Models", "If checked, tells the server to that if this request would cause a backend to load a model, to just skip doing that.\nThe backend will be marked as if the model is loaded, instantly without processing.",
-            "false", IgnoreIf: "false", IsAdvanced: true, Group: GroupSwarmInternal, AlwaysRetain: true, OrderPriority: -13
+        NoLoadModels = Register<bool>(new("No Load Models", "If checked, tells the server that if this request would cause a backend to load a model, to just skip doing that.\nThe backend will be marked as if the model is loaded, instantly without processing.",
+            "false", IgnoreIf: "false", IsAdvanced: true, Group: GroupSwarmInternal, AlwaysRetain: true, OrderPriority: -13, IntentionalUnused: true
+            ));
+        NoInternalSpecialHandling = Register<bool>(new("No Internal Special Handling", "If checked, tells the server that it should not do any internal special handling in this request.\nA key example is in ComfyUI usage, inputs and outputs stored to comfy dirs will not be removed.",
+            "false", IgnoreIf: "false", IsAdvanced: true, Group: GroupSwarmInternal, AlwaysRetain: true, OrderPriority: -13, VisibleNormally: false
             ));
         ForwardRawBackendData = Register<bool>(new("Forward Raw Backend Data", "If checked, tells the server to forward any raw backend data (eg comfy websocket data) to the caller.\nThis is for advanced usage (eg API calls), not normal users.",
+            "false", IgnoreIf: "false", IsAdvanced: true, Group: GroupSwarmInternal, AlwaysRetain: true, HideFromMetadata: true, VisibleNormally: false
+            ));
+        ForwardSwarmData = Register<bool>(new("Forward Swarm Data", "If checked, tells the server to forward Swarm internal helper data.\nThis is for advanced usage (eg API calls), not normal users.",
             "false", IgnoreIf: "false", IsAdvanced: true, Group: GroupSwarmInternal, AlwaysRetain: true, HideFromMetadata: true, VisibleNormally: false
             ));
         Webhooks = Register<string>(new("Webhooks", "What webhooks are enabled for this generation job.",
@@ -735,7 +745,7 @@ public class T2IParamTypes
             IsAdvanced: true, Permission: Permissions.ParamBackendType, Group: GroupSwarmInternal, AlwaysRetain: true, OrderPriority: -10
             ));
         ExactBackendID = Register<string>(new("Exact Backend ID", "Manually force a specific exact backend (by ID #) to be used for this generation.",
-            "0", GetValues: _ => [.. Program.Backends.T2IBackends.Values.OrderBy(v => v.ID >= 0 ? v.ID : v.ID + 999999).Select(v => $"{v.ID}///{v.ID}: {v.Backend.Title}")], Toggleable: true, IsAdvanced: true, ViewType: ParamViewType.BIG, Permission: Permissions.ParamBackendID, Group: GroupSwarmInternal, AlwaysRetain: true, OrderPriority: -9
+            "0", GetValues: _ => [.. Program.Backends.EnumerateT2IBackends.OrderBy(v => v.ID >= 0 ? v.ID : v.ID + 999999).Select(v => $"{v.ID}///{v.ID}: {v.Backend.Title}")], Toggleable: true, IsAdvanced: true, ViewType: ParamViewType.BIG, Permission: Permissions.ParamBackendID, Group: GroupSwarmInternal, AlwaysRetain: true, OrderPriority: -9
             ));
         WildcardSeed = Register<long>(new("Wildcard Seed", "Wildcard selection seed.\nIf enabled, this seed will be used for selecting entries from wildcards.\nIf disabled, the image seed will be used.\n-1 = random.",
             "-1", Min: -1, Max: uint.MaxValue, Step: 1, Toggleable: true, Examples: ["1", "2", "...", "10"], ViewType: ParamViewType.SEED, Group: GroupSwarmInternal, AlwaysRetain: true, ChangeWeight: -4, OrderPriority: -5
@@ -747,7 +757,7 @@ public class T2IParamTypes
             "false", IgnoreIf: "false", IsAdvanced: true, Group: GroupSwarmInternal, AlwaysRetain: true, OrderPriority: -4
             ));
         PersonalNote = Register<string>(new("Personal Note", "Optional field to type in any personal text note you want.\nThis will be stored in the image metadata.",
-            "", IgnoreIf: "", IsAdvanced: true, Clean: ApplyStringEdit, Group: GroupSwarmInternal, ViewType: ParamViewType.BIG, AlwaysRetain: true, OrderPriority: 0
+            "", IgnoreIf: "", IsAdvanced: true, Clean: ApplyStringEdit, Group: GroupSwarmInternal, ViewType: ParamViewType.BIG, AlwaysRetain: true, OrderPriority: 0, IntentionalUnused: true
             ));
         BitDepth = Register<string>(new("Color Depth", "Specifies the color depth (in bits per channel) to use.\nOnly works for 'PNG' image file format currently.\n'8-bit' is normal (8 bits per red, 8 for green, 8 for blue, making 24 bits total per pixel).\nand '16-bit' encodes additional high-precision (HDR-like) data.\nNote that overprecision data is unlikely to be meaningful, as currently available models haven't been trained for that.",
             "8bit", IgnoreIf: "8bit", GetValues: (_) => ["8bit///8-bit per channel (24-bit total)", "16bit///16-bit per channel (48-bit total)"], IsAdvanced: true, Group: GroupSwarmInternal, OrderPriority: 1.5
@@ -791,6 +801,9 @@ public class T2IParamTypes
             ));
         SegmentSortOrder = Register<string>(new("Segment Sort Order", "How to sort segments when using '<segment:yolo->' syntax with indices.\nFor example: <segment:yolo-face_yolov8m-seg_60.pt-2> with largest-smallest, will select the second largest face segment.",
             "left-right", IgnoreIf: "left-right", GetValues: _ => ["left-right", "right-left", "top-bottom", "bottom-top", "largest-smallest", "smallest-largest"], Group: GroupSegmentRefining, OrderPriority: 7
+            ));
+        SegmentApplyAfter = Register<string>(new("Segment Apply After", "When to apply the segment processing.\n'Refiner' (default) applies segment processing after the refiner step.\n'Base' applies segment processing after the base sampler but before the refiner, allowing the refiner to then blend and refine the segmented areas.",
+            "Refiner", IgnoreIf: "Refiner", GetValues: _ => ["Base", "Refiner"], Group: GroupSegmentRefining, OrderPriority: 8
             ));
         SegmentTargetResolution = Register<string>(new("Segment Target Resolution", "Optional specific target resolution for segment.\nThis controls both aspect ratio, and size.\nThis is just a target, the system may fail to exactly hit it.\nIf the mask is on the edge of an image, the aspect may be squished.\nIf unspecified, the aspect ratio of the detection will be used, and the resolution of the model.",
             "1024x1024", Toggleable: true, Group: GroupSegmentRefining, OrderPriority: 20
@@ -1016,6 +1029,7 @@ public class T2IParamTypes
         }
         if (value == type.IgnoreIf)
         {
+            data.Remove(type, sectionId);
             return;
         }
         if (type.Permission is not null)

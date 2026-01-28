@@ -19,6 +19,9 @@ class ImageFullViewHelper {
             }
             this.noClose = false;
         }, true);
+        this.modalJq.on('hidden.bs.modal', () => {
+            this.close();
+        });
         this.lastMouseX = 0;
         this.lastMouseY = 0;
         this.isDragging = false;
@@ -30,6 +33,7 @@ class ImageFullViewHelper {
         this.fixButtonDelay = null;
         this.lastClosed = 0;
         this.showMetadata = true;
+        this.didPasteState = false;
     }
 
     getImgOrContainer() {
@@ -115,7 +119,6 @@ class ImageFullViewHelper {
         let wrap = getRequiredElementById('imageview_modal_imagewrap');
         if (wrap.style.textAlign == 'center') {
             let img = this.getImgOrContainer();
-            wrap.style.textAlign = 'left';
             let width = img.naturalWidth ?? img.videoWidth;
             let height = img.naturalHeight ?? img.videoHeight;
             let imgAspectRatio = width / height;
@@ -133,6 +136,7 @@ class ImageFullViewHelper {
             }
             img.style.objectFit = '';
             img.style.maxWidth = '';
+            wrap.style.textAlign = 'left';
         }
     }
 
@@ -159,6 +163,7 @@ class ImageFullViewHelper {
         img.style.top = `${state.top}px`;
         img.style.height = `${state.height}%`;
         this.toggleMetadataVisibility(state.showMetadata);
+        this.didPasteState = true;
     }
 
     onWheel(e) {
@@ -209,20 +214,42 @@ class ImageFullViewHelper {
         }
     }
 
+    /** Format fixes that need to run after the image content has loaded. */
+    onImgLoad() {
+        if (this.didPasteState) {
+            return;
+        }
+        if (getUserSetting('ui.defaulthidemetadatainfullview')) {
+            let img = this.getImg();
+            let width = img.naturalWidth ?? img.videoWidth;
+            let height = img.naturalHeight ?? img.videoHeight;
+            let aspectRatio = width / height;
+            let screenAspectRatio = window.innerWidth / window.innerHeight;
+            if (aspectRatio <= screenAspectRatio) {
+                this.toggleMetadataVisibility(false);
+            }
+            else {
+                this.toggleMetadataVisibility(true);
+            }
+        }
+    }
+
     showImage(src, metadata, batchId = null) {
+        this.didPasteState = false;
         this.currentSrc = src;
         this.currentMetadata = metadata;
         this.currentBatchId = batchId;
+        this.updateCounter();
         let wasAlreadyOpen = this.isOpen();
         let isVideo = isVideoExt(src);
         let isAudio = isAudioExt(src);
         let encodedSrc = escapeHtmlForUrl(src);
-        let imgHtml = `<img class="imageview_popup_modal_img" id="imageview_popup_modal_img" style="cursor:grab;max-width:100%;object-fit:contain;" src="${encodedSrc}">`;
+        let imgHtml = `<img class="imageview_popup_modal_img" id="imageview_popup_modal_img" style="cursor:grab;max-width:100%;object-fit:contain;" src="${encodedSrc}" onload="imageFullView.onImgLoad()">`;
         if (isVideo) {
-            imgHtml = `<div class="video-container imageview_popup_modal_img" id="imageview_popup_modal_img"><video class="imageview_popup_modal_img" style="cursor:grab;max-width:100%;object-fit:contain;" autoplay loop><source src="${encodedSrc}" type="${isVideo}"></video></div>`;
+            imgHtml = `<div class="video-container imageview_popup_modal_img" id="imageview_popup_modal_img"><video class="imageview_popup_modal_img" style="cursor:grab;max-width:100%;object-fit:contain;" autoplay loop muted onload="imageFullView.onImgLoad()"><source src="${encodedSrc}" type="${isVideo}"></video></div>`;
         }
         else if (isAudio) {
-            imgHtml = `<audio class="imageview_popup_modal_img" id="imageview_popup_modal_img" style="cursor:grab;max-width:100%;object-fit:contain;" controls src="${encodedSrc}"></audio>`;
+            imgHtml = `<audio class="imageview_popup_modal_img" id="imageview_popup_modal_img" style="cursor:grab;max-width:100%;object-fit:contain;" controls src="${encodedSrc}" onload="imageFullView.onImgLoad()"></audio>`;
         }
         this.content.innerHTML = `
         <div class="modal-dialog" style="display:none">(click outside image to close)</div>
@@ -290,18 +317,42 @@ class ImageFullViewHelper {
     }
 
     close() {
-        if (!this.isOpen()) {
-            return;
+        if (this.isOpen()) {
+            this.modalJq.modal('hide');
+            this.lastClosed = Date.now();
         }
         this.isDragging = false;
         this.didDrag = false;
-        this.modalJq.modal('hide');
-        this.lastClosed = Date.now();
         this.content.innerHTML = '';
     }
 
     isOpen() {
         return this.modalJq.is(':visible');
+    }
+
+    updateCounter() {
+        let counterElem = getRequiredElementById('image_fullview_modal_counter');
+        if (!this.currentSrc) {
+            counterElem.textContent = ``;
+            return;
+        }
+        let items = [];
+        let index = -1;
+        if (this.currentBatchId == 'history' && lastHistoryImageDiv && lastHistoryImageDiv.parentElement) {
+            items = [...lastHistoryImageDiv.parentElement.children].filter(div => div.classList.contains('image-block'));
+            index = items.findIndex(div => div == lastHistoryImageDiv);
+        }
+        else {
+            let currentImageBatchDiv = getRequiredElementById('current_image_batch');
+            items = [...currentImageBatchDiv.getElementsByClassName('image-block')].filter(block => !block.classList.contains('image-block-placeholder'));
+            index = items.findIndex(block => block.dataset.src == this.currentSrc);
+        }
+        if (index != -1 && items.length > 0) {
+            counterElem.textContent = `${index + 1}/${items.length} `;
+        }
+        else {
+            counterElem.textContent = `1/${items.length} `;
+        }
     }
 }
 
@@ -851,16 +902,55 @@ function setCurrentImage(src, metadata = '', batchId = '', previewGrow = false, 
     let buttonsChoice = getUserSetting('ButtonsUnderMainImages', '');
     buttonsChoice = buttonsChoice.toLowerCase().replaceAll(' ', '').split(',');
     let subButtons = [];
+    let buttonsChoiceOrdered = [];
+    function normalizeButtonKey(name) {
+        let normalized = (name || '').toLowerCase().replaceAll(' ', '');
+        if (normalized == 'starred') {
+            normalized = 'star';
+        }
+        return normalized;
+    }
     function includeButton(name, action, extraClass = '', title = '') {
-        let checkName = name.toLowerCase().replaceAll(' ', '');
-        if (checkName == 'starred') {
-            checkName = 'star';
+        buttonDefs[normalizeButtonKey(name)] = { name, action, extraClass, title };
+    }
+    function includeLinkButton(name, href, isDownload = false, title = '') {
+        buttonDefs[normalizeButtonKey(name)] = { name, href, is_download: isDownload, title: title };
+    }
+    function renderButtonsFromDefs() {
+        for (let key of buttonsChoiceOrdered) {
+            let def = buttonDefs[key];
+            if (def) {
+                delete buttonDefs[key];
+                if (def.href) {
+                    let link = document.createElement('a');
+                    link.className = `basic-button${def.extraClass || ''}`;
+                    link.innerHTML = def.name;
+                    link.title = def.title || '';
+                    link.href = def.href;
+                    if (def.is_download) {
+                        link.download = '';
+                    }
+                    buttons.appendChild(link);
+                }
+                else {
+                    quickAppendButton(buttons, def.name, (e, button) => def.action(button), def.extraClass, def.title);
+                }
+            }
         }
-        if (buttonsChoice.includes(checkName)) {
-            quickAppendButton(buttons, name, (e, button) => action(button), extraClass, title);
+        for (let def of Object.values(buttonDefs)) {
+            if (def.href) {
+                subButtons.push({ key: def.name, href: def.href, is_download: def.is_download, title: def.title });
+            }
+            else {
+                subButtons.push({ key: def.name, action: def.action, title: def.title });
+            }
         }
-        else {
-            subButtons.push({ key: name, action: action, title: title });
+    }
+    let rawButtonsChoice = buttonsChoice.toLowerCase().split(',');
+    for (let name of rawButtonsChoice) {
+        let key = normalizeButtonKey(name);
+        if (key) {
+            buttonsChoiceOrdered.push(key);
         }
     }
     let isDataImage = src.startsWith('data:');
@@ -972,7 +1062,7 @@ function setCurrentImage(src, metadata = '', batchId = '', previewGrow = false, 
             if (currentMetadataVal) {
                 let readable = interpretMetadata(currentMetadataVal);
                 let metadata = readable ? JSON.parse(readable).sui_image_params : {};
-                if ('seed' in metadata) {
+                if ('seed' in metadata && !('refinercontrolpercentage' in metadata)) { // (Special case to not seed-burn on double-refine)
                     input_overrides['seed'] = metadata.seed;
                 }
             }
@@ -1023,12 +1113,13 @@ function setCurrentImage(src, metadata = '', batchId = '', previewGrow = false, 
             continue;
         }
         if (added.href) {
-            subButtons.push({ key: added.label, href: added.href, is_download: added.is_download, title: added.title });
+            includeLinkButton(added.label, added.href, added.is_download, added.title);
         }
         else {
             includeButton(added.label, added.onclick, '', added.title);
         }
     }
+    renderButtonsFromDefs();
     quickAppendButton(buttons, 'More &#x2B9F;', (e, button) => {
         let rect = button.getBoundingClientRect();
         new AdvancedPopover('image_more_popover', subButtons, false, rect.x, rect.y + button.offsetHeight + 6, document.body, null);
@@ -1050,9 +1141,8 @@ function setCurrentImage(src, metadata = '', batchId = '', previewGrow = false, 
 function highlightSelectedImage(src) {
     let batchContainer = getRequiredElementById('current_image_batch');
     if (batchContainer) {
-        let batchImg = batchContainer.querySelector(`[data-src="${src}"]`);
         for (let i of batchContainer.getElementsByClassName('image-block')) {
-            if (batchImg == i) {
+            if (i.dataset.src == src) {
                 i.classList.add('image-block-current');
             }
             else {

@@ -129,7 +129,7 @@ public partial class WorkflowGenerator
             g.LoadingVAE = g.CreateVAELoader(vaeNameToLoad, nodeId);
         }
 
-        public string DoClipLoader(string id, T2IRegisteredParam<T2IModel> param)
+        string RequireClipModel(string name, string url, string hash, T2IRegisteredParam<T2IModel> param)
         {
             if (param is not null && g.UserInput.TryGet(param, out T2IModel model))
             {
@@ -157,7 +157,7 @@ public partial class WorkflowGenerator
     }
 
     /// <summary>Creates a model loader and adapts it with any registered model adapters, and returns (Model, Clip, VAE).</summary>
-    public (T2IModel, JArray, JArray, JArray) CreateStandardModelLoader(T2IModel model, string type, string id = null, bool noCascadeFix = false)
+    public (T2IModel, JArray, JArray, JArray) CreateStandardModelLoader(T2IModel model, string type, string id = null, bool noCascadeFix = false, int sectionId = 0)
     {
         ModelLoadHelpers helpers = new(this);
         string helper = $"modelloader_{model.Name}_{type}";
@@ -239,7 +239,7 @@ public partial class WorkflowGenerator
                     string modelNode = CreateNode("NunchakuFluxDiTLoader", new JObject()
                     {
                         ["model_path"] = model.Name.EndsWith("/transformer_blocks.safetensors") ? model.Name.BeforeLast('/').Replace("/", ModelFolderFormat ?? $"{Path.DirectorySeparatorChar}") : model.ToString(ModelFolderFormat),
-                        ["cache_threshold"] = UserInput.Get(ComfyUIBackendExtension.NunchakuCacheThreshold, 0),
+                        ["cache_threshold"] = UserInput.Get(ComfyUIBackendExtension.NunchakuCacheThreshold, 0, sectionId: sectionId),
                         ["attention"] = "nunchaku-fp16",
                         ["cpu_offload"] = "auto",
                         ["device_id"] = 0,
@@ -256,6 +256,14 @@ public partial class WorkflowGenerator
                         ["cpu_offload"] = "auto",
                         ["num_blocks_on_gpu"] = 1, // TODO: If nunchaku doesn't fix automation here, add a param. Also enable cpu_offload if the param is given.
                         ["use_pin_memory"] = "enable"
+                    }, id, false);
+                    LoadingModel = [modelNode, 0];
+                }
+                else if (IsZImage())
+                {
+                    string modelNode = CreateNode("NunchakuZImageDiTLoader", new JObject()
+                    {
+                        ["model_name"] = model.ToString(ModelFolderFormat),
                     }, id, false);
                     LoadingModel = [modelNode, 0];
                 }
@@ -283,7 +291,7 @@ public partial class WorkflowGenerator
                 {
                     Logs.Error($"Model '{model.Name}' likely has corrupt/invalid metadata, and needs to be reset.");
                 }
-                string dtype = UserInput.Get(ComfyUIBackendExtension.PreferredDType, "automatic");
+                string dtype = UserInput.Get(ComfyUIBackendExtension.PreferredDType, "automatic", sectionId: sectionId);
                 if (dtype == "automatic")
                 {
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || model.Metadata?.SpecialFormat == "fp8_scaled" || CurrentCompatClass() is "nvidia-cosmos-predict2" or "chroma" or "chroma-radiance" or "z-image" || CurrentCompatClass().StartsWith("omnigen-")) // TODO: Or AMD?
