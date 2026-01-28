@@ -1219,7 +1219,6 @@ public class WorkflowGeneratorSteps
                 g.FinalLoadedModel = refineModel;
                 g.FinalLoadedModelList = [refineModel];
                 (g.FinalLoadedModel, g.FinalModel, g.FinalClip, g.FinalVae) = g.CreateStandardModelLoader(refineModel, "Refiner", loaderNodeId, sectionId: T2IParamInput.SectionID_Refiner);
-                g.NoVAEOverride = false;
                 prompt = g.CreateConditioning(g.UserInput.Get(T2IParamTypes.Prompt), g.FinalClip, g.FinalLoadedModel, true, isRefiner: true);
                 negPrompt = g.CreateConditioning(g.UserInput.Get(T2IParamTypes.NegativePrompt), g.FinalClip, g.FinalLoadedModel, false, isRefiner: true);
                 bool doSave = g.UserInput.Get(T2IParamTypes.OutputIntermediateImages, false);
@@ -1302,7 +1301,7 @@ public class WorkflowGeneratorSteps
                     {
                         ["model_name"] = upscaleMethod.After("latentmodel-")
                     }, "27");
-                    if (g.IsHunyuanVideo15())
+                    if (g.CurrentCompatClass() == "hunyuan-video-1_5")
                     {
                         g.CreateNode("HunyuanVideo15LatentUpscaleWithModel", new JObject()
                         {
@@ -1315,7 +1314,7 @@ public class WorkflowGeneratorSteps
                         }, "26");
                         g.FinalSamples = ["26", 0];
                     }
-                    else if (g.IsLTXV2())
+                    else if (g.CurrentCompatClass() == "lightricks-ltx-video-2")
                     {
                         string separated = g.CreateNode("LTXVSeparateAVLatent", new JObject()
                         {

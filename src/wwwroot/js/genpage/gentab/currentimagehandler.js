@@ -900,7 +900,7 @@ function setCurrentImage(src, metadata = '', batchId = '', previewGrow = false, 
     let buttons = createDiv(null, 'current-image-buttons');
     let imagePathClean = getImageFullSrc(src);
     let buttonsChoice = getUserSetting('ButtonsUnderMainImages', '');
-    buttonsChoice = buttonsChoice.toLowerCase().replaceAll(' ', '').split(',');
+    let buttonDefs = {};
     let subButtons = [];
     let buttonsChoiceOrdered = [];
     function normalizeButtonKey(name) {

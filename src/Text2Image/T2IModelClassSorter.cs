@@ -112,7 +112,7 @@ public class T2IModelClassSorter
             ID = "flux-2", ShortCode = "Flux-2",
             Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             StandardWidth = 1024, StandardHeight = 1024,
-            TextEncoders = ["mistral_3_small_fp8"], ClipType = "flux2", VAE = "flux2-vae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingFlux"
+            TextEncoders = ["mistral_3_small_flux2"], ClipType = "flux2", VAE = "flux2-vae", LatentNode = "EmptySD3LatentImage", SigmaShiftNode = "ModelSamplingFlux"
         }),
         CompatWan21 = RegisterCompat(new() {
             ID = "wan-21", ShortCode = "Wan14B",
@@ -182,9 +182,15 @@ public class T2IModelClassSorter
         CompatAltDiffusion = RegisterCompat(new() { ID = "alt_diffusion_v1", ShortCode = "AltD", StandardWidth = 512, StandardHeight = 512, Architecture = ModelArchitecture.UNet, PredType = PredictionType.eps }),
         CompatLtxv = RegisterCompat(new() {
             ID = "lightricks-ltx-video", ShortCode = "LTXV",
-            Architecture = ModelArchitecture.Dit, PredType = PredictionType.eps,
+            Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             StandardWidth = 768, StandardHeight = 512,
             TextEncoders = ["t5xxl"], ClipType = "ltxv", VAE = "ltxv-vae", LatentNode = "EmptyLTXVLatentVideo"
+        }),
+        CompatLtxv2 = RegisterCompat(new() {
+            ID = "lightricks-ltx-video-2", ShortCode = "LTXV2",
+            Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            StandardWidth = 960, StandardHeight = 960,
+            TextEncoders = ["gemma3-12B-it"], ClipType = "ltxv", VAE = "ltxv-vae", LatentNode = "EmptyLTXVLatentVideo"
         }),
         CompatLumina2 = RegisterCompat(new() {
             ID = "lumina-2", ShortCode = "Lumi2",
@@ -263,28 +269,18 @@ public class T2IModelClassSorter
             StandardWidth = 1024, StandardHeight = 1024,
             TextEncoders = ["ovis_2.5-5b"], ClipType = "ovis", VAE = "flux-vae", LatentNode = "EmptySD3LatentImage"
         }),
-        CompatKandinsky5ImgLite = RegisterCompat(new() {
-            ID = "kandinsky5-imglite", ShortCode = "Kan5IL",
+        CompatFlux2Klein4B = RegisterCompat(new() {
+            ID = "flux-2-klein-4b", ShortCode = "F2K4",
             Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             StandardWidth = 1024, StandardHeight = 1024,
-            TextEncoders = ["qwen-2.5-vl-7b"], ClipType = "ovis", VAE = "flux-vae", LatentNode = "EmptyHunyuanLatentVideo"
+            TextEncoders = ["mistral_3_small_flux2"], ClipType = "flux2", VAE = "flux2-vae", LatentNode = "EmptySD3LatentImage"
         }),
-        CompatKandinsky5VidLite = RegisterCompat(new() {
-            ID = "kandinsky5-vidlite", ShortCode = "Kan5VL",
+        CompatFlux2Klein9B = RegisterCompat(new() {
+            ID = "flux-2-klein-9b", ShortCode = "F2K9",
             Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
-            StandardWidth = 640, StandardHeight = 640,
-            TextEncoders = ["qwen-2.5-vl-7b"], ClipType = "ovis", VAE = "hunyuan-video-vae", LatentNode = "EmptyHunyuanLatentVideo"
-        }),
-        CompatKandinsky5VidPro = RegisterCompat(new() {
-            ID = "kandinsky5-vidpro", ShortCode = "Kan5VP",
-            Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
-            StandardWidth = 640, StandardHeight = 640,
-            TextEncoders = ["qwen-2.5-vl-7b"], ClipType = "ovis", VAE = "hunyuan-video-vae", LatentNode = "EmptyHunyuanLatentVideo"
+            StandardWidth = 1024, StandardHeight = 1024,
+            TextEncoders = ["mistral_3_small_flux2"], ClipType = "flux2", VAE = "flux2-vae", LatentNode = "EmptySD3LatentImage"
         });
-                CompatLtxv = RegisterCompat(new() { ID = "lightricks-ltx-video", ShortCode = "LTXV", IsText2Video = true, IsImage2Video = true }),
-        CompatLtxv2 = RegisterCompat(new() { ID = "lightricks-ltx-video-2", ShortCode = "LTXV2", IsText2Video = true, IsImage2Video = true }),
-                CompatFlux2Klein4B = RegisterCompat(new() { ID = "flux-2-klein-4b", ShortCode = "Fl2K4", LorasTargetTextEnc = false }),
-        CompatFlux2Klein9B = RegisterCompat(new() { ID = "flux-2-klein-9b", ShortCode = "Fl2K9", LorasTargetTextEnc = false }),
 
     /// <summary>Initialize the class sorter.</summary>
     public static void Init()
@@ -353,7 +349,6 @@ public class T2IModelClassSorter
         bool isLtxvVae(JObject h) => h.ContainsKey("decoder.conv_in.conv.bias") && h.ContainsKey("decoder.last_time_embedder.timestep_embedder.linear_1.bias");
         bool isLtxv2(JObject h) => hasKey(h, "transformer_blocks.1.audio_to_video_attn.k_norm.weight");
         bool isLtxv2Lora(JObject h) => hasKey(h, "transformer_blocks.0.attn1.to_k.lora_A.weight") && hasKey(h, "transformer_blocks.0.attn1.to_out.0.lora_A.weight") && hasKey(h, "transformer_blocks.9.attn2.to_v.lora_B.weight");
-        bool isSana(JObject h) => h.ContainsKey("attention_y_norm.weight") && h.ContainsKey("blocks.0.attn.proj.weight");
         bool isHunyuanVideo(JObject h) => h.ContainsKey("model.model.txt_in.individual_token_refiner.blocks.1.self_attn.qkv.weight") || h.ContainsKey("txt_in.individual_token_refiner.blocks.1.self_attn_qkv.weight");
         bool isHunyuanVideoSkyreelsImage2V(JObject h) => h.TryGetValue("img_in.proj.weight", out JToken jtok) && jtok["shape"].ToArray()[1].Value<long>() == 32;
         bool isHunyuanVideoNativeImage2V(JObject h) => h.TryGetValue("img_in.proj.weight", out JToken jtok) && jtok["shape"].ToArray()[1].Value<long>() == 33;
@@ -402,11 +397,6 @@ public class T2IModelClassSorter
         bool isHyVid15Lora(JObject h) => hasKey(h, "cond_type_embedding.lora_down.weight") && hasKey(h, "byt5_in.fc1.lora_down.weight") && hasKey(h, "vision_in.proj.1.lora_down.weight");
         bool isHyImgRefiner(JObject h) => h.ContainsKey("double_blocks.0.img_attn_k_norm.weight") && h.TryGetValue("time_r_in.mlp.0.bias", out JToken timeTok) && timeTok["shape"].ToArray()[0].Value<long>() == 3328;
         bool isAuraFlow(JObject h) => h.ContainsKey("model.cond_seq_linear.weight") && h.ContainsKey("model.double_layers.0.attn.w1k.weight");
-        bool isKandinsky5(JObject h) => hasKey(h, "pooled_text_embeddings.in_layer.weight") && hasKey(h, "text_transformer_blocks.0.feed_forward.in_layer.weight");
-        bool tryGetKan5IdKey(JObject h, out JToken tok) => h.TryGetValue("text_embeddings.in_layer.weight", out tok);
-        bool isKan5VidLite(JObject h) => tryGetKan5IdKey(h, out JToken tok) && tok["shape"].ToArray()[0].Value<long>() == 1792;
-        bool isKan5ImgLite(JObject h) => tryGetKan5IdKey(h, out JToken tok) && tok["shape"].ToArray()[0].Value<long>() == 2560;
-        bool isKan5VidPro(JObject h) => tryGetKan5IdKey(h, out JToken tok) && tok["shape"].ToArray()[0].Value<long>() == 4096;
         // ====================== Stable Diffusion v1 ======================
         Register(new() { ID = "stable-diffusion-v1", CompatClass = CompatSdv1, Name = "Stable Diffusion v1", IsThisModelOfClass = (m, h) =>
         {
@@ -638,19 +628,19 @@ public class T2IModelClassSorter
         {
             return isFlux2DevLora(h);
         }});
-        Register(new() { ID = "flux.2-klein-4b", CompatClass = CompatFlux2Klein4B, Name = "Flux.2 Klein 4B", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "flux.2-klein-4b", CompatClass = CompatFlux2Klein4B, Name = "Flux.2 Klein 4B", IsThisModelOfClass = (m, h) =>
         {
             return isFlux2Klein4B(h);
         }});
-        Register(new() { ID = "flux.2-klein-4b/lora", CompatClass = CompatFlux2Klein4B, Name = "Flux.2 Klein 4B LoRA", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "flux.2-klein-4b/lora", CompatClass = CompatFlux2Klein4B, Name = "Flux.2 Klein 4B LoRA", IsThisModelOfClass = (m, h) =>
         {
             return isFlux2KleinLora(h) && !isFlux2Klein9BLora(h);
         }});
-        Register(new() { ID = "flux.2-klein-9b", CompatClass = CompatFlux2Klein9B, Name = "Flux.2 Klein 9B", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "flux.2-klein-9b", CompatClass = CompatFlux2Klein9B, Name = "Flux.2 Klein 9B", IsThisModelOfClass = (m, h) =>
         {
             return isFlux2Klein9B(h);
         }});
-        Register(new() { ID = "flux.2-klein-9b/lora", CompatClass = CompatFlux2Klein9B, Name = "Flux.2 Klein 9B LoRA", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "flux.2-klein-9b/lora", CompatClass = CompatFlux2Klein9B, Name = "Flux.2 Klein 9B LoRA", IsThisModelOfClass = (m, h) =>
         {
             return isFlux2KleinLora(h) && isFlux2Klein9BLora(h);
         }});
@@ -805,45 +795,20 @@ public class T2IModelClassSorter
         {
             return isQwenImageLora(h);
         }});
-        // ====================== Kandinsky5 ======================
-        Register(new() { ID = "kandinsky5-image-lite", CompatClass = CompatKandinsky5ImgLite, Name = "Kandinsky5 Image Lite", DefaultParameters = ["cfgscale:4", "steps:14"], IsThisModelOfClass = (m, h) =>
-        {
-            return isKandinsky5(h) && isKan5ImgLite(h);
-        }});
-        Register(new() { ID = "kandinsky5-image-lite/lora", CompatClass = CompatKandinsky5ImgLite, Name = "Kandinsky5 Image Lite LoRA", IsThisModelOfClass = (m, h) =>
-        {
-            return false; // TODO?
-        }});
-        Register(new() { ID = "kandinsky5-video-lite", CompatClass = CompatKandinsky5VidLite, Name = "Kandinsky5 Video Lite", ModelType = ModelType.TextAndImageToVideo, DefaultParameters = ["cfgscale:4", "steps:14"], IsThisModelOfClass = (m, h) =>
-        {
-            return isKandinsky5(h) && isKan5VidLite(h);
-        }});
-        Register(new() { ID = "kandinsky5-video-lite/lora", CompatClass = CompatKandinsky5VidLite, Name = "Kandinsky5 Video Lite LoRA", IsThisModelOfClass = (m, h) =>
-        {
-            return false; // TODO?
-        }});
-        Register(new() { ID = "kandinsky5-video-pro", CompatClass = CompatKandinsky5VidPro, Name = "Kandinsky5 Video Pro", ModelType = ModelType.TextAndImageToVideo, DefaultParameters = ["cfgscale:4", "steps:14"], IsThisModelOfClass = (m, h) =>
-        {
-            return isKandinsky5(h) && isKan5VidPro(h);
-        }});
-        Register(new() { ID = "kandinsky5-video-pro/lora", CompatClass = CompatKandinsky5VidPro, Name = "Kandinsky5 Video Pro LoRA", IsThisModelOfClass = (m, h) =>
-        {
-            return false; // TODO?
-        }});
         // ====================== LTX-V ======================
-        Register(new() { ID = "lightricks-ltx-video", CompatClass = CompatLtxv, Name = "Lightricks LTX Video", StandardWidth = 768, StandardHeight = 512, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "lightricks-ltx-video", CompatClass = CompatLtxv, Name = "Lightricks LTX Video", ModelType = ModelType.TextAndImageToVideo, DefaultParameters = ["cfgscale:3", "steps:30", "scheduler:ltxv", "text2videoframes:97"], IsThisModelOfClass = (m, h) =>
         {
-            return isLtxv(h) && !isLtxv2(h);
+            return isLtxv(h);
         }});
-        Register(new() { ID = "lightricks-ltx-video/vae", CompatClass = CompatLtxv, Name = "Lightricks LTX Video VAE", StandardWidth = 768, StandardHeight = 512, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "lightricks-ltx-video/vae", CompatClass = CompatLtxv, Name = "Lightricks LTX Video VAE", IsThisModelOfClass = (m, h) =>
         {
             return isLtxvVae(h);
         }});
-        Register(new() { ID = "lightricks-ltx-video-2", CompatClass = CompatLtxv2, Name = "Lightricks LTX Video 2", StandardWidth = 960, StandardHeight = 960, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "lightricks-ltx-video-2", CompatClass = CompatLtxv2, Name = "Lightricks LTX Video 2", IsThisModelOfClass = (m, h) =>
         {
             return isLtxv2(h);
         }});
-        Register(new() { ID = "lightricks-ltx-video-2/lora", CompatClass = CompatLtxv2, Name = "Lightricks LTX Video 2 LoRA", StandardWidth = 960, StandardHeight = 960, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "lightricks-ltx-video-2/lora", CompatClass = CompatLtxv2, Name = "Lightricks LTX Video 2 LoRA", IsThisModelOfClass = (m, h) =>
         {
             return isLtxv2Lora(h);
         }});
@@ -859,14 +824,6 @@ public class T2IModelClassSorter
         Register(new() { ID = "alt_diffusion_v1_512_placeholder", CompatClass = CompatAltDiffusion, Name = "Alt-Diffusion", IsThisModelOfClass = (m, h) =>
         {
             return IsAlt(h);
-        }});
-        Register(new() { ID = "lightricks-ltx-video", CompatClass = CompatLtxv, Name = "Lightricks LTX Video", ModelType = ModelType.TextAndImageToVideo, DefaultParameters = ["cfgscale:3", "steps:30", "scheduler:ltxv", "text2videoframes:97"], IsThisModelOfClass = (m, h) =>
-        {
-            return isLtxv(h);
-        }});
-        Register(new() { ID = "lightricks-ltx-video/vae", CompatClass = CompatLtxv, Name = "Lightricks LTX Video VAE", IsThisModelOfClass = (m, h) =>
-        {
-            return isLtxvVae(h);
         }});
         Register(new() { ID = "lumina-2", CompatClass = CompatLumina2, Name = "Lumina 2", DefaultParameters = ["cfgscale:4", "steps:25", "sampler:res_multistep", "sigmashift:6.0"], IsThisModelOfClass = (m, h) =>
         {

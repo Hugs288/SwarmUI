@@ -689,7 +689,7 @@ public partial class WorkflowGenerator
     /// <summary>Creates a VAEDecode node and returns its node ID.</summary>
     public string CreateVAEDecode(JArray vae, JArray latent, string id = null, bool canAudioDecode = true)
     {
-        if (IsLTXV2() && FinalAudioVae is not null && canAudioDecode)
+        if (CurrentCompatClass() == "lightricks-ltx-video-2" && FinalAudioVae is not null && canAudioDecode)
         {
             string separated = CreateNode("LTXVSeparateAVLatent", new JObject()
             {

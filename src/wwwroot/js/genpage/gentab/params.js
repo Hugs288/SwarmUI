@@ -456,6 +456,8 @@ function genInputs(delay_final = false) {
             for (let target of [inputWidth, inputWidthSlider, inputHeight, inputHeightSlider]) {
                 target.addEventListener('input', resTrick);
             }
+            let curModelWidth;
+            let curModelHeight;
             inputAspectRatio.addEventListener('change', () => {
                 if (inputAspectRatio.value != "Resolution") {
                     let aspectRatio;

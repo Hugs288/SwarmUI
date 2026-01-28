@@ -1023,40 +1023,145 @@ function trt_modal_create() {
     });
 }
 
-let noModelChangeDup = false;
+/** Helper class that manages the state of the currently selected model. */
+class CurrentModelHelper {
+    constructor() {
+        this.antiDup = false;
+        this.modelSelector = getRequiredElementById('current_model');
+        this.curModel = null;
+        this.curArch = null;
+        this.curCompatClass = null;
+        this.curSpecialFormat = null;
+        this.curWidth = null;
+        this.curHeight = null;
+        this.desiredModel = null;
+        this.modelSelector.addEventListener('change', () => this.currentModelChanged());
+    }
 
-function currentModelChanged() {
-    if (noModelChangeDup) {
-        return;
+    ensureCurrentModel(callback) {
+        if (this.modelSelector.value != '') {
+            callback?.();
+            return;
+        }
+        genericRequest('ListLoadedModels', {}, data => {
+            if (data.models.length > 0) {
+                this.directSetModel(data.models[0]);
+            }
+            callback?.();
+        });
     }
-    let name = getRequiredElementById('current_model').value;
-    if (name == '') {
-        return;
-    }
-    genericRequest('DescribeModel', {'modelName': name}, data => {
-        noModelChangeDup = true;
-        directSetModel(data.model);
-        noModelChangeDup = false;
-    });
-}
 
-function doModelInstallRequiredCheck() {
-    if ((curModelSpecialFormat == 'bnb_nf4' || curModelSpecialFormat == 'bnb_fp4') && !currentBackendFeatureSet.includes('bnb_nf4') && !localStorage.getItem('hide_bnb_nf4_check')) {
-        $('#bnb_nf4_installer').modal('show');
-        return true;
+    directSetModel(model) {
+        if (!model) {
+            return;
+        }
+        this.antiDup = true;
+        let priorModel = this.curModel;
+        if (priorModel) {
+            modelPresetLinkManager.removePresetsFrom('Stable-Diffusion', priorModel);
+        }
+        if (model.name) {
+            this.curModel = model.name;
+            let clean = cleanModelName(model.name);
+            forceSetDropdownValue('input_model', clean);
+            forceSetDropdownValue('current_model', clean);
+            setCookie('selected_model', `${clean},${model.standard_width},${model.standard_height},${model.architecture},${model.compat_class},${model.special_format}`, 90);
+            this.curWidth = model.standard_width;
+            this.curHeight = model.standard_height;
+            this.curArch = model.architecture;
+            this.curCompatClass = model.compat_class;
+            this.curSpecialFormat = model.special_format;
+        }
+        else if (model.includes(',')) {
+            let [name, width, height, arch, compatClass, specialFormat] = model.split(',');
+            forceSetDropdownValue('input_model', name);
+            forceSetDropdownValue('current_model', name);
+            setCookie('selected_model', `${name},${width},${height},${arch},${compatClass},${specialFormat}`, 90);
+            this.curWidth = parseInt(width);
+            this.curHeight = parseInt(height);
+            this.curArch = arch;
+            this.curCompatClass = compatClass;
+            this.curSpecialFormat = specialFormat;
+            this.curModel = name;
+        }
+        reviseBackendFeatureSet();
+        modelPresetLinkManager.addPresetsFrom('Stable-Diffusion', this.curModel);
+        this.getModelParam().dispatchEvent(new Event('change'));
+        let aspect = document.getElementById('input_aspectratio');
+        if (aspect) {
+            aspect.dispatchEvent(new Event('change'));
+        }
+        sdModelBrowser.rebuildSelectedClasses();
+        for (let browser of subModelBrowsers) {
+            if (browser.subType != 'Stable-Diffusion') {
+                browser.browser.lightRefresh();
+            }
+        }
+        this.antiDup = false;
     }
-    if ((curModelSpecialFormat == 'nunchaku' || curModelSpecialFormat == 'nunchaku-fp4') && !currentBackendFeatureSet.includes('nunchaku') && !localStorage.getItem('hide_nunchaku_check')) {
-        $('#nunchaku_installer').modal('show');
-        return true;
+
+    updateDesiredModel(callback) {
+        if (!this.desiredModel || this.desiredModel == this.curModel) {
+            callback?.();
+            return;
+        }
+        let name = this.desiredModel;
+        genericRequest('DescribeModel', {'modelName': this.desiredModel}, data => {
+            if (name != this.desiredModel) {
+                callback?.();
+                return;
+            }
+            this.directSetModel(data.model);
+            callback?.();
+        }, 0, err => {
+            this.antiDup = false;
+            console.error('updateDesiredModel', name, err);
+            callback?.();
+        });
     }
-    let imageVidToggler = document.getElementById('input_group_content_imagetovideo_toggle');
-    let isImageVidToggled = imageVidToggler && imageVidToggler.checked;
-    let videoModel = isImageVidToggled ? document.getElementById('input_videomodel')?.value : '';
-    if ((curModelSpecialFormat == 'gguf' || videoModel.endsWith('.gguf')) && !currentBackendFeatureSet.includes('gguf') && !localStorage.getItem('hide_gguf_check')) {
-        $('#gguf_installer').modal('show');
-        return true;
+
+    getModelParam() {
+        return document.getElementById('input_model');
     }
-    return false;
+
+    currentModelChanged() {
+        if (this.antiDup) {
+            return;
+        }
+        let name = this.modelSelector.value;
+        if (name == '') {
+            return;
+        }
+        this.desiredModel = name;
+        this.updateDesiredModel();
+    }
+
+    doModelInstallRequiredCheck() {
+        if ((this.curSpecialFormat == 'bnb_nf4' || this.curSpecialFormat == 'bnb_fp4') && !currentBackendFeatureSet.includes('bnb_nf4') && !localStorage.getItem('hide_bnb_nf4_check')) {
+            $('#bnb_nf4_installer').modal('show');
+            return true;
+        }
+        if ((this.curSpecialFormat == 'nunchaku' || this.curSpecialFormat == 'nunchaku-fp4') && !currentBackendFeatureSet.includes('nunchaku') && !localStorage.getItem('hide_nunchaku_check')) {
+            $('#nunchaku_installer').modal('show');
+            return true;
+        }
+        let imageVidToggler = document.getElementById('input_group_content_imagetovideo_toggle');
+        let isImageVidToggled = imageVidToggler && imageVidToggler.checked;
+        let videoModel = isImageVidToggled ? document.getElementById('input_videomodel')?.value : '';
+        if ((this.curSpecialFormat == 'gguf' || videoModel.endsWith('.gguf')) && !currentBackendFeatureSet.includes('gguf') && !localStorage.getItem('hide_gguf_check')) {
+            $('#gguf_installer').modal('show');
+            return true;
+        }
+        if (this.curCompatClass == 'pixart-ms-sigma-xl-2' && !currentBackendFeatureSet.includes('extramodelspixart') && !localStorage.getItem('hide_extramodels_check')) {
+            $('#extramodels_installer').modal('show');
+            return true;
+        }
+        if (this.curCompatClass == 'nvidia-sana-1600' && !currentBackendFeatureSet.includes('extramodelssana') && !localStorage.getItem('hide_extramodels_check')) {
+            $('#extramodels_installer').modal('show');
+            return true;
+        }
+        return false;
+    }
 }
 
 /** Helper instance that manages the state of the currently selected model. */

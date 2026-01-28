@@ -129,7 +129,7 @@ public partial class WorkflowGenerator
             g.LoadingVAE = g.CreateVAELoader(vaeNameToLoad, nodeId);
         }
 
-        string RequireClipModel(string name, string url, string hash, T2IRegisteredParam<T2IModel> param)
+        public string DoClipLoader(string id, T2IRegisteredParam<T2IModel> param)
         {
             if (param is not null && g.UserInput.TryGet(param, out T2IModel model))
             {
@@ -259,7 +259,7 @@ public partial class WorkflowGenerator
                     }, id, false);
                     LoadingModel = [modelNode, 0];
                 }
-                else if (IsZImage())
+                else if (CurrentCompatClass() == "z-image")
                 {
                     string modelNode = CreateNode("NunchakuZImageDiTLoader", new JObject()
                     {
