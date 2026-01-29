@@ -423,10 +423,10 @@ public class T2IParamTypes
         // ================================================ Resolution ================================================
         GroupResolution = new("Resolution", Toggles: false, Open: false, OrderPriority: -11);
         AspectRatio = Register<string>(new("Aspect Ratio", "Image aspect ratio - that is, the shape of the image (wide vs square vs tall).\nSet to 'Resolution' to define a manual width/height instead or 'Custom' to define one yourself.\nSome models can stretch better than others.",
-            "1:1", GetValues: (_) => ["1:1", "3:2", "2:3", "4:3", "3:4", "16:9", "9:16", "Custom", "Resolution"], OrderPriority: -11, Group: GroupResolution
+            "1:1", GetValues: (_) => ["1:1", "3:2", "2:3", "4:3", "3:4", "16:9", "9:16", "Custom", "Resolution"], OrderPriority: -11, Group: GroupResolution, IntentionalUnused: true
             ));
         CustomAspectRatio = Register<string>(new("Custom Aspect Ratio", "yes you can really put in whatever you want.",
-            "1:1", IgnoreIf: "1:1", OrderPriority: -11, Group: GroupResolution
+            "1:1", IgnoreIf: "1:1", OrderPriority: -11, Group: GroupResolution, IntentionalUnused: true
             ));
         Width = Register<int>(new("Width", "Image width, in pixels.\nSDv1 uses 512, SDv2 uses 768, SDXL prefers 1024.\nSome models allow variation within a range (eg 512 to 768) but almost always want a multiple of 64.\nFlux is very open to differing values.",
             "512", Min: 64, ViewMin: 256, Max: 16384, ViewMax: 2048, Step: 32, Examples: ["512", "768", "1024"], OrderPriority: -10, ViewType: ParamViewType.POT_SLIDER, Group: GroupResolution, IntentionalUnused: true
