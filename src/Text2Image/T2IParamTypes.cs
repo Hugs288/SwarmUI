@@ -328,9 +328,6 @@ public class T2IParamTypes
         GroupAdvancedModelAddons, GroupSwarmInternal, GroupRegionalPrompting, GroupSegmentRefining, GroupSegmentOverrides, GroupAdvancedSampling, GroupAlternateGuidance, GroupVideo, GroupText2Video, GroupAdvancedVideo, GroupVideoExtend, GroupOtherFixes,
         GroupStarred, GroupUser1, GroupUser2, GroupUser3;
 
-    [Obsolete("This group was discarded from core.")]
-    public static T2IParamGroup GroupOtherFixes;
-
     public class ControlNetParamHolder
     {
         public T2IParamGroup Group;
@@ -613,9 +610,6 @@ public class T2IParamTypes
         VideoCFG = Register<double>(new("Video CFG", "The CFG Scale to use for video generation.\nWith SVD, videos start with this CFG on the first frame, and then reduce to MinCFG (normally 1) by the end frame.\nSVD prefers 2.5\nCosmos takes normal CFGs (around 7).\nLTXV prefers around 3 for its CFG.\nWan prefers around 6.",
             "7", Min: 1, Max: 100, ViewMax: 20, Step: 0.5, OrderPriority: 4, ViewType: ParamViewType.SLIDER, Group: GroupVideo, Permission: Permissions.ParamVideo, FeatureFlag: "video,text2video", DoNotPreview: true, Toggleable: true
             ));
-        VideoBoomerang = Register<bool>(new("Video Boomerang", "Whether to boomerang (aka pingpong) the video.\nIf true, the video will play and then play again in reverse to enable smooth looping.",
-            "false", IgnoreIf: "false", OrderPriority: 18, Group: GroupVideo, Permission: Permissions.ParamVideo, IsAdvanced: true, FeatureFlag: "video,text2video", DoNotPreview: true, ChangeWeight: -1
-            ));
         VideoResolution = Register<string>(new("Video Resolution", "What resolution/aspect the video should use.\n'Image Aspect, Model Res' uses the aspect-ratio of the image, but the pixel-count size of the model standard resolution.\n'Model Preferred' means use the model's exact resolution (eg 1024x576).\n'Image' means your input image resolution (ie the standard Resolution parameters control this, usually).",
             "Image Aspect, Model Res", GetValues: _ => ["Image Aspect, Model Res", "Model Preferred", "Image"], OrderPriority: 19, Group: GroupVideo, Permission: Permissions.ParamVideo, FeatureFlag: "video,text2video", DoNotPreview: true, ChangeWeight: 1
             ));
@@ -636,7 +630,6 @@ public class T2IParamTypes
         VideoBoomerang = Register<bool>(new("Video Boomerang", "Whether to boomerang (aka pingpong) the video.\nIf true, the video will play and then play again in reverse to enable smooth looping.",
             "false", IgnoreIf: "false", OrderPriority: 2, Group: GroupAdvancedVideo, Permission: Permissions.ParamVideo, IsAdvanced: true, FeatureFlag: "video", DoNotPreview: true, ChangeWeight: -1, Toggleable: true
             ));
-        GroupAdvancedVideoObscure = new("Video Obscure Options", Open: false, OrderPriority: 50, IsAdvanced: true, Toggles: false, Description: "You almost never need these.", Parent: GroupAdvancedVideo);
         VideoMinCFG = Register<double>(new("Video Min CFG", "The minimum CFG to use for video generation.\nVideos start with max CFG on first frame, and then reduce to this CFG. Set to -1 to disable.\nOnly used for SVD.",
             "1.0", Min: -1, Max: 100, ViewMax: 30, Step: 0.5, OrderPriority: 4.5, ViewType: ParamViewType.SLIDER, Group: GroupAdvancedVideo, Permission: Permissions.ParamVideo, FeatureFlag: "video,text2video", IsAdvanced: true, Toggleable: true
             ));

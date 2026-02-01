@@ -111,6 +111,7 @@ public static class CommonModels
         Register(new("ovis_2.5-5b", "Ovis 2.5-5B", "https://huggingface.co/Comfy-Org/Ovis-Image/resolve/main/split_files/text_encoders/ovis_2.5.safetensors", "f453ee5e7a25cb23cf2adf7aae3e5b405f22097cb67f2cfcca029688cb3f740d", "Clip", "ovis_2.5.safetensors"));
         Register(new("gemma3-12B-it", "Gemma 3 12B", "https://huggingface.co/Comfy-Org/ltx-2/resolve/main/split_files/text_encoders/gemma_3_12B_it_fp4_mixed.safetensors", "aaca463d11e6d8d2a4bdb0d6299214c15ef78a3f73e0ef8113d5a9d0219b3f6d", "Clip", "gemma_3_12B_it.safetensors"));
         Register(new("ltx2-embeddings-connector", "LTX2 Embeddings Connector", "https://huggingface.co/Kijai/LTXV2_comfy/resolve/main/text_encoders/ltx-2-19b-embeddings_connector_distill_bf16.safetensors", "8990ec3fe88396ca33ac1795c89b1771d88190e51e24084b21f54b25399acbed", "Clip", "ltx2/ltx2-embeddings-connector-distill.safetensors"));
+        Register(new("qwen_3_06b", "Qwen-3-0.6B", "https://huggingface.co/circlestone-labs/Anima/resolve/main/split_files/text_encoders/qwen_3_06b_base.safetensors", "cd2a512003e2f9f3cd3c32a9c3573f820bb28c940f73c57b1ddaa983d9223eba", "Clip", "qwen_3_06b_base.safetensors"));
 
         // Clip Vision
         Register(new("wan21-clipvision-h", "Wan 2.1 ClipVision-H", "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors", "64a7ef761bfccbadbaa3da77366aac4185a6c58fa5de5f589b42a65bcc21f161", "ClipVision", "clip_vision_h.safetensors"));

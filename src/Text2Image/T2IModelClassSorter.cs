@@ -280,6 +280,12 @@ public class T2IModelClassSorter
             Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
             StandardWidth = 1024, StandardHeight = 1024,
             TextEncoders = ["mistral_3_small_flux2"], ClipType = "flux2", VAE = "flux2-vae", LatentNode = "EmptySD3LatentImage"
+        }),
+        CompatAnima = RegisterCompat(new() {
+            ID = "anima", ShortCode = "Anima",
+            Architecture = ModelArchitecture.Dit, PredType = PredictionType.sd3,
+            StandardWidth = 1024, StandardHeight = 1024,
+            TextEncoders = ["qwen_3_06b"], ClipType = "stable-diffusion", VAE = "qwen-image-vae", LatentNode = "EmptyLatentImage", SigmaShiftNode = "ModelSamplingAuraFlow"
         });
 
     /// <summary>Initialize the class sorter.</summary>
@@ -397,11 +403,6 @@ public class T2IModelClassSorter
         bool isHyVid15Lora(JObject h) => hasKey(h, "cond_type_embedding.lora_down.weight") && hasKey(h, "byt5_in.fc1.lora_down.weight") && hasKey(h, "vision_in.proj.1.lora_down.weight");
         bool isHyImgRefiner(JObject h) => h.ContainsKey("double_blocks.0.img_attn_k_norm.weight") && h.TryGetValue("time_r_in.mlp.0.bias", out JToken timeTok) && timeTok["shape"].ToArray()[0].Value<long>() == 3328;
         bool isAuraFlow(JObject h) => h.ContainsKey("model.cond_seq_linear.weight") && h.ContainsKey("model.double_layers.0.attn.w1k.weight");
-        bool isKandinsky5(JObject h) => hasKey(h, "pooled_text_embeddings.in_layer.weight") && hasKey(h, "text_transformer_blocks.0.feed_forward.in_layer.weight");
-        bool tryGetKan5IdKey(JObject h, out JToken tok) => h.TryGetValue("text_embeddings.in_layer.weight", out tok);
-        bool isKan5VidLite(JObject h) => tryGetKan5IdKey(h, out JToken tok) && tok["shape"].ToArray()[0].Value<long>() == 1792;
-        bool isKan5ImgLite(JObject h) => tryGetKan5IdKey(h, out JToken tok) && tok["shape"].ToArray()[0].Value<long>() == 2560;
-        bool isKan5VidPro(JObject h) => tryGetKan5IdKey(h, out JToken tok) && tok["shape"].ToArray()[0].Value<long>() == 4096;
         bool isAnima(JObject h) => hasKey(h, "t_embedder.1.linear_2.weight") && hasKey(h, "llm_adapter.blocks.0.self_attn.v_proj.weight") && hasKey(h, "blocks.27.adaln_modulation_cross_attn.2.weight");
         // ====================== Stable Diffusion v1 ======================
         Register(new() { ID = "stable-diffusion-v1", CompatClass = CompatSdv1, Name = "Stable Diffusion v1", IsThisModelOfClass = (m, h) =>
@@ -855,7 +856,7 @@ public class T2IModelClassSorter
         {
             return isAuraFlow(h);
         }});
-        Register(new() { ID = "anima", CompatClass = CompatAnima, Name = "Anima", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "anima", CompatClass = CompatAnima, Name = "Anima", IsThisModelOfClass = (m, h) =>
         {
             return isAnima(h);
         }});
