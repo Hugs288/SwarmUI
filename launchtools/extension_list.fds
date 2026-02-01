@@ -42,6 +42,7 @@ WaifuDiffusionV:
     - parameters
     - nodes
 
+# (ComfyDeployBackend: deprecated as ComfyDeploy shut down)
 ComfyDeployBackend:
     author: mcmonkey
     description: Adds a ComfyDeploy ( https://www.comfydeploy.com/ ) backend.
@@ -50,9 +51,10 @@ ComfyDeployBackend:
     tags:
     - paid
     - backend
+    - hidden
 
 MagicPrompt:
-    author: Hartsy AI
+    author: Hartsy
     description: Provides LLM (language model) usage inside SwarmUI to enhance your prompts.
     url: https://github.com/HartsyAI/SwarmUI-MagicPromptExtension
     license: MIT
@@ -61,13 +63,22 @@ MagicPrompt:
     - ui
 
 UniversalTab:
-    author: Hartsy AI
+    author: Hartsy
     description: Lets you embed iframes of other webservices into subtabs in SwarmUI.
     url: https://github.com/HartsyAI/SwarmUI-UniversalTabExtension
     license: MIT
     tags:
     - tabs
     - ui
+
+SDCppBackend:
+    author: Hartsy
+    description: Experimental approach to add a backend powered by an external stable-diffusion.cpp executable. Non-compatible with general use.
+    url: https://github.com/HartsyAI/SwarmUI-SD.cpp-Backend
+    license: MIT
+    tags:
+    - backend
+    - beta
 
 WildcardImporter:
     author: spoomples+bman654
