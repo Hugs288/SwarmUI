@@ -120,5 +120,8 @@ public static class CommonModels
         Register(new("CLIP-ViT-G-stability", "Clip Vision G (Stability)", "https://huggingface.co/stabilityai/control-lora/resolve/main/revision/clip_vision_g.safetensors", "9908329b3ead722a693ea400fab1d7c9ec91d6736fd194a94d20d793457f9c2e", "ClipVision", "clip_vision_g.safetensors"));
         Register(new("CLIP-ViT-G", "Clip Vision G", "https://huggingface.co/h94/IP-Adapter/resolve/main/sdxl_models/image_encoder/model.safetensors", "657723e09f46a7c3957df651601029f66b1748afb12b419816330f16ed45d64d", "ClipVision", "CLIP-ViT-bigG-14-laion2B-39B-b160k.safetensors"));
         Register(new("CLIP-ViT-H", "Clip Vision H", "https://huggingface.co/h94/IP-Adapter/resolve/main/models/image_encoder/model.safetensors", "6ca9667da1ca9e0b0f75e46bb030f7e011f44f86cbfb8d5a36590fcd7507b030", "ClipVision", "CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors"));
+
+        // Audio VAEs
+        Register(new("ace-step-15-vae", "The audio VAE for Ace Step 1.5", "https://huggingface.co/Comfy-Org/ace_step_1.5_ComfyUI_files/resolve/main/split_files/vae/ace_1.5_vae.safetensors", "6de92e3a862acd287e08b024ac90f0783a8635451b728721a33ff03565bcb2bb", "VAE", "AceStep/ace_1.5_vae.safetensors"));
     }
 }

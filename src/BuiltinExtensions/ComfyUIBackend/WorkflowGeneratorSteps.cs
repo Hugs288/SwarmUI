@@ -2,6 +2,7 @@
 using FreneticUtilities.FreneticExtensions;
 using Newtonsoft.Json.Linq;
 using SwarmUI.Core;
+using SwarmUI.Media;
 using SwarmUI.Text2Image;
 using SwarmUI.Utils;
 
@@ -337,6 +338,14 @@ public class WorkflowGeneratorSteps
         #region Base Image
         AddStep(g =>
         {
+            // TODO: Something like this for audio models.
+            /*if (g.IsAudioModel() && g.UserInput.TryGet(T2IParamTypes.InitAudio, out AudioFile audioData))
+            {
+                string audioNode = g.CreateLoadAudioNode(audioData, "${initaudio}", true);
+                g.FinalInputAudio = [audioNode, 0];
+                g.FinalLatentAudio = g.CreateAudioVAEEncode(g.FinalAudioVae, g.FinalInputAudio, "5");
+            }
+            else*/
             if (g.UserInput.TryGet(T2IParamTypes.InitImage, out Image img))
             {
                 string maskImageNode = null;

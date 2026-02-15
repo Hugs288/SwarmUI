@@ -8,7 +8,6 @@ using SwarmUI.Text2Image;
 using SwarmUI.Utils;
 using Newtonsoft.Json.Linq;
 using FreneticUtilities.FreneticExtensions;
-using FreneticUtilities.FreneticToolkit;
 
 namespace SwarmUI.Builtin_ComfyUIBackend;
 
